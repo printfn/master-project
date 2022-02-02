@@ -1,0 +1,76 @@
+<html>
+<head>
+
+<title>42 Editor</title>
+
+<style type="text/css" media="screen">
+#editor {
+    width: 100%;
+    height: 300px;
+}
+
+#output {
+    width: 100%;
+    height: 300px;
+}
+body {
+    font-family: system, -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
+}
+</style>
+
+</head>
+<body>
+
+<h1>42 Editor</h1>
+
+<div id="editor">reuse [L42.is/AdamsTowel]
+Main=(
+  Debug(S"Hello world from 42")
+  )
+</div>
+
+<p>
+    <input type="button" id="execute" value="Run" onclick="execute()">
+</p>
+
+<div id="output"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+
+window.onload = () => {
+    const editor = ace.edit('editor');
+    editor.session.setMode('ace/mode/text');
+    window.editor = editor;
+
+    const output = ace.edit('output');
+    output.session.setMode('ace/mode/text');
+    output.setReadOnly(true);
+    window.output = output;
+}
+
+async function execute() {
+    const executeButton = document.getElementById('execute');
+    try {
+        const editor = window.editor;
+        executeButton.disabled = true;
+        executeButton.value = 'Please wait...';
+        const result = await fetch('https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute', {
+            method: 'POST',
+            body: JSON.stringify({
+                code: editor.getValue(),
+            }),
+        })
+        const jsonResult = await result.json();
+        const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}`;
+        window.output.setValue(resultString);
+    } finally {
+        executeButton.disabled = false;
+        executeButton.value = "Run";
+    }
+}
+
+</script>
+
+</body>
+</html>
