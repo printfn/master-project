@@ -18,6 +18,10 @@ body {
 }
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://l42.is/js/mode-l42.js"></script>
+<script src="https://l42.is/js/theme-l42_eclipse.js"></script>
+
 </head>
 <body>
 
@@ -35,12 +39,11 @@ Main=(
 
 <div id="output"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
 
 window.onload = () => {
     const editor = ace.edit('editor');
-    editor.session.setMode('ace/mode/text');
+    editor.session.setMode('ace/mode/l42');
     window.editor = editor;
 
     const output = ace.edit('output');
@@ -64,6 +67,7 @@ async function execute() {
         const jsonResult = await result.json();
         const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}`;
         window.output.setValue(resultString);
+        window.output.gotoLine(0); // clear selection
     } finally {
         executeButton.disabled = false;
         executeButton.value = "Run";
