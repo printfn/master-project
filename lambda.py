@@ -19,9 +19,9 @@ def run_l42_program(code):
     os.mkdir('/tmp/L42Project')
     
     with open('/tmp/L42Project/Setti.ngs', 'x') as f:
-        #f.write('maxStackSize = 32M\n')
-        #f.write('initialMemorySize = 100M\n')
-        #f.write('maxMemorySize = 256M\n')
+        #f.write('maxStackSize = 1G\n')
+        #f.write('initialMemorySize = 256M\n')
+        #f.write('maxMemorySize = 2G\n')
         pass
         
     with open('/tmp/L42Project/This.L42', 'x') as f:

@@ -1,0 +1,21 @@
+reuse [L42.is/AdamsTowel]
+Point = Data:{
+  Num x
+  Num y
+  method
+  Point add(Num x) = //long version
+    Point(x=x+this.x(), y=this.y())
+  method
+  Point add(Num y) = //shorter
+    this.with(y=y+this.y())
+  method
+  Point sum(Point that) =
+    Point(x=this.x()+that.x(), y=this.y()+that.y())
+  }
+
+Main=(
+  Debug(S"Hello world from 42!")
+
+  imm Point p = (Point(x=5\, y=2\).sum(Point(x=3\, y=1\)))
+  Debug(S"p = %p")
+  )
