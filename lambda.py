@@ -35,26 +35,38 @@ def run_l42_program(code):
         capture_output=True)
     os.chdir(wd)
     return {
+        'ok': True,
         'stdout': result.stdout,
         'stderr': result.stderr,
+        'returncode': result.returncode,
     }
 
 def get_body_obj(event):
-    body = event['body']
+    try:
+        body = event['body']
+    except:
+        raise Exception('failed to read request body')
     if event['isBase64Encoded']:
         body = base64.standard_b64decode(body)
-    return json.loads(body)
+    try:
+        return json.loads(body)
+    except Exception as ex:
+        raise Exception(f"invalid json: {ex}")
 
 def lambda_handler(event, context):
-    code = HELLO_WORLD
     try:
         code = get_body_obj(event)['code']
-    except Exception as err:
-        print(err)
-        pass
-    result = run_l42_program(code)
+        result = run_l42_program(code)
+        statusCode = 200
+    except Exception as ex:
+        print(ex)
+        statusCode = 400
+        result = {
+            'ok': False,
+            'message': str(ex),
+        }
     return {
-        'statusCode': 200,
+        'statusCode': statusCode,
         'headers': {
             'Access-Control-Allow-Origin': '*',
         },
