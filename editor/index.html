@@ -65,7 +65,7 @@ async function execute() {
             }),
         })
         const jsonResult = await result.json();
-        const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}`;
+        const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}\nreturn code: ${jsonResult.returncode}\n`;
         window.output.setValue(resultString);
         window.output.gotoLine(0); // clear selection
     } finally {
