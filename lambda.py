@@ -55,7 +55,10 @@ def lambda_handler(event, context):
     result = run_l42_program(code)
     return {
         'statusCode': 200,
-        'body': json.dumps(result)
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+        },
+        'body': json.dumps(result),
     }
 
 def list_files(startpath):
