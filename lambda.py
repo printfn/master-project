@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import base64
 import json
+import math
 import os
 import shutil
 import subprocess
+import time
 
 HELLO_WORLD = """
 reuse [L42.is/AdamsTowel]
@@ -29,6 +31,7 @@ def run_l42_program(code):
     
     wd = os.getcwd()
     os.chdir("/opt/L42PortableLinux")
+    start = time.time()
     result = subprocess.run(
         ["/bin/sh", "L42.sh", "/tmp/L42Project"],
         encoding='utf-8',
@@ -39,6 +42,7 @@ def run_l42_program(code):
         'stdout': result.stdout,
         'stderr': result.stderr,
         'returncode': result.returncode,
+        'duration': math.ceil((time.time() - start) * 1000) / 1000
     }
 
 def get_body_obj(event):
