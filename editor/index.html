@@ -47,6 +47,8 @@ body {
 <div id="output"></div>
 
 <script>
+    
+window.L42_SERVER_URL = 'https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute';
 
 const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
 Main=(
@@ -112,7 +114,7 @@ async function execute() {
         const editor = window.editor;
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
-        const result = await fetch('https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute', {
+        const result = await fetch(window.L42_SERVER_URL, {
             method: 'POST',
             body: JSON.stringify({
                 code: editor.getValue(),
