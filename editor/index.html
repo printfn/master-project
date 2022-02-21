@@ -48,14 +48,12 @@ body {
 
 <script>
 
-// add ?server=example.com to override the server URL
-window.L42_SERVER_URL_OVERRIDE = 'https://' + findGetParameter('server');
-
+// add '?server=example.com' this page's URL to override the server URL
 window.L42_SERVER_URLS = [
     'https://aws.flry.net',
-    'https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute',
     'http://localhost',
     'https://r53.heitland-it.de',
+    'https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute',
 ];
 
 const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
@@ -129,12 +127,14 @@ function findGetParameter(parameterName) {
 }
 
 async function multiFetch(options) {
-    // try fetching each of the possible server URLs in order
-    if (window.L42_SERVER_URL_OVERRIDE) {
-        console.log(`Using override URL '${window.L42_SERVER_URL_OVERRIDE}'...`);
-        return await fetch(window.L42_SERVER_URL_OVERRIDE, options);
+    const overrideUrl = findGetParameter('server');
+    if (findGetParameter('server')) {
+        console.log(`Using override URL '${overrideUrl}'...`);
+        return await fetch(overrideUrl, options);
     }
-    for (let url of window.L42_SERVER_URLS) {
+
+    // try fetching each of the possible server URLs in order
+    for (const url of window.L42_SERVER_URLS) {
         try {
             console.log(`Using url '${url}'...`);
             return await fetch(url, options);
