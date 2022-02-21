@@ -47,8 +47,16 @@ body {
 <div id="output"></div>
 
 <script>
-    
-window.L42_SERVER_URL = 'https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute';
+
+// add ?server=example.com to override the server URL
+window.L42_SERVER_URL_OVERRIDE = 'https://' + findGetParameter('server');
+
+window.L42_SERVER_URLS = [
+    'https://aws.flry.net',
+    'https://rvjbpplei0.execute-api.ap-southeast-2.amazonaws.com/execute',
+    'http://localhost',
+    'https://r53.heitland-it.de',
+];
 
 const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
 Main=(
@@ -108,18 +116,50 @@ function loadSampleProgram() {
     window.editor.gotoLine(0); // clear selection
 }
 
+// modified from https://stackoverflow.com/a/5448595
+function findGetParameter(parameterName) {
+    let result = null;
+    location.search.substr(1).split("&").forEach(item => {
+        let tmp = item.split("=");
+        if (tmp[0] === parameterName) {
+            result = decodeURIComponent(tmp[1]);
+        }
+    });
+    return result;
+}
+
+async function multiFetch(options) {
+    // try fetching each of the possible server URLs in order
+    if (window.L42_SERVER_URL_OVERRIDE) {
+        console.log(`Using override URL '${window.L42_SERVER_URL_OVERRIDE}'...`);
+        return await fetch(window.L42_SERVER_URL_OVERRIDE, options);
+    }
+    for (let url of window.L42_SERVER_URLS) {
+        try {
+            console.log(`Using url '${url}'...`);
+            return await fetch(url, options);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    return null;
+}
+
 async function execute() {
     const executeButton = document.getElementById('execute');
     try {
         const editor = window.editor;
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
-        const result = await fetch(window.L42_SERVER_URL, {
+        const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
                 code: editor.getValue(),
             }),
-        })
+        });
+        if (!result) {
+            alert('Unable to contact server, see log for details');
+        }
         const jsonResult = await result.json();
         const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}\nreturn code: ${jsonResult.returncode}\nduration: ${jsonResult.duration} seconds`;
         window.output.setValue(resultString);
