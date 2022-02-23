@@ -173,6 +173,7 @@ async function execute() {
         const editor = window.editor;
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
+        window.output.setValue('');
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
