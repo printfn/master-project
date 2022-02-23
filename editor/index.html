@@ -35,6 +35,7 @@ body {
 <select id="sample-program-select">
     <option selected>Hello World</option>
     <option>Point</option>
+    <option>Simple Invariant</option>
 </select>
 <input type="button" onclick="loadSampleProgram()" value="Load">
 </p>
@@ -79,6 +80,29 @@ Main=(
   )
 `;
 
+const SIMPLE_INVARIANT = `reuse [L42.is/AdamsTowel]
+Point = Data:{
+  Double x
+  Double y
+  @Cache.Now class method Double distanceFromOrigin(Double x, Double y) = 
+    ((x*x)+(y*y)).pow(exp=\\"0.5")
+  // x and y must always be positive
+  @Cache.Now class method Void invariant(Double x, Double y) = 
+    if !(x>=0Double && y>=0Double) error X"""%
+      | Invalid state:
+      | x = %x
+      | y = %y
+      """
+  }
+
+Main=(
+  Point p = Point(x=Double"5", y=Double"3")
+  // This would result in an error:
+  //Point p2 = Point(x=Double"5", y=Double"-3")
+  Debug(S"p = %p")
+  )
+`;
+
 window.onload = () => {
     const editor = ace.edit('editor', { minLines: 10, maxLines: 50 });
     editor.session.setMode('ace/mode/l42');
@@ -103,6 +127,9 @@ function loadSampleProgram() {
             break;
         case 'Point':
             code = POINT;
+            break;
+        case 'Simple Invariant':
+            code = SIMPLE_INVARIANT;
             break;
     }
     window.editor.setValue(code);
