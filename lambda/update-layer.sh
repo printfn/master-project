@@ -20,7 +20,3 @@ echo "Deleting large unused files from inside zip file..."
 zip -d L42PortableLinux.zip \
     L42PortableLinux/L42Internals/libjfxwebkit.so \
     L42PortableLinux/L42Internals/jdk-16/lib/src.zip
-
-# upload to AWS
-echo "Uploading to AWS S3..."
-aws s3 cp "L42PortableLinux.zip" "s3://printfn-data-unversioned/L42PortableLinux.zip"
