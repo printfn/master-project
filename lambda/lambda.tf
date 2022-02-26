@@ -1,8 +1,3 @@
-resource aws_s3_bucket "l42_bucket" {
-  bucket_prefix = "l42-"
-  force_destroy = true
-}
-
 resource "aws_s3_object" "l42_layer" {
   bucket = aws_s3_bucket.l42_bucket.bucket
   key = "L42PortableLinux.zip"
