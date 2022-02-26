@@ -1,6 +1,7 @@
-resource aws_s3_bucket "l42_bucket" {
+resource "aws_s3_bucket" "l42_bucket" {
   bucket_prefix = "l42-"
   force_destroy = true
+  tags          = local.tags
 }
 
 resource "aws_s3_bucket_acl" "l42_bucket" {
