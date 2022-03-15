@@ -1,0 +1,24 @@
+reuse [L42.is/AdamsTowel]
+Point = Data:{
+  // `var` makes the `x` and `y` values modifiable
+  var Double x
+  var Double y
+  mut method Void add(Double dx) = 
+    this.x(this.x() + dx)
+  @Cache.Now class method Void invariant(Double x, Double y) = 
+    if x < 0Double || y < 0Double error X"""%
+      | Invalid state:
+      | x = %x
+      | y = %y
+      """
+  }
+
+Main=(
+  mut Point p = Point(x=Double"5", y=Double"3")
+  // now we can try to mutate `x`:
+  p.add(dx=Double"-6") // error on this line
+  catch error This.X msg1 (
+     Debug(S"We got an error: %msg1")
+     )
+  Debug(S"p = %p")
+  )
