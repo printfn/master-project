@@ -23,15 +23,27 @@ public class Main {
             return;
         }
 
+        runL42(projectLocation);
+        runL42(projectLocation);
+        System.out.println("Reached end of main()");
+    }
+
+    static Settings settings = null;
+    static Slave slave = null;
+    static void runL42(URI projectLocation) {
         try {
-            Settings settings = parseSettings(Path.of(projectLocation));
-            Slave slave = makeSlave(settings);
+            if (settings == null) {
+                settings = parseSettings(Path.of(projectLocation));
+            }
+            if (slave == null) {
+                slave = makeSlave(settings);
+            }
 
             slave.run(()->{
                 try {
-                    CachedTop cache = new CachedTop(List.of(),List.of());
-                    is.L42.main.Main.run(Path.of(projectLocation), cache); }
-                catch(Throwable t) {
+                    CachedTop cache = new CachedTop(List.of(), List.of());
+                    is.L42.main.Main.run(Path.of(projectLocation), cache);
+                } catch(Throwable t) {
                     t.printStackTrace();
                     throw t;
                 }
@@ -52,7 +64,7 @@ public class Main {
                 new String[] {},
                 ClassLoader.getPlatformClassLoader()) {
             @Override protected List<String> getJavaArgs(String libLocation){
-                var res=super.getJavaArgs(libLocation);
+                var res = super.getJavaArgs(libLocation);
                 res.add(0,"--enable-preview");
                 currentSettings.options().addOptions(res);
                 return res;
