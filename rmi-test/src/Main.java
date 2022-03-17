@@ -1,15 +1,5 @@
-import is.L42.common.Parse;
-import is.L42.main.Settings;
-import is.L42.top.CachedTop;
-import safeNativeCode.slave.Slave;
-import safeNativeCode.slave.host.ProcessSlave;
-
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class Main {
 
@@ -23,57 +13,12 @@ public class Main {
             return;
         }
 
+        var client = new L42Client(projectLocation);
+
         System.out.println("Run #1:");
-        System.out.println(runL42(projectLocation).formatOutput());
+        System.out.println(client.runL42().formatOutput());
         System.out.println("Run #2:");
-        System.out.println(runL42(projectLocation).formatOutput());
+        System.out.println(client.runL42().formatOutput());
         System.out.println("Reached end of main()");
-    }
-
-    static Settings settings = null;
-    static Slave slave = null;
-    static L42Result runL42(URI projectLocation) {
-        long startTime = System.nanoTime();
-        try {
-            if (settings == null) {
-                settings = parseSettings(Path.of(projectLocation));
-            }
-            if (slave == null) {
-                slave = makeSlave(settings);
-            }
-
-            slave.run(()->{
-                try {
-                    CachedTop cache = new CachedTop(List.of(), List.of());
-                    is.L42.main.Main.run(Path.of(projectLocation), cache);
-                } catch(Throwable t) {
-                    t.printStackTrace();
-                    throw t;
-                }
-            });
-        } catch(Throwable t) {
-            t.printStackTrace();
-        }
-        long endTime = System.nanoTime();
-        return new L42Result(endTime - startTime);
-    }
-
-    static Settings parseSettings(Path projectDir) {
-        Path settingsPath = projectDir.resolve("Setti.ngs");
-        return Parse.sureSettings(settingsPath);
-    }
-
-    static Slave makeSlave(Settings currentSettings) throws RemoteException, ExecutionException, InterruptedException {
-        return new ProcessSlave(
-                -1,
-                new String[] {},
-                ClassLoader.getPlatformClassLoader()) {
-            @Override protected List<String> getJavaArgs(String libLocation){
-                var res = super.getJavaArgs(libLocation);
-                res.add(0,"--enable-preview");
-                currentSettings.options().addOptions(res);
-                return res;
-            }
-        };
     }
 }
