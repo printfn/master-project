@@ -23,14 +23,17 @@ public class Main {
             return;
         }
 
-        runL42(projectLocation);
-        runL42(projectLocation);
+        System.out.println("Run #1:");
+        System.out.println(runL42(projectLocation).formatOutput());
+        System.out.println("Run #2:");
+        System.out.println(runL42(projectLocation).formatOutput());
         System.out.println("Reached end of main()");
     }
 
     static Settings settings = null;
     static Slave slave = null;
-    static void runL42(URI projectLocation) {
+    static L42Result runL42(URI projectLocation) {
+        long startTime = System.nanoTime();
         try {
             if (settings == null) {
                 settings = parseSettings(Path.of(projectLocation));
@@ -51,6 +54,8 @@ public class Main {
         } catch(Throwable t) {
             t.printStackTrace();
         }
+        long endTime = System.nanoTime();
+        return new L42Result(endTime - startTime);
     }
 
     static Settings parseSettings(Path projectDir) {
