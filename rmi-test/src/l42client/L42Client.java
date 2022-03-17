@@ -1,9 +1,12 @@
+package l42client;
+
 import is.L42.common.Parse;
 import is.L42.main.Settings;
 import is.L42.top.CachedTop;
 import safeNativeCode.slave.Slave;
 import safeNativeCode.slave.host.ProcessSlave;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.rmi.RemoteException;
@@ -68,5 +71,15 @@ public class L42Client {
                 return res;
             }
         };
+    }
+
+    void terminate() {
+        try {
+            if (slave != null && slave.isAlive()) {
+                slave.terminate();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
