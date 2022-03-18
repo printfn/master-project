@@ -8,17 +8,11 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.err.println("Error: please specify a directory of a 42 project (as an absolute path)");
-            return;
-        }
-        URI projectLocation;
-        try {
-            projectLocation = new URI(String.format("file://%s", args[0]));
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+            System.err.println("Error: please specify a directory of a 42 project");
             return;
         }
 
+        var projectLocation = args[0];
         var client = new L42Client(projectLocation);
 
         System.out.println(client.runL42().formatOutput());

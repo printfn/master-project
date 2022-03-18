@@ -8,6 +8,7 @@ import safeNativeCode.slave.host.ProcessSlave;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -19,7 +20,16 @@ public class L42Client {
     CachedTop cache;
     URI projectLocation;
 
-    public L42Client(URI projectLocation) {
+    public L42Client(String projectLocationStr) {
+        URI projectLocation;
+        try {
+            Path path = Path.of(projectLocationStr);
+            projectLocation = new URI(String.format("file://%s", path.toAbsolutePath()));
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
         this.cache = new CachedTop(List.of(), List.of());
         this.projectLocation = projectLocation;
         this.settings = parseSettings();
