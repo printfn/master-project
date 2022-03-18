@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="L42">
+  <library name="safeNativeCode">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/L42.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/L42_lib/safeNativeCode.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
