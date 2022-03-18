@@ -5,5 +5,13 @@
 ### Build
 
 ```bash
-ln -s ../l42-controller/out/artifacts/l42_controller_jar/l42-controller.jar l42-controller.jar
+docker system prune -a -f
+cp -f ../l42-controller/out/artifacts/l42_controller_jar/l42-controller.jar .
+docker build --network=host --tag l42-docker-controller .
+```
+
+### Run
+
+```bash
+docker run l42-docker-controller
 ```

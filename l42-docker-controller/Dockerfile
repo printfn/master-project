@@ -8,6 +8,5 @@ FROM adoptopenjdk/openjdk16:alpine-jre
 
 WORKDIR /opt/app
 
-RUN mkdir /opt/app
-COPY ../rmi-test/out/artifacts/rmi_test_jar/rmi-test.jar /opt/app
-CMD ["java", "--enable-preview", "-jar", "/opt/app/rmi-test.jar"]
+COPY l42-controller.jar /opt/app
+CMD ["java", "--enable-preview", "-jar", "/opt/app/l42-controller.jar"]
