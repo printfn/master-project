@@ -5,7 +5,6 @@
       <element id="module-output" name="rmi-test" />
       <element id="module-source" name="rmi-test" />
       <element id="library" level="project" name="L42" />
-      <element id="library" level="project" name="safeNativeCode" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42_lib/safeNativeCode.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42_lib/antlr-4.7.2-complete.jar" path-in-jar="/" />
