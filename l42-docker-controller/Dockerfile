@@ -1,10 +1,4 @@
-# build: docker build --network=host --tag java-docker-rmi .
-# run: docker run --publish 80:80 python-docker
-# test: curl localhost:80
-# get container name: docker ps
-# remote: docker exec -u root -it <container name> bash
-
-FROM adoptopenjdk/openjdk16:alpine-jre
+FROM adoptopenjdk/openjdk16:alpine-slim
 
 WORKDIR /opt/app
 

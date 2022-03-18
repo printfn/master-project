@@ -13,5 +13,11 @@ docker build --network=host --tag l42-docker-controller .
 ### Run
 
 ```bash
-docker run l42-docker-controller
+docker run -v "$(pwd)/../l42-examples:/opt/app/examples" l42-docker-controller
+```
+
+### Debug
+
+```bash
+docker run -v "$(pwd)/../l42-examples:/opt/app/examples" -it l42-docker-controller /bin/sh
 ```
