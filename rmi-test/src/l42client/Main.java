@@ -1,7 +1,5 @@
 package l42client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Scanner;
 
 public class Main {
