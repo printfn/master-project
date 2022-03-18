@@ -5,5 +5,5 @@
 ### Build
 
 ```bash
-ln -s ../rmi-test/out/artifacts/rmi_test_jar/rmi-test.jar l42-controller.jar
+ln -s ../l42-controller/out/artifacts/l42_controller_jar/l42-controller.jar l42-controller.jar
 ```
