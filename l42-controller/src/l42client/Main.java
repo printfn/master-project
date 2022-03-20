@@ -1,5 +1,6 @@
 package l42client;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -12,6 +13,8 @@ public class Main {
 
         var projectLocation = args[0];
         var client = new L42Client(projectLocation);
+
+        var server = new Server();
 
         System.out.println(client.runL42().formatOutput());
         Scanner reader = new Scanner(System.in);
