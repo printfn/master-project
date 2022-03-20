@@ -17,6 +17,12 @@ class HealthHttpHandler implements HttpHandler {
 }
 
 class ApiHttpHandler implements HttpHandler {
+    L42Client client;
+
+    ApiHttpHandler(L42Client client) {
+        this.client = client;
+    }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!exchange.getRequestMethod().equals("POST")) {
@@ -28,7 +34,7 @@ class ApiHttpHandler implements HttpHandler {
         requestBodyStream.close();
         var requestJson = new JSONObject(requestBody);
 
-        var responseJson = Server.handleApi(requestJson);
+        var responseJson = Server.handleApi(requestJson, client);
 
         Server.respond(200, responseJson.toString(), exchange);
     }
@@ -36,6 +42,7 @@ class ApiHttpHandler implements HttpHandler {
 
 public class Server {
     HttpServer httpServer;
+    L42Client client;
 
     static void respond(int code, String response, HttpExchange exchange) {
         try {
@@ -50,33 +57,36 @@ public class Server {
         }
     }
 
-    static JSONObject handleApi(JSONObject request) {
+    static JSONObject handleApi(JSONObject request, L42Client client) {
         var code = request.getString("code");
         System.err.println("Received code:\n" + code);
+
+        var result = client.runL42();
 
         var response = new JSONObject();
         response.put("ok", true);
         response.put("stdout", "STDOUT HERE");
         response.put("stderr", "STDERR HERE");
         response.put("returncode", 0);
-        response.put("duration", 1);
+        response.put("duration", result.executionTime());
         return response;
     }
 
-    Server() {
-        this(8000);
+    Server(L42Client client) {
+        this(client, 8000);
     }
 
-    Server(int port) {
-        this("localhost", port);
+    Server(L42Client client, int port) {
+        this(client, "localhost", port);
     }
 
-    Server(String bind, int port) {
+    Server(L42Client client, String bind, int port) {
         try {
+            this.client = client;
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHttpHandler());
-            httpServer.createContext("/api", new ApiHttpHandler());
-            httpServer.setExecutor(null);
+            httpServer.createContext("/api", new ApiHttpHandler(this.client));
+            httpServer.setExecutor(null); // default executor
             httpServer.start();
             var baseUrl = "http://" + bind + ":" + port + "/";
             System.err.println("Listening on " + baseUrl);

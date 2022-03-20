@@ -14,9 +14,9 @@ public class Main {
         var projectLocation = args[0];
         var client = new L42Client(projectLocation);
 
-        var server = new Server();
+        var server = new Server(client);
 
-        System.out.println(client.runL42().formatOutput());
+        //System.out.println(client.runL42().formatOutput());
         Scanner reader = new Scanner(System.in);
         while (true) {
             var input = reader.next();
