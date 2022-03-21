@@ -47,7 +47,7 @@ public class L42Client {
     CachedTop cache;
     Path tempDir;
 
-    public L42Client(Path projectLocationStr, Path tempDir) {
+    public L42Client(Path tempDir) {
         try {
             this.tempDir = tempDir;
             clearTempDir();

@@ -12,7 +12,7 @@ public class Main {
         }
 
         var projectLocation = Path.of(args[0]);
-        var client = new L42Client(projectLocation, Path.of("/tmp/L42testing"));
+        var client = new L42Client(Path.of("/tmp/L42testing"));
 
         var server = new Server(client);
 
