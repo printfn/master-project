@@ -1,6 +1,6 @@
 package l42client;
 
-public record L42Result(long executionTimeNanos) {
+public record L42Result(long executionTimeNanos, String stdout, String stderr) {
     public double executionTime() {
         return Math.round(executionTimeNanos() / 1e6) / 1e3;
     }

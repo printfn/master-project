@@ -65,8 +65,8 @@ public class Server {
 
         var response = new JSONObject();
         response.put("ok", true);
-        response.put("stdout", "STDOUT HERE");
-        response.put("stderr", "STDERR HERE");
+        response.put("stdout", result.stdout());
+        response.put("stderr", result.stderr());
         response.put("returncode", 0);
         response.put("duration", result.executionTime());
         return response;

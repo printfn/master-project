@@ -2,11 +2,13 @@ package l42client;
 
 import is.L42.common.Parse;
 import is.L42.main.Settings;
+import is.L42.platformSpecific.javaTranslation.Resources;
 import is.L42.top.CachedTop;
 import safeNativeCode.slave.Slave;
 import safeNativeCode.slave.host.ProcessSlave;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -14,11 +16,35 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+class Output implements Serializable {
+    StringBuilder stdout = new StringBuilder();
+    StringBuilder stderr = new StringBuilder();
+
+    void clear() {
+        this.stdout.setLength(0);
+        this.stderr.setLength(0);
+    }
+
+    void setHandlers() {
+        Resources.setOutHandler(s -> {
+            synchronized(Output.class) {
+                this.stdout.append(s);
+            }
+        });
+        Resources.setErrHandler(s -> {
+            synchronized(Output.class) {
+                this.stderr.append(s);
+            }
+        });
+    }
+}
+
 public class L42Client {
     Settings settings;
     Slave slave = null;
     CachedTop cache;
     URI projectLocation;
+    Output output = new Output();
 
     public L42Client(String projectLocationStr) {
         URI projectLocation;
@@ -37,6 +63,7 @@ public class L42Client {
 
     L42Result runL42() {
         long startTime = System.nanoTime();
+        output.clear();
         try {
             if (slave == null) {
                 makeSlave();
@@ -46,7 +73,9 @@ public class L42Client {
             //     because L42Client isn't serializable
             var projectLocation = this.projectLocation;
             var cache = this.cache;
+            var output = this.output;
             slave.run(() -> {
+                output.setHandlers();
                 try {
                     is.L42.main.Main.run(Path.of(projectLocation), cache);
                 } catch(Throwable t) {
@@ -60,7 +89,10 @@ public class L42Client {
             this.cache = cache.toNextCache();
         }
         long endTime = System.nanoTime();
-        return new L42Result(endTime - startTime);
+        return new L42Result(
+                endTime - startTime,
+                output.stdout.toString(),
+                output.stderr.toString());
     }
 
     Settings parseSettings() {
