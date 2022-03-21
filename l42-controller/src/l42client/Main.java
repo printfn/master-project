@@ -1,6 +1,6 @@
 package l42client;
 
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Scanner;
 
 public class Main {
@@ -11,12 +11,11 @@ public class Main {
             return;
         }
 
-        var projectLocation = args[0];
-        var client = new L42Client(projectLocation);
+        var projectLocation = Path.of(args[0]);
+        var client = new L42Client(projectLocation, Path.of("/tmp/L42testing"));
 
         var server = new Server(client);
 
-        //System.out.println(client.runL42().formatOutput());
         Scanner reader = new Scanner(System.in);
         while (true) {
             var input = reader.next();
@@ -31,7 +30,7 @@ public class Main {
                     continue;
                 }
             }
-            System.out.println(client.runL42().formatOutput());
+            System.out.println(client.runL42FromDir(projectLocation).formatOutput());
         }
     }
 }

@@ -61,7 +61,7 @@ public class Server {
         var code = request.getString("code");
         System.err.println("Received code:\n" + code);
 
-        var result = client.runL42();
+        var result = client.runL42FromCode(code);
 
         var response = new JSONObject();
         response.put("ok", true);

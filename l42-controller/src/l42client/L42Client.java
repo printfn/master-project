@@ -7,33 +7,35 @@ import is.L42.top.CachedTop;
 import safeNativeCode.slave.Slave;
 import safeNativeCode.slave.host.ProcessSlave;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 class Output implements Serializable {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
 
-    void clear() {
-        this.stdout.setLength(0);
-        this.stderr.setLength(0);
-    }
-
     void setHandlers() {
         Resources.setOutHandler(s -> {
             synchronized(Output.class) {
-                this.stdout.append(s);
+                stdout.append(s);
             }
         });
         Resources.setErrHandler(s -> {
             synchronized(Output.class) {
-                this.stderr.append(s);
+                System.out.println("RECEIVED " + s);
+                stderr.append(s);
             }
         });
     }
@@ -43,46 +45,111 @@ public class L42Client {
     Settings settings;
     Slave slave = null;
     CachedTop cache;
-    URI projectLocation;
-    Output output = new Output();
+    Path tempDir;
 
-    public L42Client(String projectLocationStr) {
-        URI projectLocation;
+    public L42Client(Path projectLocationStr, Path tempDir) {
         try {
-            Path path = Path.of(projectLocationStr);
-            projectLocation = new URI(String.format("file://%s", path.toAbsolutePath()));
-        } catch (URISyntaxException e) {
+            this.tempDir = tempDir;
+            clearTempDir();
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
 
         this.cache = new CachedTop(List.of(), List.of());
-        this.projectLocation = projectLocation;
-        this.settings = parseSettings();
+        this.settings = null;
     }
 
-    L42Result runL42() {
-        long startTime = System.nanoTime();
-        output.clear();
+    private void clearTempDir() throws IOException {
+        var tempDirFile = tempDir.toFile();
+
+        if (tempDirFile.exists()) {
+            Files.walk(tempDir).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(f -> {
+                if (!f.delete()) {
+                    throw new RuntimeException("Failed to delete " + f.getAbsolutePath());
+                }
+            });
+        }
+
+        if (!tempDirFile.mkdirs()) {
+            throw new RuntimeException("Failed to create temp directory");
+        }
+        if (!tempDirFile.isDirectory()) {
+            throw new RuntimeException("Temp dir is not a directory");
+        }
+    }
+
+    L42Result runL42FromCode(String code) {
         try {
+            clearTempDir();
+
+            var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
+            settingsFile.createNewFile();
+            var settingsWriter = new FileWriter(settingsFile);
+            settingsWriter.write("maxStackSize = 1G\ninitialMemorySize = 256M\nmaxMemorySize = 2G\n");
+            settingsWriter.close();
+
+            var codeFile = tempDir.resolve(Path.of("This.L42")).toFile();
+            codeFile.createNewFile();
+            var codeWriter = new FileWriter(codeFile);
+            codeWriter.write(code);
+            codeWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return executeL42();
+    }
+
+    L42Result runL42FromDir(Path projectLocation) {
+        try {
+            clearTempDir();
+            try (Stream<Path> stream = Files.walk(projectLocation)) {
+                stream.forEach(source -> {
+                    try {
+                        Files.copy(
+                            source,
+                            tempDir.resolve(projectLocation.relativize(source)),
+                            StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        return executeL42();
+    }
+
+    private L42Result executeL42() {
+        long startTime = System.nanoTime();
+        if (this.settings == null) {
+            this.settings = parseSettings();
+        }
+        Output out = null;
+        try {
+            var tempDir = new URI(String.format("file://%s", this.tempDir.toAbsolutePath()));
             if (slave == null) {
                 makeSlave();
             }
 
             // we need to copy these variables to avoid a MarshalException
             //     because L42Client isn't serializable
-            var projectLocation = this.projectLocation;
             var cache = this.cache;
-            var output = this.output;
-            slave.run(() -> {
+            out = slave.call(() -> {
+                var output = new Output();
                 output.setHandlers();
                 try {
-                    is.L42.main.Main.run(Path.of(projectLocation), cache);
+                    is.L42.main.Main.run(Path.of(tempDir), cache);
                 } catch(Throwable t) {
                     t.printStackTrace();
                     throw t;
                 }
-            });
+                return output;
+            }).get();
         } catch(Throwable t) {
             t.printStackTrace();
         } finally {
@@ -91,12 +158,12 @@ public class L42Client {
         long endTime = System.nanoTime();
         return new L42Result(
                 endTime - startTime,
-                output.stdout.toString(),
-                output.stderr.toString());
+                out.stdout.toString(),
+                out.stderr.toString());
     }
 
     Settings parseSettings() {
-        Path settingsPath = Path.of(projectLocation).resolve("Setti.ngs");
+        Path settingsPath = tempDir.resolve("Setti.ngs");
         return Parse.sureSettings(settingsPath);
     }
 
