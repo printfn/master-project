@@ -1,13 +1,14 @@
 package l42client;
 
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
         var client = new L42Client(Path.of("/tmp/L42testing"));
-        var server = new Server(client);
+        var server = new Server(client, "0.0.0.0", 8000);
         Path projectLocation = null;
 
         switch (args.length) {
@@ -21,7 +22,16 @@ public class Main {
 
         Scanner reader = new Scanner(System.in);
         while (true) {
-            var input = reader.next();
+            String input = null;
+            try {
+                input = reader.next();
+            } catch (NoSuchElementException e) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                }
+                continue;
+            }
             switch (input) {
                 case "run": break;
                 case "exit": {
