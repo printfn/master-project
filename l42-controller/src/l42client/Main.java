@@ -6,15 +6,18 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Error: please specify a directory of a 42 project");
-            return;
-        }
-
-        var projectLocation = Path.of(args[0]);
         var client = new L42Client(Path.of("/tmp/L42testing"));
-
         var server = new Server(client);
+        Path projectLocation = null;
+
+        switch (args.length) {
+            case 0 -> System.err.println("Warning: no project directory specified");
+            case 1 -> projectLocation = Path.of(args[0]);
+            default -> {
+                System.err.println("Error: too many CLI arguments");
+                return;
+            }
+        }
 
         Scanner reader = new Scanner(System.in);
         while (true) {
@@ -29,6 +32,10 @@ public class Main {
                     System.err.println("Error: expected 'run' or 'exit'");
                     continue;
                 }
+            }
+            if (projectLocation == null) {
+                System.err.println("Error: cannot run L42 project: no directory specified");
+                continue;
             }
             System.out.println(client.runL42FromDir(projectLocation).formatOutput());
         }
