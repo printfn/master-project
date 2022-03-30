@@ -43,6 +43,10 @@ class ApiHttpHandler implements HttpHandler {
 public class Server {
     HttpServer httpServer;
     L42Client client;
+    static String HELLO_WORLD = "reuse [L42.is/AdamsTowel]\n" +
+            "Main=(\n" +
+            "  Debug(S\"Hello world from 42\")\n" +
+            "  )";
 
     static void respond(int code, String response, HttpExchange exchange) {
         try {
@@ -83,6 +87,7 @@ public class Server {
     Server(L42Client client, String bind, int port) {
         try {
             this.client = client;
+            client.runL42FromCode(HELLO_WORLD);
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHttpHandler());
             httpServer.createContext("/api", new ApiHttpHandler(this.client));
