@@ -43,10 +43,11 @@ class ApiHttpHandler implements HttpHandler {
 public class Server {
     HttpServer httpServer;
     L42Client client;
-    static String HELLO_WORLD = "reuse [L42.is/AdamsTowel]\n" +
-            "Main=(\n" +
-            "  Debug(S\"Hello world from 42\")\n" +
-            "  )";
+    static String HELLO_WORLD = """
+            reuse [L42.is/AdamsTowel]
+            Main=(
+              Debug(S"Hello world from 42")
+              )""";
 
     static void respond(int code, String response, HttpExchange exchange) {
         try {
