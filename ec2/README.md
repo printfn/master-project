@@ -32,6 +32,7 @@ sudo vim /etc/nginx/nginx.conf
 sudo mkdir -p /etc/pki/nginx/private
 sudo vim /etc/pki/nginx/server.crt
 sudo vim /etc/pki/nginx/private/server.key
+sudo systemctl restart nginx
 
 sudo docker run --publish 80:80 -it printfn/l42
 ```
