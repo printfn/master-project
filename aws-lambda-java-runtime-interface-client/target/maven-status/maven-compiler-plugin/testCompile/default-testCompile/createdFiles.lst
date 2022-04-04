@@ -1,0 +1,12 @@
+com/amazonaws/services/lambda/runtime/api/client/api/LambdaContextTest.class
+com/amazonaws/services/lambda/runtime/api/client/FailureTest$MySecretException.class
+testpkg/StackTraceHelper.class
+com/amazonaws/services/lambda/runtime/api/client/util/EnvWriterTest.class
+com/amazonaws/services/lambda/runtime/api/client/util/EnvWriterTest$EnvReaderMock.class
+com/amazonaws/services/lambda/runtime/api/client/logging/StdOutLogSinkTest.class
+com/amazonaws/services/lambda/runtime/api/client/XRayErrorCauseTest.class
+com/amazonaws/services/lambda/runtime/api/client/FailureTest.class
+com/amazonaws/services/lambda/runtime/serialization/factories/JacksonFactoryTest.class
+com/amazonaws/services/lambda/runtime/api/client/CustomerClassLoaderTest.class
+com/amazonaws/services/lambda/runtime/api/client/logging/FramedTelemetryLogSinkTest.class
+com/amazonaws/services/lambda/runtime/api/client/UserFaultTest.class

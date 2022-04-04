@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LambdaOutputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client.util</a> &gt; <span class="el_source">LambdaOutputStream.java</span></div><h1>LambdaOutputStream.java</h1><pre class="source lang-java linenums">/* Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. */
+
+package com.amazonaws.services.lambda.runtime.api.client.util;
+
+import java.io.OutputStream;
+import java.io.IOException;
+
+public class LambdaOutputStream extends OutputStream {
+    private final OutputStream inner;
+
+<span class="nc" id="L11">    public LambdaOutputStream(OutputStream inner) {</span>
+<span class="nc" id="L12">        this.inner = inner;</span>
+<span class="nc" id="L13">    }</span>
+
+    @Override
+    public void write(int b) throws IOException {
+<span class="nc" id="L17">        write(new byte[] {(byte)b});</span>
+<span class="nc" id="L18">    }</span>
+
+    @Override
+    public void write(byte[] bytes) throws IOException {
+<span class="nc" id="L22">        write(bytes, 0, bytes.length);</span>
+
+<span class="nc" id="L24">    }</span>
+
+    @Override
+    public void write(byte[] bytes, int offset, int length) throws IOException {
+<span class="nc" id="L28">       inner.write(bytes, offset, length);</span>
+<span class="nc" id="L29">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

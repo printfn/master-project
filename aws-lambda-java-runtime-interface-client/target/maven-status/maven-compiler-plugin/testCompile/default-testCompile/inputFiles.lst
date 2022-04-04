@@ -1,0 +1,10 @@
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/XRayErrorCauseTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/logging/FramedTelemetryLogSinkTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/serialization/factories/JacksonFactoryTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/testpkg/StackTraceHelper.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/api/LambdaContextTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/FailureTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/logging/StdOutLogSinkTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/util/EnvWriterTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/UserFaultTest.java
+/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/test/java/com/amazonaws/services/lambda/runtime/api/client/CustomerClassLoaderTest.java

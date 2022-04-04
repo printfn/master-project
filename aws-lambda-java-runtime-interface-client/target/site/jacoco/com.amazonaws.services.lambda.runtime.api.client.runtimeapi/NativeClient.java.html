@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NativeClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client.runtimeapi</a> &gt; <span class="el_source">NativeClient.java</span></div><h1>NativeClient.java</h1><pre class="source lang-java linenums">/* Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. */
+
+package com.amazonaws.services.lambda.runtime.api.client.runtimeapi;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+/**
+ * This module defines the native Runtime Interface Client which is responsible for all HTTP
+ * interactions with the Runtime API.
+ */
+<span class="nc" id="L14">class NativeClient {</span>
+    private static final String nativeLibPath = &quot;/tmp/.aws-lambda-runtime-interface-client&quot;;
+<span class="nc" id="L16">    private static final String architecturePathSuffix = &quot;/&quot; + getArchIdentifier();</span>
+    // Implementation based on AWS CRT, but adopted to support 64-bit architectures only (ref. https://github.com/awslabs/aws-crt-java/blob/0e9c3db8b07258b57c2503cfc47c787ccef10670/src/main/java/software/amazon/awssdk/crt/CRT.java#L106-L134)
+    private static final String supported_arm_architectures = &quot;^(aarch64.*|arm64.*)$&quot;;
+    private static final String supported_x86_architectures = &quot;^(x8664|amd64|ia32e|em64t|x64|x86_64)$&quot;;
+<span class="nc" id="L20">    private static final String[] libsToTry = {</span>
+            &quot;aws-lambda-runtime-interface-client.glibc.so&quot;,
+            &quot;aws-lambda-runtime-interface-client.musl.so&quot;,
+    };
+<span class="nc" id="L24">    private static final Throwable[] exceptions = new Throwable[libsToTry.length];</span>
+    static {
+<span class="nc" id="L26">            boolean loaded = false;</span>
+<span class="nc bnc" id="L27" title="All 4 branches missed.">            for (int i = 0; !loaded &amp;&amp; i &lt; libsToTry.length; ++i) {</span>
+<span class="nc" id="L28">                try (InputStream lib = NativeClient.class.getResourceAsStream(</span>
+<span class="nc" id="L29">                        Paths.get(architecturePathSuffix, libsToTry[i]).toString())) {</span>
+<span class="nc" id="L30">                    Files.copy(lib, Paths.get(nativeLibPath), StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L31">                    System.load(nativeLibPath);</span>
+<span class="nc" id="L32">                    loaded = true;</span>
+<span class="nc" id="L33">                } catch (UnsatisfiedLinkError e) {</span>
+<span class="nc" id="L34">                    exceptions[i] = e;</span>
+<span class="nc" id="L35">                } catch (Exception e) {</span>
+<span class="nc" id="L36">                    exceptions[i] = e;</span>
+<span class="nc" id="L37">                }</span>
+            }
+<span class="nc bnc" id="L39" title="All 2 branches missed.">            if (!loaded) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">                for (int i = 0; i &lt; libsToTry.length; ++i) {</span>
+<span class="nc" id="L41">                    System.err.printf(&quot;Failed to load the native runtime interface client library %s. Exception: %s\n&quot;, libsToTry[i], exceptions[i].getMessage());</span>
+                }
+<span class="nc" id="L43">                System.exit(-1);</span>
+            }
+<span class="nc" id="L45">            String userAgent = String.format(</span>
+                    &quot;aws-lambda-java/%s-%s&quot; ,
+<span class="nc" id="L47">                    System.getProperty(&quot;java.vendor.version&quot;),</span>
+<span class="nc" id="L48">                    NativeClient.class.getPackage().getImplementationVersion());</span>
+<span class="nc" id="L49">            initializeClient(userAgent.getBytes());</span>
+<span class="nc" id="L50">    }</span>
+
+    /**
+     * @return a string describing the detected architecture the RIC is executing on
+     * @throws UnknownPlatformException
+     */
+    static String getArchIdentifier() {
+<span class="nc" id="L57">        String arch = System.getProperty(&quot;os.arch&quot;);</span>
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (arch.matches(supported_x86_architectures)) {</span>
+<span class="nc" id="L60">            return &quot;x86_64&quot;;</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        } else if (arch.matches(supported_arm_architectures)) {</span>
+<span class="nc" id="L62">            return &quot;arm64&quot;;</span>
+        }
+
+<span class="nc" id="L65">        throw new UnknownPlatformException(&quot;architecture not supported: &quot; + arch);</span>
+    }
+
+    static native void initializeClient(byte[] userAgent);
+
+    static native InvocationRequest next();
+
+    static native void postInvocationResponse(byte[] requestId, byte[] response);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

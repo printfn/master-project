@@ -1,0 +1,40 @@
+-------------------------------------------------------------------------------
+Test set: com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.024 s <<< FAILURE! - in com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest
+shouldSetTheAwsExecutionEnvVar_Java11  Time elapsed: 0.014 s  <<< ERROR!
+java.lang.RuntimeException: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetTheAwsExecutionEnvVar_Java11(EnvWriterTest.java:77)
+Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetTheAwsExecutionEnvVar_Java11(EnvWriterTest.java:77)
+
+shouldSetupEnvironmentCredentialsWhenTheyAreNotEmpty  Time elapsed: 0.002 s  <<< ERROR!
+java.lang.RuntimeException: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetupEnvironmentCredentialsWhenTheyAreNotEmpty(EnvWriterTest.java:51)
+Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetupEnvironmentCredentialsWhenTheyAreNotEmpty(EnvWriterTest.java:51)
+
+shouldRemoveEnvironmentCredentialsWhenTheyAreEmpty  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.RuntimeException: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldRemoveEnvironmentCredentialsWhenTheyAreEmpty(EnvWriterTest.java:40)
+Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldRemoveEnvironmentCredentialsWhenTheyAreEmpty(EnvWriterTest.java:40)
+
+shouldModifyEnv  Time elapsed: 0.004 s  <<< ERROR!
+java.lang.RuntimeException: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldModifyEnv(EnvWriterTest.java:31)
+Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.setEnv(EnvWriterTest.java:96)
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldModifyEnv(EnvWriterTest.java:31)
+
+shouldSetTheAwsExecutionEnvVar_Java8  Time elapsed: 0.002 s  <<< ERROR!
+java.lang.RuntimeException: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetTheAwsExecutionEnvVar_Java8(EnvWriterTest.java:63)
+Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module @5d099f62
+	at com.amazonaws.services.lambda.runtime.api.client.util.EnvWriterTest.shouldSetTheAwsExecutionEnvVar_Java8(EnvWriterTest.java:63)
+

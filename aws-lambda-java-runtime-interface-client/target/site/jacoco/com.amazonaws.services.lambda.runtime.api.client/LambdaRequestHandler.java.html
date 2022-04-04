@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LambdaRequestHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client</a> &gt; <span class="el_source">LambdaRequestHandler.java</span></div><h1>LambdaRequestHandler.java</h1><pre class="source lang-java linenums">/* Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. */
+
+package com.amazonaws.services.lambda.runtime.api.client;
+
+import com.amazonaws.services.lambda.runtime.api.client.runtimeapi.InvocationRequest;
+
+import java.io.ByteArrayOutputStream;
+
+public interface LambdaRequestHandler {
+    ByteArrayOutputStream call(InvocationRequest request) throws Error, Exception;
+
+    class UserFaultHandler implements LambdaRequestHandler {
+        public final UserFault fault;
+
+<span class="nc" id="L15">        public UserFaultHandler(UserFault fault) {</span>
+<span class="nc" id="L16">            this.fault = fault;</span>
+<span class="nc" id="L17">        }</span>
+
+        public ByteArrayOutputStream call(InvocationRequest request) {
+<span class="nc" id="L20">            throw fault;</span>
+        }
+    }
+
+    static LambdaRequestHandler initErrorHandler(final Throwable e, String className) {
+<span class="nc" id="L25">        return new UserFaultHandler(UserFault.makeInitErrorUserFault(e, className));</span>
+    }
+
+    static LambdaRequestHandler classNotFound(final Throwable e, String className) {
+<span class="nc" id="L29">        return new UserFaultHandler(UserFault.makeClassNotFoundUserFault(e, className));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

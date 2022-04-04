@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InvocationRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client.runtimeapi</a> &gt; <span class="el_source">InvocationRequest.java</span></div><h1>InvocationRequest.java</h1><pre class="source lang-java linenums">package com.amazonaws.services.lambda.runtime.api.client.runtimeapi;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+/**
+ * An invocation request represents the response of the runtime API's next invocation API.
+ *
+ * Copyright (c) 2019 Amazon. All rights reserved.
+ */
+<span class="nc" id="L11">public class InvocationRequest {</span>
+
+    /**
+     * The Lambda request ID associated with the request.
+     */
+    private String id;
+
+    /**
+     * The X-Ray tracing ID.
+     */
+    private String xrayTraceId;
+
+    /**
+     * The ARN of the Lambda function being invoked.
+     */
+    private String invokedFunctionArn;
+
+    /**
+     * Function execution deadline counted in milliseconds since the Unix epoch.
+     */
+    private long deadlineTimeInMs;
+
+    /**
+     * The client context header. This field is populated when the function is invoked from a mobile client.
+     */
+    private String clientContext;
+
+    /**
+     * The Cognito Identity context for the invocation. This field is populated when the function is invoked with AWS
+     * credentials obtained from Cognito Identity.
+     */
+    private String cognitoIdentity;
+
+    /**
+     * An input stream of the invocation's request body.
+     */
+    private InputStream stream;
+
+    private byte[] content;
+
+    public String getId() {
+<span class="nc" id="L52">        return id;</span>
+    }
+
+    public String getXrayTraceId() {
+<span class="nc" id="L56">        return xrayTraceId;</span>
+    }
+
+    public String getInvokedFunctionArn() {
+<span class="nc" id="L60">        return invokedFunctionArn;</span>
+    }
+
+    public long getDeadlineTimeInMs() {
+<span class="nc" id="L64">        return deadlineTimeInMs;</span>
+    }
+
+    public String getClientContext() {
+<span class="nc" id="L68">        return clientContext;</span>
+    }
+
+    public String getCognitoIdentity() {
+<span class="nc" id="L72">        return cognitoIdentity;</span>
+    }
+
+    public InputStream getContentAsStream() {
+<span class="nc" id="L76">        return new ByteArrayInputStream(content);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

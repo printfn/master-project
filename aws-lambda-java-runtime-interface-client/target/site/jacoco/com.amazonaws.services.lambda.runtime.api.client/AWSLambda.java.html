@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AWSLambda.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client</a> &gt; <span class="el_source">AWSLambda.java</span></div><h1>AWSLambda.java</h1><pre class="source lang-java linenums">//
+//  AWSLambda.java
+//
+//  Copyright (c) 2013 Amazon. All rights reserved.
+//
+package com.amazonaws.services.lambda.runtime.api.client;
+
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.api.client.logging.LambdaContextLogger;
+import com.amazonaws.services.lambda.runtime.api.client.logging.StdOutLogSink;
+import com.amazonaws.services.lambda.runtime.api.client.util.EnvReader;
+import com.amazonaws.services.lambda.runtime.api.client.util.EnvWriter;
+import com.amazonaws.services.lambda.runtime.api.client.util.LambdaOutputStream;
+import com.amazonaws.services.lambda.runtime.api.client.util.UnsafeUtil;
+import com.amazonaws.services.lambda.runtime.serialization.PojoSerializer;
+import com.amazonaws.services.lambda.runtime.serialization.factories.GsonFactory;
+import com.amazonaws.services.lambda.runtime.serialization.factories.JacksonFactory;
+import com.amazonaws.services.lambda.runtime.serialization.util.ReflectUtil;
+import com.amazonaws.services.lambda.runtime.api.client.LambdaRequestHandler.UserFaultHandler;
+import com.amazonaws.services.lambda.runtime.api.client.logging.FramedTelemetryLogSink;
+import com.amazonaws.services.lambda.runtime.api.client.logging.LogSink;
+import com.amazonaws.services.lambda.runtime.api.client.runtimeapi.InvocationRequest;
+import com.amazonaws.services.lambda.runtime.api.client.runtimeapi.LambdaRuntimeClient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.net.URLClassLoader;
+import java.nio.file.Paths;
+import java.security.Security;
+import java.util.Properties;
+
+import static com.amazonaws.services.lambda.runtime.api.client.UserFault.makeUserFault;
+
+/**
+ * The entrypoint of this class is {@link AWSLambda#startRuntime}. It performs two main tasks:
+ *
+ * &lt;p&gt;
+ * 1. loads the user's handler.
+ * &lt;br/&gt;
+ * 2. enters the Lambda runtime loop which handles function invocations as defined in the Lambda Custom Runtime API.
+ *
+ * &lt;p&gt;
+ * Once initialized, {@link AWSLambda#startRuntime} will halt only if an irrecoverable error occurs.
+ */
+<span class="nc" id="L50">public class AWSLambda {</span>
+
+<span class="nc" id="L52">    private static final Runnable doNothing = () -&gt; {</span>
+<span class="nc" id="L53">    };</span>
+
+    private static final String TRUST_STORE_PROPERTY = &quot;javax.net.ssl.trustStore&quot;;
+
+    private static final String JAVA_SECURITY_PROPERTIES = &quot;java.security.properties&quot;;
+
+    private static final String NETWORKADDRESS_CACHE_NEGATIVE_TTL_ENV_VAR = &quot;AWS_LAMBDA_JAVA_NETWORKADDRESS_CACHE_NEGATIVE_TTL&quot;;
+
+    private static final String NETWORKADDRESS_CACHE_NEGATIVE_TTL_PROPERTY = &quot;networkaddress.cache.negative.ttl&quot;;
+
+    private static final String DEFAULT_NEGATIVE_CACHE_TTL = &quot;1&quot;;
+
+    static {
+        // Override the disabledAlgorithms setting to match configuration for openjdk8-u181.
+        // This is to keep DES ciphers around while we deploying security updates.
+<span class="nc" id="L68">        Security.setProperty(</span>
+                &quot;jdk.tls.disabledAlgorithms&quot;,
+                &quot;SSLv3, RC4, MD5withRSA, DH keySize &lt; 1024, EC keySize &lt; 224, DES40_CBC, RC4_40, 3DES_EDE_CBC&quot;
+        );
+        // Override the location of the trusted certificate authorities to be provided by the system.
+        // The ca-certificates package provides /etc/pki/java/cacerts which becomes the symlink destination
+        // of $java_home/lib/security/cacerts when java is installed in the chroot. Given that java is provided
+        // in /var/lang as opposed to installed in the chroot, this brings it closer.
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if(System.getProperty(TRUST_STORE_PROPERTY) == null) {</span>
+<span class="nc" id="L77">            final File systemCacerts = new File(&quot;/etc/pki/java/cacerts&quot;);</span>
+<span class="nc bnc" id="L78" title="All 4 branches missed.">            if(systemCacerts.exists() &amp;&amp; systemCacerts.isFile()) {</span>
+<span class="nc" id="L79">                System.setProperty(TRUST_STORE_PROPERTY, systemCacerts.getPath());</span>
+            }
+        }
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (isNegativeCacheOverridable()) {</span>
+<span class="nc" id="L84">            String ttlFromEnv = System.getenv(NETWORKADDRESS_CACHE_NEGATIVE_TTL_ENV_VAR);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            String negativeCacheTtl = ttlFromEnv == null ? DEFAULT_NEGATIVE_CACHE_TTL : ttlFromEnv;</span>
+<span class="nc" id="L86">            Security.setProperty(NETWORKADDRESS_CACHE_NEGATIVE_TTL_PROPERTY, negativeCacheTtl);</span>
+        }
+<span class="nc" id="L88">    }</span>
+
+    private static boolean isNegativeCacheOverridable() {
+<span class="nc" id="L91">        String securityPropertiesPath = System.getProperty(JAVA_SECURITY_PROPERTIES);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (securityPropertiesPath == null) {</span>
+<span class="nc" id="L93">            return true;</span>
+        }
+<span class="nc" id="L95">        try (FileInputStream inputStream = new FileInputStream(securityPropertiesPath)) {</span>
+<span class="nc" id="L96">            Properties secProps = new Properties();</span>
+<span class="nc" id="L97">            secProps.load(inputStream);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            return !secProps.containsKey(NETWORKADDRESS_CACHE_NEGATIVE_TTL_PROPERTY);</span>
+<span class="nc" id="L99">        } catch (IOException e) {</span>
+<span class="nc" id="L100">            return true;</span>
+        }
+    }
+
+    private static UserMethods findUserMethods(final String handlerString, ClassLoader customerClassLoader) {
+        final HandlerInfo handlerInfo;
+        try {
+<span class="nc" id="L107">            handlerInfo = HandlerInfo.fromString(handlerString, customerClassLoader);</span>
+<span class="nc" id="L108">        } catch (HandlerInfo.InvalidHandlerException e) {</span>
+<span class="nc" id="L109">            UserFault userFault = UserFault.makeUserFault(&quot;Invalid handler: `&quot; + handlerString + &quot;'&quot;);</span>
+<span class="nc" id="L110">            return new UserMethods(</span>
+                    doNothing,
+                    new UserFaultHandler(userFault)
+            );
+<span class="nc" id="L114">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L115">            return new UserMethods(doNothing, LambdaRequestHandler.classNotFound(e, HandlerInfo.className(handlerString)));</span>
+<span class="nc" id="L116">        } catch (NoClassDefFoundError e) {</span>
+<span class="nc" id="L117">            return new UserMethods(doNothing, LambdaRequestHandler.initErrorHandler(e, HandlerInfo.className(handlerString)));</span>
+<span class="nc" id="L118">        } catch (Throwable t) {</span>
+<span class="nc" id="L119">            throw UserFault.makeInitErrorUserFault(t, HandlerInfo.className(handlerString));</span>
+<span class="nc" id="L120">        }</span>
+
+<span class="nc" id="L122">        final LambdaRequestHandler requestHandler = EventHandlerLoader.loadEventHandler(handlerInfo);</span>
+        // if loading the handler failed and the failure is fatal (for e.g. the constructor threw an exception)
+        // we want to report this as an init error rather than deferring to the first invoke.
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if(requestHandler instanceof UserFaultHandler) {</span>
+<span class="nc" id="L126">            UserFault userFault =((UserFaultHandler) requestHandler).fault;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            if(userFault.fatal) {</span>
+<span class="nc" id="L128">                throw userFault;</span>
+            }
+        }
+
+<span class="nc" id="L132">        Runnable initHandler = doNothing;</span>
+        try {
+<span class="nc" id="L134">            initHandler = wrapInitCall(handlerInfo.clazz.getMethod(&quot;init&quot;));</span>
+<span class="nc" id="L135">        } catch (NoSuchMethodException | NoClassDefFoundError e) {</span>
+<span class="nc" id="L136">        }</span>
+
+<span class="nc" id="L138">        return new UserMethods(initHandler, requestHandler);</span>
+    }
+
+    private static Runnable wrapInitCall(final Method method) {
+<span class="nc" id="L142">        return () -&gt; {</span>
+            try {
+<span class="nc" id="L144">                method.invoke(null);</span>
+<span class="nc" id="L145">            } catch (Throwable t) {</span>
+<span class="nc" id="L146">                throw UserFault.makeUserFault(t);</span>
+<span class="nc" id="L147">            }</span>
+<span class="nc" id="L148">        };</span>
+    }
+
+    public static void setupRuntimeLogger(LambdaLogger lambdaLogger)
+            throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
+<span class="nc" id="L153">        ReflectUtil.setStaticField(</span>
+<span class="nc" id="L154">                Class.forName(&quot;com.amazonaws.services.lambda.runtime.LambdaRuntime&quot;),</span>
+                &quot;logger&quot;,
+                true,
+                lambdaLogger
+        );
+<span class="nc" id="L159">    }</span>
+
+    public static String getEnvOrExit(String envVariableName) {
+<span class="nc" id="L162">        String value = System.getenv(envVariableName);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if(value == null) {</span>
+<span class="nc" id="L164">            System.err.println(&quot;Could not get environment variable &quot; + envVariableName);</span>
+<span class="nc" id="L165">            System.exit(-1);</span>
+        }
+<span class="nc" id="L167">        return value;</span>
+    }
+
+    protected static URLClassLoader customerClassLoader;
+
+    private static LogSink createLogSink() {
+<span class="nc" id="L173">        final String fd = System.getenv(&quot;_LAMBDA_TELEMETRY_LOG_FD&quot;);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if(fd == null) {</span>
+<span class="nc" id="L175">            return new StdOutLogSink();</span>
+        }
+
+        try {
+<span class="nc" id="L179">            File pipeFdFile = Paths.get(&quot;/proc&quot;, &quot;self&quot;, &quot;fd&quot;, fd).toFile();</span>
+<span class="nc" id="L180">            return new FramedTelemetryLogSink(pipeFdFile);</span>
+<span class="nc" id="L181">        } catch (IOException e) {</span>
+<span class="nc" id="L182">            return new StdOutLogSink();</span>
+        }
+    }
+
+    public static void main(String[] args) {
+        // TODO validate arguments, show usage
+<span class="nc" id="L188">        startRuntime(args[0]);</span>
+<span class="nc" id="L189">    }</span>
+
+    private static void startRuntime(String handler) {
+<span class="nc" id="L192">        try (LogSink logSink = createLogSink()) {</span>
+<span class="nc" id="L193">            startRuntime(handler, new LambdaContextLogger(logSink));</span>
+<span class="nc" id="L194">        } catch (Throwable t) {</span>
+<span class="nc" id="L195">            throw new Error(t);</span>
+<span class="nc" id="L196">        }</span>
+<span class="nc" id="L197">    }</span>
+
+    private static void startRuntime(String handler, LambdaLogger lambdaLogger) throws Throwable {
+<span class="nc" id="L200">        UnsafeUtil.disableIllegalAccessWarning();</span>
+
+<span class="nc" id="L202">        System.setOut(new PrintStream(new LambdaOutputStream(System.out), false, &quot;UTF-8&quot;));</span>
+<span class="nc" id="L203">        System.setErr(new PrintStream(new LambdaOutputStream(System.err), false, &quot;UTF-8&quot;));</span>
+<span class="nc" id="L204">        setupRuntimeLogger(lambdaLogger);</span>
+
+<span class="nc" id="L206">        String runtimeApi = getEnvOrExit(ReservedRuntimeEnvironmentVariables.AWS_LAMBDA_RUNTIME_API);</span>
+<span class="nc" id="L207">        LambdaRuntimeClient runtimeClient = new LambdaRuntimeClient(runtimeApi);</span>
+
+<span class="nc" id="L209">        EnvReader envReader = new EnvReader();</span>
+<span class="nc" id="L210">        try (EnvWriter envWriter = new EnvWriter(envReader)) {</span>
+<span class="nc" id="L211">            envWriter.unsetLambdaInternalEnv();</span>
+<span class="nc" id="L212">            envWriter.setupEnvironmentCredentials();</span>
+<span class="nc" id="L213">            envWriter.setupAwsExecutionEnv();</span>
+        }
+
+<span class="nc" id="L216">        String taskRoot = System.getProperty(&quot;user.dir&quot;);</span>
+<span class="nc" id="L217">        String libRoot = &quot;/opt/java&quot;;</span>
+        // Make system classloader the customer classloader's parent to ensure any aws-lambda-java-core classes
+        // are loaded from the system classloader.
+<span class="nc" id="L220">        customerClassLoader = new CustomerClassLoader(taskRoot, libRoot, ClassLoader.getSystemClassLoader());</span>
+<span class="nc" id="L221">        Thread.currentThread().setContextClassLoader(customerClassLoader);</span>
+
+        // Load the user's handler
+        UserMethods methods;
+        try {
+<span class="nc" id="L226">            methods = findUserMethods(handler, customerClassLoader);</span>
+<span class="nc" id="L227">        } catch (UserFault userFault) {</span>
+<span class="nc" id="L228">            lambdaLogger.log(userFault.reportableError());</span>
+<span class="nc" id="L229">            ByteArrayOutputStream payload = new ByteArrayOutputStream(1024);</span>
+<span class="nc" id="L230">            Failure failure = new Failure(userFault);</span>
+<span class="nc" id="L231">            GsonFactory.getInstance().getSerializer(Failure.class).toJson(failure, payload);</span>
+<span class="nc" id="L232">            runtimeClient.postInitError(payload.toByteArray(), failure.getErrorType());</span>
+<span class="nc" id="L233">            System.exit(1);</span>
+<span class="nc" id="L234">            return;</span>
+<span class="nc" id="L235">        }</span>
+
+        // Call the user's init handler(a function called 'init'), if provided in the same module as the request handler.
+        // This is an undocumented feature, and still exists to keep backward compatibility. Continue if this call fails.
+        try {
+<span class="nc" id="L240">            methods.initHandler.run();</span>
+<span class="nc" id="L241">        } catch (UserFault f) {</span>
+<span class="nc" id="L242">            lambdaLogger.log(f.reportableError());</span>
+<span class="nc" id="L243">        }</span>
+
+<span class="nc" id="L245">        try (EnvWriter envWriter = new EnvWriter(envReader)) {</span>
+<span class="nc" id="L246">            boolean shouldExit = false;</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            while (!shouldExit) {</span>
+<span class="nc" id="L248">                UserFault userFault = null;</span>
+<span class="nc" id="L249">                InvocationRequest request = runtimeClient.waitForNextInvocation();</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                if (request.getXrayTraceId() != null) {</span>
+<span class="nc" id="L251">                    envWriter.modifyEnv(m -&gt; m.put(&quot;_X_AMZN_TRACE_ID&quot;, request.getXrayTraceId()));</span>
+                } else {
+<span class="nc" id="L253">                    envWriter.modifyEnv(m -&gt; m.remove(&quot;_X_AMZN_TRACE_ID&quot;));</span>
+                }
+
+                ByteArrayOutputStream payload;
+                try {
+<span class="nc" id="L258">                    payload = methods.requestHandler.call(request);</span>
+                    // TODO calling payload.toByteArray() creates a new copy of the underlying buffer
+<span class="nc" id="L260">                    runtimeClient.postInvocationResponse(request.getId(), payload.toByteArray());</span>
+<span class="nc" id="L261">                } catch (UserFault f) {</span>
+<span class="nc" id="L262">                    userFault = f;</span>
+<span class="nc" id="L263">                    UserFault.filterStackTrace(f);</span>
+<span class="nc" id="L264">                    payload = new ByteArrayOutputStream(1024);</span>
+<span class="nc" id="L265">                    Failure failure = new Failure(f);</span>
+<span class="nc" id="L266">                    GsonFactory.getInstance().getSerializer(Failure.class).toJson(failure, payload);</span>
+<span class="nc" id="L267">                    shouldExit = f.fatal;</span>
+<span class="nc" id="L268">                    runtimeClient.postInvocationError(request.getId(), payload.toByteArray(), failure.getErrorType());</span>
+<span class="nc" id="L269">                } catch (Throwable t) {</span>
+<span class="nc" id="L270">                    UserFault.filterStackTrace(t);</span>
+<span class="nc" id="L271">                    userFault = UserFault.makeUserFault(t);</span>
+<span class="nc" id="L272">                    payload = new ByteArrayOutputStream(1024);</span>
+<span class="nc" id="L273">                    Failure failure = new Failure(t);</span>
+<span class="nc" id="L274">                    GsonFactory.getInstance().getSerializer(Failure.class).toJson(failure, payload);</span>
+                    // These two categories of errors are considered fatal.
+<span class="nc" id="L276">                    shouldExit = Failure.isInvokeFailureFatal(t);</span>
+<span class="nc" id="L277">                    runtimeClient.postInvocationError(request.getId(), payload.toByteArray(), failure.getErrorType(),</span>
+<span class="nc" id="L278">                            serializeAsXRayJson(t));</span>
+                } finally {
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                    if (userFault != null) {</span>
+<span class="nc" id="L281">                        lambdaLogger.log(userFault.reportableError());</span>
+                    }
+                }
+<span class="nc" id="L284">            }</span>
+        }
+<span class="nc" id="L286">    }</span>
+
+    private static PojoSerializer&lt;XRayErrorCause&gt; xRayErrorCauseSerializer;
+
+    /**
+     *
+     * @param throwable throwable to convert
+     * @return json as string expected by XRay's web console. On conversion failure, returns null.
+     */
+    private static String serializeAsXRayJson(Throwable throwable) {
+        try {
+<span class="nc" id="L297">            final OutputStream outputStream = new ByteArrayOutputStream();</span>
+<span class="nc" id="L298">            final XRayErrorCause cause = new XRayErrorCause(throwable);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">            if(xRayErrorCauseSerializer == null) {</span>
+<span class="nc" id="L300">                xRayErrorCauseSerializer = JacksonFactory.getInstance().getSerializer(XRayErrorCause.class);</span>
+            }
+<span class="nc" id="L302">            xRayErrorCauseSerializer.toJson(cause, outputStream);</span>
+<span class="nc" id="L303">            return outputStream.toString();</span>
+<span class="nc" id="L304">        } catch (Exception e) {</span>
+<span class="nc" id="L305">            return null;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

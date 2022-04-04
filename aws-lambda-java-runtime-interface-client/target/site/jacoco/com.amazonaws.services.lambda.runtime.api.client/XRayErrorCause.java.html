@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XRayErrorCause.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AWS Lambda Java Runtime Interface Client</a> &gt; <a href="index.source.html" class="el_package">com.amazonaws.services.lambda.runtime.api.client</a> &gt; <span class="el_source">XRayErrorCause.java</span></div><h1>XRayErrorCause.java</h1><pre class="source lang-java linenums">/* Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. */
+
+package com.amazonaws.services.lambda.runtime.api.client;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * helper class for serializing an exception in the format expected by XRay's web console.
+ */
+public class XRayErrorCause {
+    private final String working_directory;
+    private final Collection&lt;XRayException&gt; exceptions;
+    private final Collection&lt;String&gt; paths;
+
+<span class="fc" id="L19">    public XRayErrorCause(Throwable throwable) {</span>
+<span class="fc" id="L20">        working_directory = System.getProperty(&quot;user.dir&quot;);</span>
+<span class="fc" id="L21">        exceptions = Collections.unmodifiableCollection(Collections.singletonList(new XRayException(throwable)));</span>
+<span class="fc" id="L22">        paths = Collections.unmodifiableCollection(</span>
+<span class="fc" id="L23">                Arrays.stream(throwable.getStackTrace())</span>
+<span class="fc" id="L24">                        .map(XRayErrorCause::determineFileName)</span>
+<span class="fc" id="L25">                        .collect(Collectors.toSet()));</span>
+<span class="fc" id="L26">    }</span>
+
+    public String getWorking_directory() {
+<span class="fc" id="L29">        return working_directory;</span>
+    }
+
+    public Collection&lt;XRayException&gt; getExceptions() {
+<span class="fc" id="L33">        return exceptions;</span>
+    }
+
+    public Collection&lt;String&gt; getPaths() {
+<span class="fc" id="L37">        return paths;</span>
+    }
+
+    /**
+     * This method provides compatibility between Java 8 and Java 11 in determining the fileName of the class in the
+     * StackTraceElement.
+     *
+     * If the fileName property of the StackTraceElement is null (as it can be for native methods in Java 11), it
+     * constructs it using the className by stripping out the package and appending &quot;.java&quot;.
+     */
+    private static String determineFileName(StackTraceElement e) {
+<span class="fc" id="L48">        String fileName = null;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if(e.getFileName() != null) {</span>
+<span class="fc" id="L50">            fileName = e.getFileName();</span>
+        }
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        if(fileName == null) {</span>
+<span class="fc" id="L53">            String className = e.getClassName();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">            fileName = className == null ? null : className.substring(className.lastIndexOf('.') + 1) + &quot;.java&quot;;</span>
+        }
+<span class="fc" id="L56">        return fileName;</span>
+    }
+
+    public static class XRayException {
+        private final String message;
+        private final String type;
+        private final List&lt;StackElement&gt; stack;
+
+<span class="fc" id="L64">        public XRayException(Throwable throwable) {</span>
+<span class="fc" id="L65">            this.message = throwable.getMessage();</span>
+<span class="fc" id="L66">            this.type = throwable.getClass().getName();</span>
+<span class="fc" id="L67">            this.stack = Arrays.stream(throwable.getStackTrace()).map(this::toStackElement).collect(Collectors.toList());</span>
+<span class="fc" id="L68">        }</span>
+
+        private StackElement toStackElement(StackTraceElement e) {
+<span class="fc" id="L71">            return new StackElement(</span>
+<span class="fc" id="L72">                    e.getMethodName(),</span>
+<span class="fc" id="L73">                    determineFileName(e),</span>
+<span class="fc" id="L74">                    e.getLineNumber());</span>
+        }
+
+        public String getMessage() {
+<span class="fc" id="L78">            return message;</span>
+        }
+
+        public String getType() {
+<span class="fc" id="L82">            return type;</span>
+        }
+
+        public List&lt;StackElement&gt; getStack() {
+<span class="fc" id="L86">            return stack;</span>
+        }
+
+        public static class StackElement {
+            private final String label;
+            private final String path;
+            private final int line;
+
+<span class="fc" id="L94">            private StackElement(String label, String path, int line) {</span>
+<span class="fc" id="L95">                this.label = label;</span>
+<span class="fc" id="L96">                this.path = path;</span>
+<span class="fc" id="L97">                this.line = line;</span>
+<span class="fc" id="L98">            }</span>
+
+            public String getLabel() {
+<span class="fc" id="L101">                return label;</span>
+            }
+
+            public String getPath() {
+<span class="fc" id="L105">                return path;</span>
+            }
+
+            public int getLine() {
+<span class="fc" id="L109">                return line;</span>
+            }
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
