@@ -1,26 +1,43 @@
 package l42client;
 
-import com.amazonaws.lambda.thirdparty.com.google.gson.Gson;
-import com.amazonaws.lambda.thirdparty.com.google.gson.GsonBuilder;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /// AWS Lambda entry point
-public class Lambda implements RequestHandler<Map<String,String>, String> {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-    public String handleRequest(Map<String,String> event, Context context) {
+public class Lambda implements RequestStreamHandler {
+    public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+        var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        var writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
+        var tokener = new JSONTokener(reader);
         LambdaLogger logger = context.getLogger();
-        String response = new String("200 OK");
-        // log execution details
-        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
-        logger.log("CONTEXT: " + gson.toJson(context));
-        // process event
-        logger.log("EVENT: " + gson.toJson(event));
-        logger.log("EVENT TYPE: " + event.getClass().toString());
-        return response;
+        try {
+            JSONObject eventObj = new JSONObject(tokener);
+            JSONObject result = handler(eventObj, context, logger);
+            writer.write(result.toString());
+            if (writer.checkError()) {
+                logger.log("WARNING: Writer encountered an error.");
+            }
+        } catch (Exception e) {
+            logger.log(e.toString());
+        } finally {
+            reader.close();
+            writer.close();
+        }
+    }
+
+    public JSONObject handler(JSONObject event, Context context, LambdaLogger logger) {
+        logger.log("Event: " + event);
+
+        var result = new JSONObject();
+        result.put("ok", true);
+        result.put("event", event);
+        result.put("context", context);
+        return result;
     }
 }
