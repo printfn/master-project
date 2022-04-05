@@ -7,12 +7,10 @@ import is.L42.top.CachedTop;
 import safeNativeCode.slave.Slave;
 import safeNativeCode.slave.host.ProcessSlave;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -79,7 +77,7 @@ public class L42Client {
         }
     }
 
-    L42Result runL42FromCode(String code) {
+    Result runL42FromCode(String code) {
         try {
             clearTempDir();
 
@@ -101,7 +99,7 @@ public class L42Client {
         return executeL42();
     }
 
-    L42Result runL42FromDir(Path projectLocation) {
+    Result runL42FromDir(Path projectLocation) {
         try {
             clearTempDir();
             try (Stream<Path> stream = Files.walk(projectLocation)) {
@@ -124,7 +122,7 @@ public class L42Client {
         return executeL42();
     }
 
-    private L42Result executeL42() {
+    private Result executeL42() {
         long startTime = System.nanoTime();
         if (this.settings == null) {
             this.settings = parseSettings();
@@ -156,7 +154,7 @@ public class L42Client {
             this.cache = cache.toNextCache();
         }
         long endTime = System.nanoTime();
-        return new L42Result(
+        return new Result(
                 endTime - startTime,
                 out.stdout.toString(),
                 out.stderr.toString());

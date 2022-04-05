@@ -58,7 +58,7 @@ public class Main {
                 System.err.println("Error: cannot run L42 project: no directory specified");
                 continue;
             }
-            System.out.println(client.runL42FromDir(projectLocation).formatOutput());
+            System.out.println(client.runL42FromDir(projectLocation).formattedTime());
         }
     }
 }

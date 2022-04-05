@@ -1,11 +1,11 @@
 package l42client;
 
-public record L42Result(long executionTimeNanos, String stdout, String stderr) {
+public record Result(long executionTimeNanos, String stdout, String stderr) {
     public double executionTime() {
         return Math.round(executionTimeNanos() / 1e6) / 1e3;
     }
 
-    public String formatOutput() {
+    public String formattedTime() {
         return String.format("Time: %.3f s", executionTime());
     }
 }
