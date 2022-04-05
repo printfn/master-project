@@ -4,7 +4,7 @@ Prerequisites:
 
 Run these commands to build the AWS Lambda Java Runtime Interface Client library:
 
-```
+```bash
 git clone git@github.com:aws/aws-lambda-java-libs.git
 cd aws-lambda-java-libs
 cd aws-lambda-java-runtime-interface-client

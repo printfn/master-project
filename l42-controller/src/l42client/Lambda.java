@@ -8,9 +8,12 @@ import org.json.JSONTokener;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 /// AWS Lambda entry point
 public class Lambda implements RequestStreamHandler {
+    L42Client client = new L42Client(Path.of("/tmp/L42testing"));
+
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         var writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
@@ -34,10 +37,12 @@ public class Lambda implements RequestStreamHandler {
     public JSONObject handler(JSONObject event, Context context, LambdaLogger logger) {
         logger.log("Event: " + event);
 
-        var result = new JSONObject();
-        result.put("ok", true);
-        result.put("event", event);
-        result.put("context", context);
-        return result;
+        var body = event.getString("body");
+        var bodyTokener = new JSONTokener(body);
+        var paramObject = new JSONObject(bodyTokener);
+        var code = paramObject.getString("code");
+
+        logger.log("Received code: " + code);
+        return client.runL42FromCode(code).toJSON();
     }
 }

@@ -65,16 +65,7 @@ public class Server {
     static JSONObject handleApi(JSONObject request, L42Client client) {
         var code = request.getString("code");
         System.err.println("Received code:\n" + code);
-
-        var result = client.runL42FromCode(code);
-
-        var response = new JSONObject();
-        response.put("ok", true);
-        response.put("stdout", result.stdout());
-        response.put("stderr", result.stderr());
-        response.put("returncode", 0);
-        response.put("duration", result.executionTime());
-        return response;
+        return client.runL42FromCode(code).toJSON();
     }
 
     Server(L42Client client) {

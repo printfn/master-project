@@ -25,7 +25,9 @@ docker run --publish 9000:8080 -it l42-docker-controller rie
 The function can then be invoked with:
 
 ```bash
-curl -X POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+echo 'reuse [L42.is/AdamsTowel]\nMain=(\n  Debug(S\"Hello world from 42\")\n  )' \
+    | jq -Rs "{code: .} | tostring | {body: .}" \
+    | curl -X POST "http://localhost:9000/2015-03-31/functions/function/invocations" --data-raw -
 ```
 
 ### Debug
