@@ -8,6 +8,7 @@ Run these commands to build the AWS Lambda Java Runtime Interface Client library
 git clone git@github.com:aws/aws-lambda-java-libs.git
 cd aws-lambda-java-libs
 cd aws-lambda-java-runtime-interface-client
+mvn dependency:go-offline dependency:copy-dependencies
 mvn package -Dmaven.test.skip
 ```
 
