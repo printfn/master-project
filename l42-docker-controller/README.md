@@ -22,8 +22,11 @@ docker run --publish 80:80 -it l42-docker-controller
 docker run --publish 9000:8080 -it l42-docker-controller rie
 ```
 
-The function can then be invoked by navigating to
-<http://localhost:9000/2015-03-31/functions/function/invocations>.
+The function can then be invoked with:
+
+```bash
+curl -X POST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+```
 
 ### Debug
 
@@ -31,7 +34,7 @@ The function can then be invoked by navigating to
 docker run --publish 80:80 -v "$(pwd)/../l42-examples:/opt/app/examples" -it l42-docker-controller /bin/sh
 ```
 
-### Upload to AWS
+### Upload to AWS ECR
 
 ```bash
 # put the following lines into ~/L42_exports.sh

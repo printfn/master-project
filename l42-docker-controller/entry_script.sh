@@ -21,12 +21,12 @@ if [ ! -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
         "--add-opens" java.base/java.util=ALL-UNNAMED \
         "-cp" "$L42_JAR_PATH" \
         com.amazonaws.services.lambda.runtime.api.client.AWSLambda \
-        l42client.Lambda::main
+        l42client.Lambda
 elif [ "$#" -gt 0 ] && [ "$1" = "rie" ]; then
     echo "Launched with the \"rie\" option:"
     echo "   Launching the AWS Lambda Runtime Interface Emulator"
-    echo "You can invoke the function by navigating to:"
-    echo "http://localhost:9000/2015-03-31/functions/function/invocations"
+    echo "You can invoke the function with:"
+    echo "curl -X POST \"http://localhost:9000/2015-03-31/functions/function/invocations\" -d '{}'"
     exec /usr/local/bin/aws-lambda-rie "$0"
 else
     echo "Starting a server on port 80"
