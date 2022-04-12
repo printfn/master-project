@@ -20,8 +20,14 @@ public class Lambda implements RequestStreamHandler {
         var tokener = new JSONTokener(reader);
         LambdaLogger logger = context.getLogger();
         try {
-            JSONObject eventObj = new JSONObject(tokener);
-            JSONObject result = handler(eventObj, context, logger);
+            var eventObj = new JSONObject(tokener);
+            var resultBody = handler(eventObj, context, logger);
+            var result = new JSONObject();
+            result.put("body", resultBody);
+            result.put("statusCode", 200);
+            var headers = new JSONObject();
+            headers.put("Access-Control-Allow-Origin", "*");
+            result.put("headers", headers);
             writer.write(result.toString());
             if (writer.checkError()) {
                 logger.log("WARNING: Writer encountered an error.");
@@ -37,17 +43,25 @@ public class Lambda implements RequestStreamHandler {
     public JSONObject handler(JSONObject event, Context context, LambdaLogger logger) {
         logger.log("Event: " + event);
 
-        // When calling this Lambda via API Gateway, we need to read out the HTTP request body
-        // from the "body" element
-        if (event.has("body")) {
-            var body = event.getString("body");
-            var bodyTokener = new JSONTokener(body);
-            event = new JSONObject(bodyTokener);
+        try {
+            // When calling this Lambda via API Gateway, we need to read out the HTTP request body
+            // from the "body" element
+            if (event.has("body")) {
+                var body = event.getString("body");
+                var bodyTokener = new JSONTokener(body);
+                event = new JSONObject(bodyTokener);
+            }
+
+            var code = event.getString("code");
+
+            logger.log("Received code: " + code);
+            return client.runL42FromCode(code).toJSON();
+        } catch (Exception e) {
+            logger.log(e.toString());
+            var response = new JSONObject();
+            response.put("ok", false);
+            response.put("message", e.toString());
+            return response;
         }
-
-        var code = event.getString("code");
-
-        logger.log("Received code: " + code);
-        return client.runL42FromCode(code).toJSON();
     }
 }

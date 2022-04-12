@@ -79,14 +79,17 @@ public class L42Client {
 
     Result runL42FromCode(String code) {
         try {
+            System.err.println("Clearing temp dir " + tempDir);
             clearTempDir();
 
+            System.err.println("Creating Setti.ngs file");
             var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
             settingsFile.createNewFile();
             var settingsWriter = new FileWriter(settingsFile);
             settingsWriter.write("maxStackSize = 1G\ninitialMemorySize = 256M\nmaxMemorySize = 2G\n");
             settingsWriter.close();
 
+            System.err.println("Creating This.L42 file");
             var codeFile = tempDir.resolve(Path.of("This.L42")).toFile();
             codeFile.createNewFile();
             var codeWriter = new FileWriter(codeFile);
@@ -123,6 +126,7 @@ public class L42Client {
     }
 
     private Result executeL42() {
+        System.err.println("Starting to execute 42...");
         long startTime = System.nanoTime();
         if (this.settings == null) {
             this.settings = parseSettings();
@@ -131,12 +135,14 @@ public class L42Client {
         try {
             var tempDir = new URI(String.format("file://%s", this.tempDir.toAbsolutePath()));
             if (slave == null) {
+                System.err.println("Starting slave...");
                 makeSlave();
             }
 
             // we need to copy these variables to avoid a MarshalException
             //     because L42Client isn't serializable
             var cache = this.cache;
+            System.err.println("Calling slave...");
             out = slave.call(() -> {
                 var output = new Output();
                 output.setHandlers();
@@ -148,6 +154,7 @@ public class L42Client {
                 }
                 return output;
             }).get();
+            System.err.println("Finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();
         } finally {
