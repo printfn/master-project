@@ -8,4 +8,7 @@ build: clean
 run:
 	docker run --publish 9000:8080 -it l42-docker-controller rie
 
+deploy:
+	./deploy.sh
+
 .PHONY: build clean run
