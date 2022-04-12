@@ -9,6 +9,7 @@ import org.json.JSONTokener;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Base64;
 
 /// AWS Lambda entry point
 public class Lambda implements RequestStreamHandler {
@@ -29,6 +30,7 @@ public class Lambda implements RequestStreamHandler {
             headers.put("Access-Control-Allow-Origin", "*");
             result.put("headers", headers);
             writer.write(result.toString());
+            logger.log("Response: \n" + result);
             if (writer.checkError()) {
                 logger.log("WARNING: Writer encountered an error.");
             }
@@ -44,9 +46,14 @@ public class Lambda implements RequestStreamHandler {
         logger.log("Event: " + event);
 
         try {
-            // When calling this Lambda via API Gateway, we need to read out the HTTP request body
-            // from the "body" element
-            if (event.has("body")) {
+            if (event.has("isBase64Encoded") && event.getBoolean("isBase64Encoded")) {
+                var base64 = event.getString("body");
+                var body = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
+                var bodyTokener = new JSONTokener(body);
+                event = new JSONObject(bodyTokener);
+            } else if (event.has("body")) {
+                // When calling this Lambda via API Gateway, we need to read out the HTTP request body
+                // from the "body" element
                 var body = event.getString("body");
                 var bodyTokener = new JSONTokener(body);
                 event = new JSONObject(bodyTokener);
