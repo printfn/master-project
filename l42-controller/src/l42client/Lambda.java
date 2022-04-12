@@ -37,10 +37,15 @@ public class Lambda implements RequestStreamHandler {
     public JSONObject handler(JSONObject event, Context context, LambdaLogger logger) {
         logger.log("Event: " + event);
 
-        var body = event.getString("body");
-        var bodyTokener = new JSONTokener(body);
-        var paramObject = new JSONObject(bodyTokener);
-        var code = paramObject.getString("code");
+        // When calling this Lambda via API Gateway, we need to read out the HTTP request body
+        // from the "body" element
+        if (event.has("body")) {
+            var body = event.getString("body");
+            var bodyTokener = new JSONTokener(body);
+            event = new JSONObject(bodyTokener);
+        }
+
+        var code = event.getString("code");
 
         logger.log("Received code: " + code);
         return client.runL42FromCode(code).toJSON();
