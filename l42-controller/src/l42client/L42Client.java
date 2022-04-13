@@ -182,6 +182,7 @@ public class L42Client {
                 var res = super.getJavaArgs(libLocation);
                 res.add(0,"--enable-preview");
                 settings.options().addOptions(res);
+                System.err.println("getJavaArgs: " + res);
                 return res;
             }
         };

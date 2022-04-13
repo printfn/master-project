@@ -11,4 +11,7 @@ run:
 deploy:
 	./deploy.sh
 
-.PHONY: build clean run
+logs:
+	aws --region ap-southeast-2 logs tail /aws/lambda/L42 --follow
+
+.PHONY: build clean deploy logs run
