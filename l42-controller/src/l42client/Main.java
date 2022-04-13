@@ -1,14 +1,10 @@
 package l42client;
 
 import java.nio.file.Path;
-import java.text.NumberFormat;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         var client = new L42Client(Path.of("/tmp/L42testing"));
-        Path projectLocation = null;
         int port = 8000;
         var warmCache = false;
 

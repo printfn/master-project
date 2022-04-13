@@ -1,11 +1,7 @@
 package l42client;
 
-import is.L42.common.Parse;
-import is.L42.main.Settings;
 import is.L42.platformSpecific.javaTranslation.Resources;
 import is.L42.top.CachedTop;
-import safeNativeCode.slave.Slave;
-import safeNativeCode.slave.host.ProcessSlave;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,12 +9,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.rmi.RemoteException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
 
 class Output implements Serializable {
     StringBuilder stdout = new StringBuilder();
@@ -28,6 +20,7 @@ class Output implements Serializable {
         Resources.setOutHandler(s -> {
             synchronized(Output.class) {
                 stdout.append(s);
+                System.out.println("outHandler: " + s);
             }
         });
         Resources.setErrHandler(s -> {
@@ -40,8 +33,6 @@ class Output implements Serializable {
 }
 
 public class L42Client {
-    Settings settings;
-    Slave slave = null;
     CachedTop cache;
     Path tempDir;
 
@@ -55,7 +46,6 @@ public class L42Client {
         }
 
         this.cache = new CachedTop(List.of(), List.of());
-        this.settings = null;
     }
 
     private void clearTempDir() throws IOException {
@@ -102,59 +92,17 @@ public class L42Client {
         return executeL42();
     }
 
-    Result runL42FromDir(Path projectLocation) {
-        try {
-            clearTempDir();
-            try (Stream<Path> stream = Files.walk(projectLocation)) {
-                stream.forEach(source -> {
-                    try {
-                        Files.copy(
-                            source,
-                            tempDir.resolve(projectLocation.relativize(source)),
-                            StandardCopyOption.REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        return executeL42();
-    }
-
     private Result executeL42() {
         System.err.println("Starting to execute 42...");
         long startTime = System.nanoTime();
-        if (this.settings == null) {
-            this.settings = parseSettings();
-        }
-        Output out = null;
+        Output out = new Output();
+        out.setHandlers();
         try {
             var tempDir = new URI(String.format("file://%s", this.tempDir.toAbsolutePath()));
-            if (slave == null) {
-                System.err.println("Starting slave...");
-                makeSlave();
-            }
 
-            // we need to copy these variables to avoid a MarshalException
-            //     because L42Client isn't serializable
-            var cache = this.cache;
-            System.err.println("Calling slave...");
-            out = slave.call(() -> {
-                var output = new Output();
-                output.setHandlers();
-                try {
-                    is.L42.main.Main.run(Path.of(tempDir), cache);
-                } catch(Throwable t) {
-                    t.printStackTrace();
-                    throw t;
-                }
-                return output;
-            }).get();
-            System.err.println("Finished executing 42");
+            System.err.println("Executing 42...");
+            is.L42.main.Main.run(Path.of(tempDir), cache);
+            System.err.println("... finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();
         } finally {
@@ -165,36 +113,5 @@ public class L42Client {
                 endTime - startTime,
                 out.stdout.toString(),
                 out.stderr.toString());
-    }
-
-    Settings parseSettings() {
-        Path settingsPath = tempDir.resolve("Setti.ngs");
-        return Parse.sureSettings(settingsPath);
-    }
-
-    void makeSlave() throws RemoteException, ExecutionException, InterruptedException {
-        var settings = this.settings;
-        this.slave = new ProcessSlave(
-                -1,
-                new String[] {},
-                ClassLoader.getPlatformClassLoader()) {
-            @Override protected List<String> getJavaArgs(String libLocation) {
-                var res = super.getJavaArgs(libLocation);
-                res.add(0,"--enable-preview");
-                settings.options().addOptions(res);
-                System.err.println("getJavaArgs: " + res);
-                return res;
-            }
-        };
-    }
-
-    void terminate() {
-        try {
-            if (slave != null && slave.isAlive()) {
-                slave.terminate();
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

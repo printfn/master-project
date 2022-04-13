@@ -16,7 +16,7 @@ public record Result(long executionTimeNanos, String stdout, String stderr) {
         response.put("ok", true);
         response.put("stdout", stdout());
         response.put("stderr", stderr());
-        response.put("returncode", 0);
+        response.put("returncode", 0); // TODO
         response.put("duration", executionTime());
         return response;
     }
