@@ -58,7 +58,6 @@ def run_l42_program(code):
             JAVA_ARGS,
             start_new_session=True
         )
-        time.sleep(5)
         while not check_health():
             time.sleep(0.5)
         app.logger.info("Server started")

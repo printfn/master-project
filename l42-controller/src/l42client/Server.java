@@ -68,18 +68,13 @@ public class Server {
         return client.runL42FromCode(code).toJSON();
     }
 
-    Server(L42Client client) {
-        this(client, 8000);
-    }
-
-    Server(L42Client client, int port) {
-        this(client, "localhost", port);
-    }
-
-    Server(L42Client client, String bind, int port) {
+    Server(L42Client client, int port, boolean warmCache) {
+        final var bind = "0.0.0.0";
         try {
             this.client = client;
-            client.runL42FromCode(HELLO_WORLD);
+            if (warmCache) {
+                client.runL42FromCode(HELLO_WORLD);
+            }
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHttpHandler());
             httpServer.createContext("/api", new ApiHttpHandler(this.client));
