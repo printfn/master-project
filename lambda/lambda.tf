@@ -1,14 +1,14 @@
 resource "aws_s3_object" "l42_layer" {
   bucket        = aws_s3_bucket.l42_bucket.bucket
-  key           = "L42PortableLinux.zip"
-  source        = "${path.module}/L42PortableLinux.zip"
-  source_hash   = filebase64sha256("L42PortableLinux.zip")
+  key           = "lambda_layer.zip"
+  source        = "${path.module}/lambda_layer.zip"
+  source_hash   = filebase64sha256("lambda_layer.zip")
   force_destroy = true
   tags          = local.tags
 }
 
 resource "aws_lambda_layer_version" "l42_layer" {
-  layer_name = "L42PortableLinux"
+  layer_name = "l42_lambda_layer"
 
   s3_bucket = aws_s3_object.l42_layer.bucket
   s3_key    = aws_s3_object.l42_layer.key
@@ -16,8 +16,7 @@ resource "aws_lambda_layer_version" "l42_layer" {
   source_code_hash = aws_s3_object.l42_layer.source_hash
 
   description = <<-EOS
-    Contains the 42 compiler from https://l42.is.
-    To reduce file size, 'libjfxwebkit.so' and 'jdk-16/lib/src.zip' have been removed.
+    Based on the 42 compiler from https://l42.is.
   EOS
 
   compatible_runtimes      = ["python3.9"]
@@ -103,7 +102,7 @@ resource "aws_lambda_function" "l42_lambda" {
   s3_key    = aws_s3_object.l42_lambda.key
 
   runtime = "python3.9"
-  handler = "lambda.lambda_handler"
+  handler = "app.lambda_handler"
 
   memory_size = 2048
   timeout     = 30
