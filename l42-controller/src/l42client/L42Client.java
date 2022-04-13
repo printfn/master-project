@@ -86,7 +86,7 @@ public class L42Client {
             var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
             settingsFile.createNewFile();
             var settingsWriter = new FileWriter(settingsFile);
-            settingsWriter.write("maxStackSize = 1G\ninitialMemorySize = 256M\nmaxMemorySize = 2G\n");
+            settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
             settingsWriter.close();
 
             System.err.println("Creating This.L42 file");
