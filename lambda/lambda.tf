@@ -19,7 +19,7 @@ resource "aws_lambda_layer_version" "l42_layer" {
     Based on the 42 compiler from https://l42.is.
   EOS
 
-  compatible_runtimes      = ["python3.9"]
+  compatible_runtimes      = ["provided.al2"]
   compatible_architectures = ["x86_64"]
 }
 
@@ -101,8 +101,8 @@ resource "aws_lambda_function" "l42_lambda" {
   s3_bucket = aws_s3_object.l42_lambda.bucket
   s3_key    = aws_s3_object.l42_lambda.key
 
-  runtime = "python3.9"
-  handler = "app.lambda_handler"
+  runtime = "provided.al2"
+  handler = "_"
 
   memory_size = 2048
   timeout     = 30
