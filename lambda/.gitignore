@@ -3,5 +3,4 @@ L42PortableLinux.zip
 terraform.tfstate
 terraform.tfstate.backup
 terraform.auto.tfvars
-lambda_package.zip
-lambda_layer.zip
+l42_package.zip

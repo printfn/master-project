@@ -1,8 +1,8 @@
 resource "aws_s3_object" "l42_lambda" {
   bucket        = aws_s3_bucket.l42_bucket.bucket
-  key           = "lambda_package.zip"
-  source        = "${path.module}/lambda_package.zip"
-  source_hash   = filesha256("lambda_package.zip")
+  key           = "l42_package.zip"
+  source        = "${path.module}/l42_package.zip"
+  source_hash   = filesha256("l42_package.zip")
   force_destroy = true
   tags          = local.tags
 }
@@ -75,7 +75,7 @@ resource "aws_lambda_function" "l42_lambda" {
   memory_size = 2048
   timeout     = 30
 
-  source_code_hash = filesha256("lambda_package.zip")
+  source_code_hash = filesha256("l42_package.zip")
 
   role   = aws_iam_role.l42_lambda.arn
 
