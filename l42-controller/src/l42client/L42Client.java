@@ -109,6 +109,7 @@ public class L42Client {
         System.err.println("Starting to execute 42...");
         Output out = new Output();
         out.setHandlers();
+        int returnCode = 0;
         try {
             var tempDir = new URI(String.format("file://%s", this.tempDir.toAbsolutePath()));
 
@@ -117,11 +118,13 @@ public class L42Client {
             System.err.println("... finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();
+            returnCode = 1;
         } finally {
             this.cache = cache.toNextCache();
         }
         return new Result(
                 out.stdout.toString(),
-                out.stderr.toString());
+                out.stderr.toString(),
+                returnCode);
     }
 }

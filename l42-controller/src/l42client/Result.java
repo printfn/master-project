@@ -6,10 +6,12 @@ public class Result {
     public long executionTimeNanos = -1;
     public String stdout;
     public String stderr;
+    public int returnCode;
 
-    public Result(String stdout, String stderr) {
+    public Result(String stdout, String stderr, int returnCode) {
         this.stdout = stdout;
         this.stderr = stderr;
+        this.returnCode = returnCode;
     }
 
     public double executionTime() {
@@ -25,7 +27,7 @@ public class Result {
         response.put("ok", true);
         response.put("stdout", stdout);
         response.put("stderr", stderr);
-        response.put("returncode", 0); // TODO
+        response.put("returncode", returnCode);
         response.put("duration", formattedTime());
         return response;
     }
