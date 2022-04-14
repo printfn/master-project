@@ -1,40 +1,8 @@
-resource "aws_s3_object" "l42_layer" {
-  bucket        = aws_s3_bucket.l42_bucket.bucket
-  key           = "lambda_layer.zip"
-  source        = "${path.module}/lambda_layer.zip"
-  source_hash   = filebase64sha256("lambda_layer.zip")
-  force_destroy = true
-  tags          = local.tags
-}
-
-resource "aws_lambda_layer_version" "l42_layer" {
-  layer_name = "l42_lambda_layer"
-
-  s3_bucket = aws_s3_object.l42_layer.bucket
-  s3_key    = aws_s3_object.l42_layer.key
-
-  source_code_hash = aws_s3_object.l42_layer.source_hash
-
-  description = <<-EOS
-    Based on the 42 compiler from https://l42.is.
-  EOS
-
-  compatible_runtimes      = ["provided.al2"]
-  compatible_architectures = ["x86_64"]
-}
-
-data "archive_file" "l42_lambda" {
-  type             = "zip"
-  source_dir       = "${path.module}/lambda_package"
-  output_path      = "${path.module}/lambda_package.zip"
-  output_file_mode = "0755"
-}
-
 resource "aws_s3_object" "l42_lambda" {
   bucket        = aws_s3_bucket.l42_bucket.bucket
   key           = "lambda_package.zip"
   source        = "${path.module}/lambda_package.zip"
-  source_hash   = data.archive_file.l42_lambda.output_base64sha256
+  source_hash   = filesha256("lambda_package.zip")
   force_destroy = true
   tags          = local.tags
 }
@@ -107,10 +75,9 @@ resource "aws_lambda_function" "l42_lambda" {
   memory_size = 2048
   timeout     = 30
 
-  source_code_hash = data.archive_file.l42_lambda.output_base64sha256
+  source_code_hash = filesha256("lambda_package.zip")
 
   role   = aws_iam_role.l42_lambda.arn
-  layers = [aws_lambda_layer_version.l42_layer.arn]
 
   depends_on = [
     aws_iam_role_policy_attachment.l42_lambda_logs,
