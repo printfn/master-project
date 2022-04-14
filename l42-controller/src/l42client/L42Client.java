@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 class Output implements Serializable {
     StringBuilder stdout = new StringBuilder();
@@ -35,6 +36,8 @@ class Output implements Serializable {
 public class L42Client {
     CachedTop cache;
     Path tempDir;
+    Result cachedResult = null;
+    String cachedCode = null;
 
     public L42Client(Path tempDir) {
         try {
@@ -68,6 +71,11 @@ public class L42Client {
     }
 
     Result runL42FromCode(String code) {
+        long startTime = System.nanoTime();
+        if (Objects.equals(this.cachedCode, code)) {
+            this.cachedResult.executionTimeNanos = 0;
+            return this.cachedResult;
+        }
         try {
             System.err.println("Clearing temp dir " + tempDir);
             clearTempDir();
@@ -89,12 +97,16 @@ public class L42Client {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return executeL42();
+        var result = executeL42();
+        long endTime = System.nanoTime();
+        result.executionTimeNanos = endTime - startTime;
+        this.cachedResult = result;
+        this.cachedCode = code;
+        return result;
     }
 
     private Result executeL42() {
         System.err.println("Starting to execute 42...");
-        long startTime = System.nanoTime();
         Output out = new Output();
         out.setHandlers();
         try {
@@ -108,9 +120,7 @@ public class L42Client {
         } finally {
             this.cache = cache.toNextCache();
         }
-        long endTime = System.nanoTime();
         return new Result(
-                endTime - startTime,
                 out.stdout.toString(),
                 out.stderr.toString());
     }
