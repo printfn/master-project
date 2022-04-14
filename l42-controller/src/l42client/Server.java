@@ -77,13 +77,13 @@ public class Server {
             }
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHttpHandler());
-            httpServer.createContext("/api", new ApiHttpHandler(this.client));
+            httpServer.createContext("/", new ApiHttpHandler(this.client));
             httpServer.setExecutor(null); // default executor
             httpServer.start();
             var baseUrl = "http://" + bind + ":" + port + "/";
             System.err.println("Listening on " + baseUrl);
             System.err.println("Health: " + baseUrl + "health");
-            System.err.println("42 API: " + baseUrl + "api");
+            System.err.println("42 API: " + baseUrl);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
