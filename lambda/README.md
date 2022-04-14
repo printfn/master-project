@@ -35,7 +35,7 @@ https://printfn.github.io/master-project/editor/?server=https://<api_gateway_bas
 | Name | Version |
 |------|---------|
 | <a name="provider_archive"></a> [archive](#provider\_archive) | 2.2.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.2.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.9.0 |
 
 ## Modules
 
@@ -55,6 +55,7 @@ No modules.
 | [aws_iam_role.l42_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.l42_lambda_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lambda_function.l42_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_function_url.l42_lambda_url](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function_url) | resource |
 | [aws_lambda_layer_version.l42_layer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_layer_version) | resource |
 | [aws_lambda_permission.api_gw](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_s3_bucket.l42_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
@@ -76,4 +77,5 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_editor_url"></a> [editor\_url](#output\_editor\_url) | url to launch L42 editor |
+| <a name="output_editor_url_2"></a> [editor\_url\_2](#output\_editor\_url\_2) | url to launch L42 editor |
 <!-- END_TF_DOCS -->

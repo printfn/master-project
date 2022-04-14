@@ -148,16 +148,25 @@ function findGetParameter(parameterName) {
     return result;
 }
 
+function modifyUrl(url) {
+    // consider http:, https:, file: etc.
+    if (!url.includes(':')) {
+        url = 'https://' + url;
+    }
+    return url;
+}
+
 async function multiFetch(options) {
     const overrideUrl = findGetParameter('server');
     if (overrideUrl) {
         console.log(`Using override URL '${overrideUrl}'...`);
-        return await fetch(overrideUrl, options);
+        return await fetch(modifyUrl(overrideUrl), options);
     }
 
     // try fetching each of the possible server URLs in order
     for (const url of window.L42_SERVER_URLS) {
         try {
+            const url = modifyUrl(url);
             console.log(`Using url '${url}'...`);
             return await fetch(url, options);
         } catch (e) {
