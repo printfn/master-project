@@ -72,7 +72,7 @@ resource "aws_lambda_function" "l42_lambda" {
   runtime = "provided.al2"
   handler = "_"
 
-  memory_size = 2048
+  memory_size = 1024
   timeout     = 30
 
   source_code_hash = filesha256("l42_package.zip")

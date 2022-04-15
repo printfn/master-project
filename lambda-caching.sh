@@ -2,7 +2,7 @@
 
 LAMBDA_URL=https://vy654m6qfiwzry5qgyq4bk4mty0kyqct.lambda-url.eu-central-1.on.aws
 CODE='{"code":"reuse [L42.is/AdamsTowel]\nMain=(\n  Debug(S\"Hello world from 42\")\n  )"}'
-MAX_SECONDS=3600
+MAX_SECONDS=1800
 
 while :; do
     echo "Calling Lambda at $(date)..."
