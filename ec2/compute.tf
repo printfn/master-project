@@ -99,6 +99,14 @@ data "aws_ami" "amazon_linux_2" {
   }
 }
 
+data "template_file" "user_data_file" {
+  template = file("${path.module}/scripts/user_data.sh")
+  vars = {
+    region = var.region
+    account_id = local.account_id
+  }
+}
+
 resource "aws_launch_configuration" "asg" {
   name_prefix   = format("%s-${terraform.workspace}", local.project_name)
   image_id      = data.aws_ami.amazon_linux_2.id
@@ -115,16 +123,7 @@ resource "aws_launch_configuration" "asg" {
     create_before_destroy = true
   }
 
-  user_data = <<EOF
-#!/bin/bash
-# user data runs under root account and starts in /!
-aws s3 cp --source-region ${local.user_data_bucket_region} "s3://${local.user_data_bucket_name}/${local.cwa_config_s3_key_linux}" "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
-cd /usr/local/bin
-aws s3 cp --source-region ${local.user_data_bucket_region} "s3://${local.user_data_bucket_name}/${local.user_data_s3_key_linux}" "${local.user_data_file_name_linux}"
-chmod +x ${local.user_data_file_name_linux}
-sed -i '1,$s/$TF_INSTANCE_TYPE/${local.instance_type}/g' ./${local.user_data_file_name_linux}
-./${local.user_data_file_name_linux}
-  EOF
+  user_data = data.template_file.user_data_file.rendered
 }
 
 resource "aws_iam_instance_profile" "asg" {
