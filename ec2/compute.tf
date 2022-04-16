@@ -360,23 +360,22 @@ resource "aws_lb" "alb" {
   }
 }
 
-# resource "aws_lb_listener" "front_end" {
-#   load_balancer_arn = aws_lb.alb.arn
-#   port              = "80"
-#   protocol          = "HTTP"
-#   default_action {
-#     type             = "forward"
-#     target_group_arn = aws_alb_target_group.albtargetgrp.arn
-#   }
-# }
+resource "aws_lb_listener" "front_end_http" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.albtargetgrp.arn
+  }
+}
 
-resource "aws_lb_listener" "front_end" {
+resource "aws_lb_listener" "front_end_https" {
   load_balancer_arn = aws_lb.alb.arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
   certificate_arn   = var.certificate_arn
-
   default_action {
     type             = "forward"
     target_group_arn = aws_alb_target_group.albtargetgrp.arn
