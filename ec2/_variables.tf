@@ -43,14 +43,14 @@ locals {
   instance_type   = "t2.micro"
 
   asg_count_min     = 1
-  asg_count_max     = 3
-  asg_count_desired = 2
+  asg_count_max     = 1
+  asg_count_desired = 1
   asg_schedules = {
     "Working hours" = {
       schedule          = "0 7 * * *"
       asg_count_min     = null
       asg_count_max     = null
-      asg_count_desired = 2
+      asg_count_desired = 1
     },
     "After working hours" = {
       schedule          = "0 18 * * *"

@@ -102,7 +102,7 @@ data "aws_ami" "amazon_linux_2" {
 data "template_file" "user_data_file" {
   template = file("${path.module}/scripts/user_data.sh")
   vars = {
-    region = var.region
+    region     = var.region
     account_id = local.account_id
   }
 }
@@ -175,6 +175,7 @@ resource "aws_iam_role_policy" "asg" {
           "ec2:DescribeInstanceStatus",
           "ec2:DescribeSecurity*",
           "ec2messages:*",
+          "ecr:*",
           "logs:*",
           "route53:ChangeResourceRecordSets",
           "route53:ListHostedZones",
@@ -389,7 +390,7 @@ resource "aws_alb_target_group" "albtargetgrp" {
   vpc_id               = aws_vpc.l42_vpc.id
   deregistration_delay = 30 # (Optional, equivalent to connection draining in classical ELB) Amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds.
   health_check {
-    path                = "/"
+    path                = "/health"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 15
