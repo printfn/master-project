@@ -230,7 +230,7 @@ resource "aws_autoscaling_group" "asg" {
   }
 
   name_prefix               = format("%s-asg-${terraform.workspace}", local.project_name)
-  vpc_zone_identifier       = aws_subnet.l42_subpub.*.id
+  vpc_zone_identifier       = aws_subnet.l42_subprv.*.id
   max_size                  = local.asg_count_max
   min_size                  = local.asg_count_min
   desired_capacity          = local.asg_count_desired

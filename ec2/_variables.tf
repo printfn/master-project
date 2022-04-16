@@ -74,4 +74,7 @@ locals {
   ec2_log_groups = [
     "linux"
   ]
+  tags = {
+    Name = local.project_name
+  }
 }

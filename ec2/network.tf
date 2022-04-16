@@ -112,3 +112,38 @@ resource "aws_default_route_table" "l42_rtprv" {
     project_name = local.project_name
   }
 }
+
+resource "aws_nat_gateway" "l42_main" {
+  count = length(local.subprv_cidrs)
+
+  allocation_id = element(aws_eip.nat.*.id, count.index)
+  subnet_id     = element(aws_subnet.l42_subpub.*.id, count.index)
+  tags          = local.tags
+}
+
+resource "aws_eip" "nat" {
+  count = length(local.subprv_cidrs)
+
+  vpc  = true
+  tags = local.tags
+
+  depends_on = [aws_internet_gateway.l42_igw]
+}
+
+resource "aws_route_table" "private" {
+  count = length(local.subprv_cidrs)
+
+  vpc_id = aws_vpc.l42_vpc.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = element(aws_nat_gateway.l42_main.*.id, count.index)
+  }
+  tags = local.tags
+}
+
+resource "aws_route_table_association" "private" {
+  count = length(local.subprv_cidrs)
+
+  subnet_id      = element(aws_subnet.l42_subprv.*.id, count.index)
+  route_table_id = element(aws_route_table.private.*.id, count.index)
+}
