@@ -1,5 +1,9 @@
 # ec2
 
+## EC2 Architecture
+
+![ec2](../docs/ec2.drawio.png)
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

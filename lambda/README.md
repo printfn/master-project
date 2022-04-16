@@ -1,5 +1,9 @@
 # Lambda Function for 42
 
+## Lambda Architecture
+
+![lambda](../docs/lambda.drawio.png)
+
 To get started, run these commands:
 
 ```bash
@@ -16,10 +20,6 @@ run *editor/index.html* in a browser with the following url:
 ```text
 https://printfn.github.io/master-project/editor/?server=https://<api_gateway_base_url>/execute
 ```
-
-## Architecture
-
-<img src="./L42_lambda.svg?sanitize=true">
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

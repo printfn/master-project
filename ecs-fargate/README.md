@@ -1,5 +1,11 @@
 # Using Amazon ECS Fargate to run L42 in containers
 
+## ECS Fargate Architecture
+
+![architecture](../docs/Diagram-ECS-Fargate-ALB.png)
+
+![architecture2](../docs/Diagram-Network.png)
+
 The HTTPS encryption will take place between your external clients (anyone in the internet) and the load balancer, and the load balancer nodes will communicate to your Fargate tasks over HTTP using their private IP addresses.
 
 HTTPS requires an SSL certificate, hence you would need to either create or purchase an SSL certificate. Valid SSL certificates require DNS, however you can use a self-signed SSL certificate (the traffic will be encrypted but you would receive a warning when attempting to connect to the load balancer over HTTPS). Here we are using AWS Certificate Manager to generate and store a certificate for our domain.
