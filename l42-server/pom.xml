@@ -16,7 +16,7 @@
         </dependency>
 
         <dependency>
-            <groupId>is</groupId>
+            <groupId>is.L42</groupId>
             <artifactId>L42</artifactId>
             <version>0.0.0</version>
         </dependency>

@@ -29,13 +29,21 @@ fi
 
 unzip artifacts/L42PortableLinux.zip \
     L42PortableLinux/L42Internals/L42.jar \
+    L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
     -d artifacts
+
+(cd l42-server && mvn install:install-file \
+    -Dfile=../artifacts/L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
+    -Dversion=0.0.0 \
+    -DgroupId=is.L42 \
+    -DartifactId=safeNativeCode \
+    -Dpackaging=jar)
 
 L42_POM="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <project xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns=\"http://maven.apache.org/POM/4.0.0\"
     xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>is</groupId>
+    <groupId>is.L42</groupId>
     <artifactId>L42</artifactId>
     <version>0.0.0</version>
     <description>POM was created from install:install-file</description>
@@ -52,6 +60,18 @@ L42_POM="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
             <artifactId>failureaccess</artifactId>
             <version>1.0.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>is.L42</groupId>
+            <artifactId>safeNativeCode</artifactId>
+            <version>0.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.0.1-jre</version>
+        </dependency>
     </dependencies>
 </project>"
 echo "$L42_POM" >artifacts/l42-pom.xml
@@ -59,7 +79,8 @@ echo "$L42_POM" >artifacts/l42-pom.xml
 # see https://maven.apache.org/plugins/maven-install-plugin/usage.html#The_install:install-file_goal
 (cd l42-server && mvn install:install-file \
     -Dfile=../artifacts/L42PortableLinux/L42Internals/L42.jar \
-    -DpomFile=../artifacts/l42-pom.xml)
+    -DpomFile=../artifacts/l42-pom.xml \
+    -DgeneratePom=false)
 
 if [[ -d "/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home" ]]; then
     export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home"
