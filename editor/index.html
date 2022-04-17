@@ -172,14 +172,24 @@ async function multiFetch(options) {
     // try fetching each of the possible server URLs in order
     for (const url of window.L42_SERVER_URLS) {
         try {
-            const url = modifyUrl(url);
-            console.log(`Using url '${url}'...`);
-            return await fetch(url, options);
+            const modifiedUrl = modifyUrl(url);
+            console.log(`Using url '${modifiedUrl}'...`);
+            return await fetch(modifiedUrl, options);
         } catch (e) {
             console.log(e);
         }
     }
     return null;
+}
+
+function buildResultString(result) {
+    let str = 'stdout:\n' + result.stdout;
+    if (result.stderr) {
+        str += '\nstderr:\n' + result.stderr;
+    }
+    str += '\nreturn code: ' + result.returncode;
+    str += '\nduration: ' + result.duration + ' seconds';
+    return str;
 }
 
 async function execute() {
@@ -199,9 +209,12 @@ async function execute() {
             alert('Unable to contact server, see log for details');
         }
         const jsonResult = await result.json();
-        const resultString = `stdout:\n${jsonResult.stdout}\nstderr:\n${jsonResult.stderr}\nreturn code: ${jsonResult.returncode}\nduration: ${jsonResult.duration} seconds`;
+        const resultString = buildResultString(jsonResult);
         window.output.setValue(resultString);
         window.output.gotoLine(0); // clear selection
+    } catch (e) {
+        window.output.setValue(e.toString());
+        window.output.gotoLine(0);
     } finally {
         executeButton.disabled = false;
         executeButton.value = "Run";
