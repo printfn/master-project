@@ -46,7 +46,7 @@ L42_POM="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
             <artifactId>antlr4</artifactId>
             <version>4.7.2</version>
         </dependency>
-    
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>failureaccess</artifactId>
@@ -60,6 +60,12 @@ echo "$L42_POM" >artifacts/l42-pom.xml
 (cd l42-server && mvn install:install-file \
     -Dfile=../artifacts/L42PortableLinux/L42Internals/L42.jar \
     -DpomFile=../artifacts/l42-pom.xml)
+
+if [[ -d "/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home" ]]; then
+    export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home"
+fi
+
+(cd l42-server && mvn package)
 
 cp artifacts/L42PortableLinux.zip artifacts/l42_package.zip
 

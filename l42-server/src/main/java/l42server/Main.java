@@ -22,7 +22,7 @@ public class Main {
                 return;
             } else {
                 try {
-                    port = Integer.parseInt(args[0]);
+                    port = Integer.parseInt(arg);
                     System.err.println("Starting Java web server on port " + port);
                 } catch (NumberFormatException e) {
                     System.err.println("Please specify a valid port number for the Java web server");
