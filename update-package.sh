@@ -45,7 +45,7 @@ cd \$LAMBDA_TASK_ROOT
     com.amazonaws.services.lambda.runtime.api.client.AWSLambda \\
     l42server.Lambda"
 echo "$BOOTSTRAP" >"artifacts/bootstrap"
-chmod u+x "artifacts/bootstrap"
+chmod +x "artifacts/bootstrap"
 zip --junk-paths artifacts/l42_package.zip \
     "artifacts/bootstrap"
 
