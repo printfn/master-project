@@ -8,8 +8,13 @@ cd "$(dirname "$0")"
 #   export account=...
 source ~/L42_exports.sh
 
-aws ecr get-login-password --region $region | docker login --username AWS --password-stdin $account.dkr.ecr.$region.amazonaws.com/l42
-aws ecr create-repository --region $region --repository-name l42 || true
+aws ecr get-login-password --region $region \
+    | docker login --username AWS --password-stdin $account.dkr.ecr.$region.amazonaws.com/l42
+
+if ! aws ecr describe-repositories --region $region --repository-names l42 2>/dev/null; then
+    aws ecr create-repository --region $region --repository-name l42
+fi
+
 aws ecr batch-delete-image --region $region --repository-name l42 --image-ids imageTag=latest
 docker tag l42:latest $account.dkr.ecr.$region.amazonaws.com/l42:latest
 docker push $account.dkr.ecr.$region.amazonaws.com/l42:latest
