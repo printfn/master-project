@@ -25,7 +25,7 @@ zip -d l42_package.zip \
     L42PortableLinux/L42Internals/L42.jar \
     L42PortableLinux/L42Internals/L42_lib/\*
 
-echo >&2 "Adding l42-controller.jar..."
+echo >&2 "Adding l42-server.jar..."
 zip --junk-paths l42_package.zip \
     ../l42-server/out/artifacts/l42_server_jar/l42-server.jar
 

@@ -2,7 +2,7 @@ package l42server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.json.JSONObject;
+import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

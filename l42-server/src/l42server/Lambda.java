@@ -1,10 +1,10 @@
 package l42server;
 
+import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
+import com.amazonaws.lambda.thirdparty.org.json.JSONTokener;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

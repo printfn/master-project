@@ -9,7 +9,6 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42_lib/antlr-4.7.2-complete.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42_lib/guava-31.0.1-jre.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/L42_lib/failureaccess-1.0.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/lib/json-20211205.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/aws-lambda-java-runtime-interface-client/target/dependency/apiguardian-api-1.1.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/aws-lambda-java-runtime-interface-client/target/dependency/aws-lambda-java-core-1.2.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/aws-lambda-java-runtime-interface-client/target/dependency/aws-lambda-java-serialization-1.0.0.jar" path-in-jar="/" />

@@ -1,6 +1,6 @@
 package l42server;
 
-import org.json.JSONObject;
+import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
 
 class Result {
     public long executionTimeNanos = -1;

@@ -35,6 +35,6 @@ public class Main {
     }
 
     static void printUsage() {
-        System.err.println("Usage: l42-controller [--warm] [port]");
+        System.err.println("Usage: l42-server [--warm] [port]");
     }
 }
