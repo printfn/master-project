@@ -23,6 +23,44 @@ else
     echo >&2 "... successfully downloaded artifacts/L42PortableLinux.zip"
 fi
 
+if [[ -d "artifacts/L42PortableLinux" ]]; then
+    rm -rf artifacts/L42PortableLinux
+fi
+
+unzip artifacts/L42PortableLinux.zip \
+    L42PortableLinux/L42Internals/L42.jar \
+    -d artifacts
+
+L42_POM="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<project xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\" xmlns=\"http://maven.apache.org/POM/4.0.0\"
+    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>is</groupId>
+    <artifactId>L42</artifactId>
+    <version>0.0.0</version>
+    <description>POM was created from install:install-file</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.7.2</version>
+        </dependency>
+    
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>failureaccess</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+    </dependencies>
+</project>"
+echo "$L42_POM" >artifacts/l42-pom.xml
+
+# see https://maven.apache.org/plugins/maven-install-plugin/usage.html#The_install:install-file_goal
+(cd l42-server && mvn install:install-file \
+    -Dfile=../artifacts/L42PortableLinux/L42Internals/L42.jar \
+    -DpomFile=../artifacts/l42-pom.xml)
+
 cp artifacts/L42PortableLinux.zip artifacts/l42_package.zip
 
 echo >&2 "Deleting large unused files from inside zip file..."
