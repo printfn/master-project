@@ -26,8 +26,8 @@ zip -d l42_package.zip \
     L42PortableLinux/L42Internals/L42_lib/\*
 
 echo >&2 "Adding l42-controller.jar..."
-zip -j l42_package.zip \
-    ../l42-controller/out/artifacts/l42_controller_jar/l42-controller.jar
+zip --junk-paths l42_package.zip \
+    ../l42-server/out/artifacts/l42_server_jar/l42-server.jar
 
 echo >&2 "Adding bootstrap..."
 BOOTSTRAP="#!/bin/sh
@@ -35,13 +35,13 @@ cd \$LAMBDA_TASK_ROOT
 /var/task/L42PortableLinux/L42Internals/jdk-16/bin/java \\
     --enable-preview \\
     --add-opens java.base/java.util=ALL-UNNAMED \\
-    -cp /var/task/l42-controller.jar \\
+    -cp /var/task/l42-server.jar \\
     com.amazonaws.services.lambda.runtime.api.client.AWSLambda \\
-    l42client.Lambda"
+    l42server.Lambda"
 TEMP_DIR="$(mktemp -d)"
 echo "$BOOTSTRAP" >"$TEMP_DIR/bootstrap"
 chmod u+x "$TEMP_DIR/bootstrap"
-zip -j l42_package.zip \
+zip --junk-paths l42_package.zip \
     "$TEMP_DIR/bootstrap"
 rm -rf "$TEMP_DIR"
 

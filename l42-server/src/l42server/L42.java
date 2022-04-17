@@ -1,11 +1,9 @@
-package l42client;
+package l42server;
 
-import is.L42.platformSpecific.javaTranslation.Resources;
 import is.L42.top.CachedTop;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,33 +11,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-class Output implements Serializable {
-    StringBuilder stdout = new StringBuilder();
-    StringBuilder stderr = new StringBuilder();
-
-    void setHandlers() {
-        Resources.setOutHandler(s -> {
-            synchronized(Output.class) {
-                stdout.append(s);
-                System.out.println("outHandler: " + s);
-            }
-        });
-        Resources.setErrHandler(s -> {
-            synchronized(Output.class) {
-                System.out.println("RECEIVED " + s);
-                stderr.append(s);
-            }
-        });
-    }
-}
-
-public class L42Client {
+class L42 {
     CachedTop cache;
     Path tempDir;
     Result cachedResult = null;
     String cachedCode = null;
 
-    public L42Client(Path tempDir) {
+    public L42(Path tempDir) {
         try {
             this.tempDir = tempDir;
             clearTempDir();

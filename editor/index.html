@@ -153,6 +153,12 @@ function modifyUrl(url) {
     if (!url.includes(':')) {
         url = 'https://' + url;
     }
+    if (!url.includes('/execute')) {
+        if (!url.endsWith('/')) {
+            url += '/';
+        }
+        url += 'execute';
+    }
     return url;
 }
 

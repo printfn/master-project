@@ -1,8 +1,8 @@
-package l42client;
+package l42server;
 
 import org.json.JSONObject;
 
-public class Result {
+class Result {
     public long executionTimeNanos = -1;
     public String stdout;
     public String stderr;

@@ -77,7 +77,7 @@ resource "aws_lambda_function" "l42_lambda" {
 
   source_code_hash = filesha256("l42_package.zip")
 
-  role   = aws_iam_role.l42_lambda.arn
+  role = aws_iam_role.l42_lambda.arn
 
   depends_on = [
     aws_iam_role_policy_attachment.l42_lambda_logs,

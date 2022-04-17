@@ -1,4 +1,4 @@
-package l42client;
+package l42server;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
@@ -13,7 +13,19 @@ import java.util.Base64;
 
 /// AWS Lambda entry point
 public class Lambda implements RequestStreamHandler {
-    L42Client client = new L42Client(Path.of("/tmp/L42testing"));
+    L42 client = new L42(Path.of("/tmp/L42testing"));
+
+    String getPath(JSONObject event) {
+        if (!event.has("requestContext"))
+            return null;
+        var requestContext = event.getJSONObject("requestContext");
+        if (!requestContext.has("http"))
+            return null;
+        var http = requestContext.getJSONObject("http");
+        if (!http.has("path"))
+            return null;
+        return http.getString("path");
+    }
 
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
         var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -22,10 +34,26 @@ public class Lambda implements RequestStreamHandler {
         LambdaLogger logger = context.getLogger();
         try {
             var eventObj = new JSONObject(tokener);
-            var resultBody = handler(eventObj, context, logger);
+            JSONObject resultBody;
+            var statusCode = 200;
+            switch (getPath(eventObj)) {
+                case "/execute":
+                    resultBody = executeHandler(eventObj, logger);
+                    break;
+                case "/health":
+                    resultBody = new JSONObject();
+                    resultBody.put("ok", true);
+                    break;
+                default:
+                    resultBody = new JSONObject();
+                    resultBody.put("ok", false);
+                    resultBody.put("message", "404 Not Found");
+                    statusCode = 400;
+                    break;
+            }
             var result = new JSONObject();
             result.put("body", resultBody);
-            result.put("statusCode", 200);
+            result.put("statusCode", statusCode);
             var headers = new JSONObject();
             headers.put("Access-Control-Allow-Origin", "*");
             result.put("headers", headers);
@@ -42,7 +70,7 @@ public class Lambda implements RequestStreamHandler {
         }
     }
 
-    public JSONObject handler(JSONObject event, Context context, LambdaLogger logger) {
+    public JSONObject executeHandler(JSONObject event, LambdaLogger logger) {
         logger.log("Event: " + event);
 
         try {

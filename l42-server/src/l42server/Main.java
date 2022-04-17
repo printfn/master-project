@@ -1,10 +1,10 @@
-package l42client;
+package l42server;
 
 import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
-        var client = new L42Client(Path.of("/tmp/L42testing"));
+        var l42 = new L42(Path.of("/tmp/L42testing"));
         int port = 8000;
         var warmCache = false;
 
@@ -31,7 +31,7 @@ public class Main {
             }
         }
 
-        new Server(client, port, warmCache);
+        new Server(l42, port, warmCache);
     }
 
     static void printUsage() {
