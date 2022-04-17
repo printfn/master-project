@@ -51,7 +51,7 @@ L42_POM="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <dependencies>
         <dependency>
             <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
+            <artifactId>antlr4-runtime</artifactId>
             <version>4.7.2</version>
         </dependency>
 
