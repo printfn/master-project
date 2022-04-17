@@ -33,7 +33,7 @@ zip -d artifacts/l42_package.zip \
     L42PortableLinux/L42Internals/L42_lib/\*
 
 echo >&2 "Adding l42-server.jar..."
-zip --junk-paths artifacts/l42_package.zip \
+zip --junk-paths --latest-time -X artifacts/l42_package.zip \
     l42-server/out/artifacts/l42_server_jar/l42-server.jar
 
 echo >&2 "Adding bootstrap..."
@@ -47,7 +47,7 @@ cd \$LAMBDA_TASK_ROOT
     l42server.Lambda"
 echo "$BOOTSTRAP" >"artifacts/bootstrap"
 chmod +x "artifacts/bootstrap"
-zip --junk-paths artifacts/l42_package.zip \
+zip --junk-paths --latest-time -X artifacts/l42_package.zip \
     "artifacts/bootstrap"
 
 echo >&2 "Successfully created artifacts/l42_package.zip"
