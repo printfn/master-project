@@ -1,6 +1,4 @@
 .terraform/
-L42PortableLinux.zip
 terraform.tfstate
 terraform.tfstate.backup
 terraform.auto.tfvars
-l42_package.zip

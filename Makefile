@@ -3,8 +3,8 @@ clean:
 	rm -rf docker/l42_package
 
 build: clean
-	./lambda/update-layer.sh
-	unzip -u lambda/l42_package.zip -d docker/l42_package/
+	./update-package.sh
+	unzip -u artifacts/l42_package.zip -d docker/l42_package/
 	docker build --network=host --tag l42 docker
 
 run:
