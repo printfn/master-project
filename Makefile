@@ -1,11 +1,16 @@
 clean:
 	docker system prune -a -f
-	rm -rf docker/l42_package
+	rm -rf artifacts/docker_image artifacts/l42_package artifacts/l42_package.zip
 
 build: clean
 	./scripts/update-package.sh
-	unzip -u artifacts/l42_package.zip -d docker/l42_package/
-	docker build --network=host --tag l42 docker
+
+	# docker
+	rm -rf artifacts/docker_image
+	mkdir artifacts/docker_image
+	unzip -u artifacts/l42_package.zip -d artifacts/docker_image/l42_package/
+	cp docker/Dockerfile artifacts/docker_image/
+	docker build --network=host --tag l42 artifacts/docker_image
 
 run:
 	docker run --publish 8000:80 -it l42
