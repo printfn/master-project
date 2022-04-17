@@ -3,7 +3,7 @@ clean:
 	rm -rf docker/l42_package
 
 build: clean
-	./update-package.sh
+	./scripts/update-package.sh
 	unzip -u artifacts/l42_package.zip -d docker/l42_package/
 	docker build --network=host --tag l42 docker
 
@@ -11,7 +11,7 @@ run:
 	docker run --publish 8000:80 -it l42
 
 ecr:
-	./docker/deploy-ecr.sh
+	./scripts/deploy-ecr.sh
 
 docker_debug:
 	docker run --entrypoint /bin/sh -it l42

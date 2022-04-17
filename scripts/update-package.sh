@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
+cd ..
 
 # This script creates a `l42_package.zip` file that can be uploaded to
 # AWS Lambda to be executed, or its contents can be extracted into a
