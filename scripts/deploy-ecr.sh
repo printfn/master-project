@@ -2,10 +2,10 @@
 set -euxo pipefail
 cd "$(dirname "$0")"
 
-# put the following lines into ~/L42_exports.sh
+# put the following lines into L42_exports.sh in the root of this project
 #   export AWS_PROFILE=...
 #   export region=...
-source ~/L42_exports.sh
+source ../L42_exports.sh
 
 account="$(aws sts get-caller-identity | jq -r .Account)"
 
