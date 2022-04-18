@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project name="maven-antrun-" default="Build JNI libraries"  >
-<target name="Build JNI libraries">
-  <exec logError="true" failonerror="true" executable="/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/src/main/jni/build-jni-lib.sh">
-    <arg value="/Users/printfn/Code/aws-lambda-java-libs/aws-lambda-java-runtime-interface-client/target"/>
-  </exec>
-</target>
-</project>

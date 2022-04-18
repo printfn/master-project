@@ -1,5 +1,10 @@
 # ec2
 
+## Setup
+
+You need to copy a public key (`id_rsa.pub`) into this folder. This allows you
+to remotely log in to the ec2 instance with your corresponding private key.
+
 ## EC2 Architecture
 
 ![ec2](../docs/ec2.drawio.png)

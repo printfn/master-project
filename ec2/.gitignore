@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
+id_rsa.pub
 
 .terraform*
 terraform.tfstate*

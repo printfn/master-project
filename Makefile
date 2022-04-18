@@ -4,6 +4,11 @@ clean:
 	rm -rf l42-server/out l42-server/target
 	rm -rf ~/.m2
 
+mild_clean:
+	rm -rf artifacts/docker_image artifacts/L42PortableLinux artifacts/bootstrap
+	rm -rf artifacts/l42-pom.xml artifacts/l42-server.jar artifacts/l42_package.zip
+	rm -rf l42-server/out l42-server/target
+
 build:
 	./scripts/update-package.sh
 
