@@ -5,8 +5,9 @@ cd "$(dirname "$0")"
 # put the following lines into ~/L42_exports.sh
 #   export AWS_PROFILE=...
 #   export region=...
-#   export account=...
 source ~/L42_exports.sh
+
+account="$(aws sts get-caller-identity | jq -r .Account)"
 
 aws ecr get-login-password --region $region \
     | docker login --username AWS --password-stdin $account.dkr.ecr.$region.amazonaws.com/l42
