@@ -1,8 +1,10 @@
 clean:
 	docker system prune -a -f
-	rm -rf artifacts/docker_image artifacts/l42_package artifacts/l42_package.zip
+	rm -rf artifacts
+	rm -rf l42-server/out l42-server/target
+	rm -rf ~/.m2
 
-build: clean
+build:
 	./scripts/update-package.sh
 
 	# docker
