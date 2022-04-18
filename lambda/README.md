@@ -7,10 +7,9 @@
 To get started, run these commands:
 
 ```bash
-terraform-docs markdown .
+(cd .. && make build)
 terraform init
 cp -f variables.sample.txt terraform.auto.tfvars
-./update-layer.sh
 terraform apply
 ```
 
@@ -18,7 +17,7 @@ Terraform returns <api_gateway_base_url> in its output,
 run *editor/index.html* in a browser with the following url:
 
 ```text
-https://printfn.github.io/master-project/editor/?server=https://<api_gateway_base_url>/execute
+https://printfn.github.io/master-project/editor/?server=https://<api_gateway_base_url>
 ```
 
 <!-- BEGIN_TF_DOCS -->
