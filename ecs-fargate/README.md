@@ -2,9 +2,7 @@
 
 ## ECS Fargate Architecture
 
-![architecture](../docs/Diagram-ECS-Fargate-ALB.png)
-
-![architecture2](../docs/Diagram-Network.png)
+![architecture](../docs/ecs-fargate.drawio.png)
 
 The HTTPS encryption will take place between your external clients (anyone in the internet) and the load balancer, and the load balancer nodes will communicate to your Fargate tasks over HTTP using their private IP addresses.
 
@@ -91,16 +89,6 @@ terraform destroy
 ```
 
 + remove ECR in AWS console
-
-## Diagrams
-
-![ECS Fargate Container Tasks in Private Subnet, Load Balancer in Public Subnet](./diagrams/Diagram-ECS-Fargate-ALB.png)
-
-Diagram: *ECS Fargate Container Tasks in Private Subnet, Load Balancer in Public Subnet*
-
-![Using multiple Availability Zones to achieve High Availability](./diagrams/Diagram-Network.png)
-
-Diagram: *Using multiple Availability Zones to achieve High Availability*
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
