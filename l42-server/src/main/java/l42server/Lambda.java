@@ -87,10 +87,8 @@ public class Lambda implements RequestStreamHandler {
                 event = new JSONObject(bodyTokener);
             }
 
-            var code = event.getString("code");
-
-            logger.log("Received code: " + code);
-            return client.runL42FromCode(code).toJSON();
+            logger.log("Received input: " + event.toString());
+            return client.runL42FromCode(event).toJSON();
         } catch (Exception e) {
             logger.log(e.toString());
             var response = new JSONObject();

@@ -183,6 +183,9 @@ async function multiFetch(options) {
 }
 
 function buildResultString(result) {
+    if (!result.ok) {
+        return "Error: " + result.message;
+    }
     let str = 'stdout:\n' + result.stdout;
     if (result.stderr) {
         str += '\nstderr:\n' + result.stderr;
@@ -202,7 +205,9 @@ async function execute() {
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
-                code: editor.getValue(),
+                files: {
+                    "This.L42": editor.getValue(),
+                },
             }),
         });
         if (!result) {

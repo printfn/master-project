@@ -31,9 +31,15 @@ class Server {
     }
 
     static JSONObject handleApi(JSONObject request, L42 client) {
-        var code = request.getString("code");
-        System.err.println("Received code:\n" + code);
-        return client.runL42FromCode(code).toJSON();
+        try {
+            return client.runL42FromCode(request).toJSON();
+        } catch (Exception e) {
+            System.out.println(e);
+            var response = new JSONObject();
+            response.put("ok", false);
+            response.put("message", e.toString());
+            return response;
+        }
     }
 
     Server(L42 l42, int port, boolean warmCache) {
@@ -41,7 +47,9 @@ class Server {
         try {
             this.l42 = l42;
             if (warmCache) {
-                l42.runL42FromCode(HELLO_WORLD);
+                var input = new JSONObject();
+                input.put("files", new JSONObject().put("This.L42", HELLO_WORLD));
+                l42.runL42FromCode(input);
             }
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHandler());

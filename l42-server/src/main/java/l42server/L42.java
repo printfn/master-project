@@ -1,5 +1,6 @@
 package l42server;
 
+import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
 import is.L42.top.CachedTop;
 
 import java.io.FileWriter;
@@ -15,7 +16,7 @@ class L42 {
     CachedTop cache;
     Path tempDir;
     Result cachedResult = null;
-    String cachedCode = null;
+    JSONObject cachedInput = null;
 
     public L42(Path tempDir) {
         try {
@@ -48,29 +49,14 @@ class L42 {
         }
     }
 
-    Result runL42FromCode(String code) {
+    Result runL42FromCode(JSONObject input) {
         long startTime = System.nanoTime();
-        if (Objects.equals(this.cachedCode, code)) {
+        if (Objects.equals(this.cachedInput, input)) {
             this.cachedResult.executionTimeNanos = 0;
             return this.cachedResult;
         }
         try {
-            System.err.println("Clearing temp dir " + tempDir);
-            clearTempDir();
-
-            System.err.println("Creating Setti.ngs file");
-            var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
-            settingsFile.createNewFile();
-            var settingsWriter = new FileWriter(settingsFile);
-            settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
-            settingsWriter.close();
-
-            System.err.println("Creating This.L42 file");
-            var codeFile = tempDir.resolve(Path.of("This.L42")).toFile();
-            codeFile.createNewFile();
-            var codeWriter = new FileWriter(codeFile);
-            codeWriter.write(code);
-            codeWriter.close();
+            writeInputToTempDir(input);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -79,13 +65,38 @@ class L42 {
         long endTime = System.nanoTime();
         result.executionTimeNanos = endTime - startTime;
         this.cachedResult = result;
-        this.cachedCode = code;
+        this.cachedInput = input;
         return result;
+    }
+
+    private void writeInputToTempDir(JSONObject input) throws IOException {
+        System.err.println("Clearing temp dir " + tempDir);
+        clearTempDir();
+
+        System.err.println("Creating Setti.ngs file");
+        var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
+        settingsFile.createNewFile();
+        var settingsWriter = new FileWriter(settingsFile);
+        settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
+        settingsWriter.close();
+
+        JSONObject files = input.getJSONObject("files");
+        for (var filename : files.keySet()) {
+            if (!filename.matches("[a-zA-Z0-9.\\-_]{1,20}\\.L42")) {
+                throw new RuntimeException("Invalid filename " + filename);
+            }
+            System.err.println("Creating " + filename + " file");
+            var codeFile = tempDir.resolve(Path.of("This.L42")).toFile();
+            codeFile.createNewFile();
+            var codeWriter = new FileWriter(codeFile);
+            codeWriter.write(files.getString(filename));
+            codeWriter.close();
+        }
     }
 
     private Result executeL42() {
         System.err.println("Starting to execute 42...");
-        Output out = new Output();
+        OutputHandler out = new OutputHandler();
         out.setHandlers();
         int returnCode = 0;
         try {
