@@ -9,15 +9,17 @@ mild_clean:
 	rm -rf artifacts/l42-pom.xml artifacts/l42-server.jar artifacts/l42_package.zip
 	rm -rf l42-server/out l42-server/target
 
-build:
+zip:
 	./scripts/update-package.sh
 
-	# docker
+docker: zip
 	rm -rf artifacts/docker_image
 	mkdir artifacts/docker_image
 	unzip -u artifacts/l42_package.zip -d artifacts/docker_image/l42_package/
 	cp docker/Dockerfile artifacts/docker_image/
 	docker build --network=host --tag l42 artifacts/docker_image
+
+build: zip docker
 
 run:
 	docker run --publish 8000:80 -it l42
