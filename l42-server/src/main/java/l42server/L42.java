@@ -16,7 +16,7 @@ class L42 {
     CachedTop cache;
     Path tempDir;
     Result cachedResult = null;
-    JSONObject cachedInput = null;
+    String cachedInput = null;
 
     public L42(Path tempDir) {
         try {
@@ -51,7 +51,7 @@ class L42 {
 
     Result runL42FromCode(JSONObject input) {
         long startTime = System.nanoTime();
-        if (Objects.equals(this.cachedInput, input)) {
+        if (Objects.equals(this.cachedInput, input.toString())) {
             this.cachedResult.executionTimeNanos = 0;
             return this.cachedResult;
         }
@@ -65,7 +65,7 @@ class L42 {
         long endTime = System.nanoTime();
         result.executionTimeNanos = endTime - startTime;
         this.cachedResult = result;
-        this.cachedInput = input;
+        this.cachedInput = input.toString();
         return result;
     }
 
