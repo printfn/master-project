@@ -215,11 +215,10 @@ async function execute() {
         }
         const jsonResult = await result.json();
         const resultString = buildResultString(jsonResult);
-        window.output.setValue(resultString);
-        window.output.gotoLine(0); // clear selection
+        // -1 to clear selection and move cursor to start of line
+        window.output.setValue(resultString, -1);
     } catch (e) {
-        window.output.setValue(e.toString());
-        window.output.gotoLine(0);
+        window.output.setValue(e.toString(), -1);
     } finally {
         executeButton.disabled = false;
         executeButton.value = "Run";
