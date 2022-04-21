@@ -20,7 +20,10 @@ class L42 {
 
     public L42(Path tempDir) {
         try {
-            this.tempDir = tempDir;
+            // on macOS, /tmp is a symbolic link that points to /private/tmp/,
+            // which causes L42 to get confused
+            tempDir.toFile().mkdirs();
+            this.tempDir = tempDir.toRealPath();
             clearTempDir();
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,7 +89,7 @@ class L42 {
                 throw new RuntimeException("Invalid filename " + filename);
             }
             System.err.println("Creating " + filename + " file");
-            var codeFile = tempDir.resolve(Path.of("This.L42")).toFile();
+            var codeFile = tempDir.resolve(Path.of(filename)).toFile();
             codeFile.createNewFile();
             var codeWriter = new FileWriter(codeFile);
             codeWriter.write(files.getString(filename));
@@ -100,10 +103,8 @@ class L42 {
         out.setHandlers();
         int returnCode = 0;
         try {
-            var tempDir = new URI(String.format("file://%s", this.tempDir.toAbsolutePath()));
-
             System.err.println("Executing 42...");
-            is.L42.main.Main.run(Path.of(tempDir), cache);
+            is.L42.main.Main.run(this.tempDir.resolve("This.L42"), cache);
             System.err.println("... finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();
