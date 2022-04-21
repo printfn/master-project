@@ -43,7 +43,7 @@ body {
 
 <p>
     <label for="open-file-picker">Open File:</label>
-    <input type="file" id="open-file-picker">
+    <input type="file" id="open-file-picker" multiple>
     <input type="button" value="Load File" onclick="loadFile()">
 </p>
 
@@ -121,10 +121,16 @@ async function loadFile() {
         alert('No file selected');
         return;
     }
-
-    let file = files[0];
-    let fileContent = await file.text();
-    GUI.loadProgram(fileContent);
+    let program = {};
+    if (files.length == 1) {
+        program["This.L42"] = await files[0].text();
+    } else {
+        for (let file of files) {
+            if (file.name == "Setti.ngs") continue;
+            program[file.name] = await file.text();
+        }
+    }
+    GUI.loadProgram(program);
 }
 
 function loadSampleProgram() {
