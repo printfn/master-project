@@ -32,13 +32,19 @@ body {
 <h1>42 Editor</h1>
 
 <p>
-<label for="sample-program-select">Load sample program:</label>
-<select id="sample-program-select">
-    <option selected>Hello World</option>
-    <option>Point</option>
-    <option>Simple Invariant</option>
-</select>
-<input type="button" onclick="loadSampleProgram()" value="Load">
+    <label for="sample-program-select">Load sample program:</label>
+    <select id="sample-program-select">
+        <option selected>Hello World</option>
+        <option>Point</option>
+        <option>Simple Invariant</option>
+    </select>
+    <input type="button" onclick="loadSampleProgram()" value="Load">
+</p>
+
+<p>
+    <label for="open-file-picker">Open File:</label>
+    <input type="file" id="open-file-picker">
+    <input type="button" value="Load File" onclick="loadFile()">
 </p>
 
 <ul id="file-tree">
@@ -48,9 +54,6 @@ body {
 
 <p>
     <input type="button" id="execute" value="Run" onclick="execute()">
-    <label for="open-file-picker">Open File:</label>
-    <input type="file" id="open-file-picker">
-    <input type="button" value="Load File" onclick="loadFile()">
 </p>
 
 <div id="output"></div>
