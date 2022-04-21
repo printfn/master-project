@@ -1,0 +1,9 @@
+reuse [L42.is/AdamsTowel]
+Point = Data:{...}
+
+Main=(
+  Debug(S"Hello world from 42!")
+
+  imm Point p = (Point(x=5\, y=2\).sum(Point(x=3\, y=1\)))
+  Debug(S"p = %p")
+  )
