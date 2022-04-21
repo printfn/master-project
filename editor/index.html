@@ -20,7 +20,8 @@ body {
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.9.1/jszip.min.js" charset="utf-8"></script>
 <script src="https://l42.is/js/mode-l42.js"></script>
 <script src="https://l42.is/js/theme-l42_eclipse.js"></script>
 <script src="urls.js"></script>
@@ -40,10 +41,16 @@ body {
 <input type="button" onclick="loadSampleProgram()" value="Load">
 </p>
 
+<ul id="file-tree">
+    <li>This.L42</li>
+</ul>
 <div id="editor"></div>
 
 <p>
     <input type="button" id="execute" value="Run" onclick="execute()">
+    <label for="open-file-picker">Open File:</label>
+    <input type="file" id="open-file-picker">
+    <input type="button" value="Load File" onclick="loadFile()">
 </p>
 
 <div id="output"></div>
@@ -52,58 +59,47 @@ body {
 
 // add '?server=https://example.com' this page's URL to override the server URL
 
-const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
-Main=(
-  Debug(S"Hello world from 42")
-  )`;
+const GUI = {
+    currentProgram: null,
+    currentFile: null,
 
-const POINT = `reuse [L42.is/AdamsTowel]
-Point = Data:{
-  Num x
-  Num y
-  method
-  Point add(Num x) = //long version
-    Point(x=x+this.x(), y=this.y())
-  method
-  Point add(Num y) = //shorter
-    this.with(y=y+this.y())
-  method
-  Point sum(Point that) =
-    Point(x=this.x()+that.x(), y=this.y()+that.y())
-  }
+    loadProgram: (program) => {
+        GUI.currentProgram = JSON.parse(JSON.stringify(program));
+        if (typeof GUI.currentProgram == "string") {
+            GUI.currentProgram = {
+                "This.L42": GUI.currentProgram,
+            }
+        }
+        let fileTreeHtml = '';
+        let initialFilename = GUI.currentProgram["This.L42"] ? "This.L42" : null;
+        for (let filename in GUI.currentProgram) {
+            if (initialFilename == null) {
+                initialFilename = filename;
+            }
+            fileTreeHtml += `<li><a href="javascript:GUI.openFile('${filename}')">${filename}</a></li>`;
+        }
+        document.getElementById('file-tree').innerHTML = fileTreeHtml;
+        if (initialFilename != null) {
+            GUI.currentFile = initialFilename;
+            window.editor.setValue(GUI.currentProgram[GUI.currentFile], -1);
+        } else {
+            alert("The L42 project does not contain any files");
+        }
+    },
 
-Main=(
-  Debug(S"Hello world from 42!")
+    openFile: (filename) => {
+        GUI.currentProgram[GUI.currentFile] = editor.getValue();
+        GUI.currentFile = filename;
+        window.editor.setValue(GUI.currentProgram[GUI.currentFile], -1);
+    },
 
-  imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
-  Debug(S"p = %p")
-  )
-`;
+    getProgram: () => {
+        GUI.currentProgram[GUI.currentFile] = editor.getValue();
+        return GUI.currentProgram;
+    }
+};
 
-const SIMPLE_INVARIANT = `reuse [L42.is/AdamsTowel]
-Point = Data:{
-  Double x
-  Double y
-  @Cache.Now class method Double distanceFromOrigin(Double x, Double y) = 
-    ((x*x)+(y*y)).pow(exp=\\"0.5")
-  // x and y must always be positive
-  @Cache.Now class method Void invariant(Double x, Double y) = 
-    if !(x>=0Double && y>=0Double) error X"""%
-      | Invalid state:
-      | x = %x
-      | y = %y
-      """
-  }
-
-Main=(
-  Point p = Point(x=Double"5", y=Double"3")
-  // This would result in an error:
-  //Point p2 = Point(x=Double"5", y=Double"-3")
-  Debug(S"p = %p")
-  )
-`;
-
-window.onload = () => {
+window.onload = function() {
     const editor = ace.edit('editor', { minLines: 10, maxLines: 50 });
     editor.session.setMode('ace/mode/l42');
     window.editor = editor;
@@ -114,6 +110,18 @@ window.onload = () => {
     window.output = output;
 
     loadSampleProgram();
+}
+
+async function loadFile() {
+    const files = document.getElementById('open-file-picker').files;
+    if (files.length == 0) {
+        alert('No file selected');
+        return;
+    }
+
+    let file = files[0];
+    let fileContent = await file.text();
+    GUI.loadProgram(fileContent);
 }
 
 function loadSampleProgram() {
@@ -132,8 +140,7 @@ function loadSampleProgram() {
             code = SIMPLE_INVARIANT;
             break;
     }
-    window.editor.setValue(code);
-    window.editor.gotoLine(0); // clear selection
+    GUI.loadProgram(code);
 }
 
 // modified from https://stackoverflow.com/a/5448595
@@ -205,9 +212,7 @@ async function execute() {
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
-                files: {
-                    "This.L42": editor.getValue(),
-                },
+                files: GUI.getProgram(),
             }),
         });
         if (!result) {
@@ -224,6 +229,60 @@ async function execute() {
         executeButton.value = "Run";
     }
 }
+
+const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
+Main=(
+  Debug(S"Hello world from 42")
+  )`;
+
+const POINT = {
+    "This.L42": `reuse [L42.is/AdamsTowel]
+Point = {...}
+
+Main=(
+  Debug(S"Hello world from 42!")
+
+  imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
+  Debug(S"p = %p")
+  )\n`,
+  "Point.L42": `reuse [L42.is/AdamsTowel]
+Point = Data:{
+  Num x
+  Num y
+  method
+  Point add(Num x) = //long version
+    Point(x=x+this.x(), y=this.y())
+  method
+  Point add(Num y) = //shorter
+    this.with(y=y+this.y())
+  method
+  Point sum(Point that) =
+    Point(x=this.x()+that.x(), y=this.y()+that.y())
+  }\n`
+};
+
+const SIMPLE_INVARIANT = `reuse [L42.is/AdamsTowel]
+Point = Data:{
+  Double x
+  Double y
+  @Cache.Now class method Double distanceFromOrigin(Double x, Double y) = 
+    ((x*x)+(y*y)).pow(exp=\\"0.5")
+  // x and y must always be positive
+  @Cache.Now class method Void invariant(Double x, Double y) = 
+    if !(x>=0Double && y>=0Double) error X"""%
+      | Invalid state:
+      | x = %x
+      | y = %y
+      """
+  }
+
+Main=(
+  Point p = Point(x=Double"5", y=Double"3")
+  // This would result in an error:
+  //Point p2 = Point(x=Double"5", y=Double"-3")
+  Debug(S"p = %p")
+  )
+`;
 
 </script>
 
