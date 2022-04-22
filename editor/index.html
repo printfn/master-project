@@ -58,6 +58,12 @@ body {
 
 <div id="output"></div>
 
+<h3>Links:</h3>
+<ul>
+    <li><a href="https://l42.is">42 - Metaprogramming as default</a></li>
+    <li><a href="https://l42.is/tutorial_01Basics.xhtml">42 Tutorial</a></li>
+</ul>
+
 <script>
 
 // add '?server=https://example.com' this page's URL to override the server URL
@@ -123,7 +129,42 @@ async function loadFile() {
     }
     let program = {};
     if (files.length == 1) {
-        program["This.L42"] = await files[0].text();
+        let file = files[0];
+        if (file.name.endsWith('.zip')) {
+            let zip = await JSZip.loadAsync(files[0]);
+            console.log(zip);
+
+            // check for a single top-level folder
+            let topLevelFolder = null;
+            zip.forEach((path, file) => {
+                if (topLevelFolder == null) {
+                    topLevelFolder = path.split('/')[0];
+                } else {
+                    if (topLevelFolder != path.split('/')[0]) {
+                        topLevelFolder = '';
+                    }
+                }
+            });
+            let fileList = [];
+            zip.forEach((path, file) => {
+                if (file.dir) return;
+                let relPath = path.substring(topLevelFolder.length);
+                if (relPath.startsWith('/')) {
+                    relPath = relPath.substring(1);
+                }
+                if (relPath == "Setti.ngs") return;
+                fileList.push({
+                    name: relPath,
+                    file: file,
+                });
+            });
+            for (let file of fileList) {
+                let fileContent = await file.file.async('text');
+                program[file.name] = fileContent;
+            }
+        } else if (file.name.endsWith('.L42') || file.name.endsWith('.l42')) {
+            program["This.L42"] = await files[0].text();
+        }
     } else {
         for (let file of files) {
             if (file.name == "Setti.ngs") continue;
