@@ -104,7 +104,7 @@ class L42 {
         int returnCode = 0;
         try {
             System.err.println("Executing 42...");
-            is.L42.main.Main.run(this.tempDir.resolve("This.L42"), cache);
+            var res = is.L42.main.Main.run(this.tempDir.resolve("This.L42"), cache);
             System.err.println("... finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();

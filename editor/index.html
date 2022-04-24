@@ -271,7 +271,6 @@ function buildResultString(result) {
     if (result.stderr) {
         str += '\nstderr:\n' + result.stderr;
     }
-    str += '\nreturn code: ' + result.returncode;
     str += '\nduration: ' + result.duration + ' seconds';
     return str;
 }
