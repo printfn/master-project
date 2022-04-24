@@ -11,11 +11,6 @@ import java.nio.charset.StandardCharsets;
 class Server {
     HttpServer httpServer;
     L42 l42;
-    static String HELLO_WORLD = """
-            reuse [L42.is/AdamsTowel]
-            Main=(
-              Debug(S"Hello world from 42")
-              )""";
 
     static void respond(int code, String response, HttpExchange exchange) {
         try {
@@ -48,7 +43,7 @@ class Server {
             this.l42 = l42;
             if (warmCache) {
                 var input = new JSONObject();
-                input.put("files", new JSONObject().put("This.L42", HELLO_WORLD));
+                input.put("files", new JSONObject().put("This.L42", L42.HELLO_WORLD));
                 l42.runL42FromCode(input);
             }
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);

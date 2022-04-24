@@ -18,6 +18,12 @@ class L42 {
     Result cachedResult = null;
     String cachedInput = null;
 
+    public static final String HELLO_WORLD = """
+            reuse [L42.is/AdamsTowel]
+            Main=(
+              Debug(S"Hello world from 42")
+              )""";
+
     public L42(Path tempDir) {
         try {
             // on macOS, /tmp is a symbolic link that points to /private/tmp/,
