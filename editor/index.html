@@ -15,6 +15,11 @@
     height: 300px;
     border: 1px solid lightgray;
 }
+
+#duration-paragraph {
+    margin-left: 1em;
+}
+
 body {
     font-family: system, -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
 }
@@ -55,6 +60,10 @@ body {
 <p>
     <input type="button" id="execute" value="Run" onclick="execute()">
     <input type="button" value="Download as ZIP" onclick="downloadAsZip()">
+    <span id="duration-paragraph">
+        <label for="duration">Duration: </label>
+        <span id="duration">1.234 seconds</span>
+    </span>
 </p>
 
 <div id="output"></div>
@@ -118,6 +127,7 @@ window.onload = function() {
     output.session.setMode('ace/mode/text');
     output.setReadOnly(true);
     window.output = output;
+    clearOutput();
 
     loadSampleProgram();
 }
@@ -263,16 +273,33 @@ async function multiFetch(options) {
     return null;
 }
 
-function buildResultString(result) {
+function showResultOutput(result) {
     if (!result.ok) {
         return "Error: " + result.message;
     }
-    let str = 'stdout:\n' + result.stdout;
-    if (result.stderr) {
-        str += '\nstderr:\n' + result.stderr;
+    let resultString = '';
+    if (result.stderr && !result.stdout) {
+        resultString = result.stderr;
+    } else if (result.stdout && !result.stderr) {
+        resultString = result.stdout;
+    } else if (result.stdout && result.stderr) {
+        resultString = `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`;
     }
-    str += '\nduration: ' + result.duration + ' seconds';
-    return str;
+    // -1 to clear selection and move cursor to start of line
+    window.output.setValue(resultString, -1);
+
+    document.getElementById('duration-paragraph').style.display = 'inline';
+    document.getElementById('duration').innerHTML = result.duration + ' seconds';
+    if (result.returncode == 0) {
+        document.getElementById('output').style.color = 'black';
+    } else {
+        document.getElementById('output').style.color = 'red';
+    }
+}
+
+function clearOutput() {
+    window.output.setValue('');
+    document.getElementById('duration-paragraph').style.display = 'none';
 }
 
 async function execute() {
@@ -281,7 +308,7 @@ async function execute() {
         const editor = window.editor;
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
-        window.output.setValue('');
+        clearOutput();
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
@@ -292,9 +319,7 @@ async function execute() {
             alert('Unable to contact server, see log for details');
         }
         const jsonResult = await result.json();
-        const resultString = buildResultString(jsonResult);
-        // -1 to clear selection and move cursor to start of line
-        window.output.setValue(resultString, -1);
+        showResultOutput(jsonResult);
     } catch (e) {
         window.output.setValue(e.toString(), -1);
     } finally {
