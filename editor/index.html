@@ -50,19 +50,19 @@ body {
 <h1>42 Editor</h1>
 
 <p>
-    <label for="sample-program-select" title="Choose a sample program here">Load sample program:</label>
-    <select id="sample-program-select" title="You can select a sample program here">
+    <label for="sample-program-select" title="Choose which sample program you would like to run from this list">Load sample program:</label>
+    <select id="sample-program-select" title="Choose which sample program you would like to run from this list">
         <option selected>Hello World</option>
         <option>Point</option>
         <option>Simple Invariant</option>
     </select>
-    <input type="button" onclick="loadSampleProgram()" value="Load" title="Load the selected sample program">
+    <input type="button" onclick="loadSampleProgram()" value="Load" title="Load the selected sample program into the editor">
 </p>
 
 <p>
     <label for="open-file-picker" title="Open .L42 files, or .zip files">Open File:</label>
-    <input type="file" id="open-file-picker" multiple title="Choose one or more files. They can be .L42 files or ZIP files.">
-    <input type="button" value="Load File" title="Load the selected file(s)" onclick="loadFileHandler()">
+    <input type="file" id="open-file-picker" multiple title="Choose one or more files to load into the editor. They can be .L42 files or ZIP files.">
+    <input type="button" value="Load File" title="Load the selected file(s) into the editor" onclick="loadFileHandler()">
 </p>
 
 <ul id="file-tree">
@@ -71,8 +71,8 @@ body {
 <div id="editor"></div>
 
 <p>
-    <input type="button" id="execute" value="Run" onclick="execute()" title="Execute the 42 program">
-    <input type="button" value="Download as ZIP" onclick="downloadAsZip()" title="Click here to download your program as a ZIP file">
+    <input type="button" id="execute" value="Run" onclick="execute()" title="Execute the program on the 42 server in the cloud">
+    <input type="button" value="Download as ZIP" onclick="downloadAsZip()" title="Click here to save your program as a ZIP file to your computer">
     <span id="duration-paragraph">
         <label for="duration">Duration: </label>
         <span id="duration">1.234 seconds</span>
