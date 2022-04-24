@@ -75,7 +75,7 @@ resource "aws_lambda_function" "l42_lambda" {
   memory_size = 1536
   timeout     = 30
 
-  source_code_hash = aws_s3_object.l42_lambda.source_hash
+  source_code_hash = filebase64sha256(aws_s3_object.l42_lambda.source)
 
   role = aws_iam_role.l42_lambda.arn
 
