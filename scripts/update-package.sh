@@ -84,6 +84,8 @@ echo "$L42_POM" >artifacts/l42-pom.xml
 
 if [[ -d "/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home" ]]; then
     export JAVA_HOME="/Library/Java/JavaVirtualMachines/jdk-16.0.2.jdk/Contents/Home"
+elif [[ -d "$HOME/l42/jdk-16.0.2" ]]; then
+    export JAVA_HOME="$HOME/l42/jdk-16.0.2"
 fi
 
 (cd l42-server && mvn package)
