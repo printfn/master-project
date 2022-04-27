@@ -31,6 +31,6 @@ docker_debug:
 	docker run --entrypoint /bin/sh -it l42
 
 logs:
-	aws --region eu-central-1 logs tail /aws/lambda/L42 --follow
+	aws --region ap-southeast-2 logs tail /aws/lambda/L42 --follow
 
 .PHONY: build clean deploy logs run
