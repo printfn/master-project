@@ -10,6 +10,17 @@
     border: 1px solid lightgray;
 }
 
+#preview {
+    width: 100%;
+    height: 300px;
+    border: 1px solid lightgray;
+    display: none;
+}
+
+#editor-preview-container {
+    display: flex;
+}
+
 #output {
     width: 100%;
     height: 300px;
@@ -30,10 +41,10 @@ body {
 }
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/ace.js" charset="utf-8"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.9.1/jszip.min.js" charset="utf-8"></script>
-<script src="https://l42.is/js/mode-l42.js"></script>
-<script src="https://l42.is/js/theme-l42_eclipse.js"></script>
+<script src="libs/ace.js" charset="utf-8"></script>
+<script src="libs/jszip.min.js" charset="utf-8"></script>
+<script src="libs/mode-l42.js"></script>
+<script src="libs/theme-l42_eclipse.js"></script>
 <script src="urls.js"></script>
 
 </head>
@@ -55,6 +66,7 @@ body {
         <option selected>Hello World</option>
         <option>Point</option>
         <option>Simple Invariant</option>
+        <option>Hello World challenge</option>
     </select>
     <input type="button" onclick="loadSampleProgram()" value="Load Sample" title="Load the selected sample program into the editor">
 </p>
@@ -68,7 +80,10 @@ body {
 <ul id="file-tree">
     <li>This.L42</li>
 </ul>
-<div id="editor"></div>
+<div id="editor-preview-container">
+    <div id="editor"></div>
+    <div id="preview"></div>
+</div>
 
 <p>
     <input type="button" id="execute" value="Run" onclick="execute()" title="Execute the program on the 42 server in the cloud">
@@ -87,7 +102,14 @@ body {
 
 const GUI = {
     currentProgram: null,
-    currentFile: null,
+    currentFileName: null,
+
+    isTemplate: () => {
+        if (GUI.currentProgram["template"]) {
+            return true;
+        }
+        return false;
+    },
 
     loadProgram: (program) => {
         GUI.currentProgram = JSON.parse(JSON.stringify(program));
@@ -99,36 +121,79 @@ const GUI = {
         let fileTreeHtml = '';
         let initialFilename = GUI.currentProgram["This.L42"] ? "This.L42" : null;
         for (let filename in GUI.currentProgram) {
+            if (filename == "template")
+                continue;
             if (initialFilename == null) {
                 initialFilename = filename;
             }
-            fileTreeHtml += `<li><a href="javascript:GUI.openFile('${filename}')">${filename}</a></li>`;
+            fileTreeHtml += `<li><a href="javascript:GUI.switchToFile('${filename}')">${filename}</a></li>`;
         }
         document.getElementById('file-tree').innerHTML = fileTreeHtml;
-        if (initialFilename != null) {
-            GUI.currentFile = initialFilename;
-            window.editor.setValue(GUI.currentProgram[GUI.currentFile], -1);
+        if (initialFilename == null) {
+            alert("Error: the selected 42 project does not contain any files!");
+            GUI.currentProgram = { "This.L42": "" };
+            initialFilename = "This.L42";
+        }
+
+        GUI.currentFileName = initialFilename;
+        
+        if (GUI.isTemplate()) {
+            document.getElementById('preview').style.display = 'block';
+            window.preview.setValue(GUI.currentProgram[GUI.currentFileName], -1);
+            window.editor.setValue('', -1);
         } else {
-            alert("The L42 project does not contain any files");
+            document.getElementById('preview').style.display = 'none';
+            window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
         }
     },
 
-    openFile: (filename) => {
-        GUI.currentProgram[GUI.currentFile] = editor.getValue();
-        GUI.currentFile = filename;
-        window.editor.setValue(GUI.currentProgram[GUI.currentFile], -1);
+    switchToFile: (filename) => {
+        GUI.currentProgram[GUI.currentFileName] = editor.getValue();
+        GUI.currentFileName = filename;
+        window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
     },
 
     getProgram: () => {
-        GUI.currentProgram[GUI.currentFile] = editor.getValue();
+        GUI.currentProgram[GUI.currentFileName] = editor.getValue();
         return GUI.currentProgram;
-    }
+    },
+
+    getRenderedProgram: () => {
+        if (!GUI.isTemplate()) {
+            return GUI.getProgram();
+        }
+        let template = GUI.currentProgram[GUI.currentFileName];
+        let editorCode = window.editor.getValue()
+        let previewCode = template;
+        if (editorCode.length > 0) {
+            previewCode = template.replaceAll('???', editorCode);
+        }
+        let result = {};
+        result[GUI.currentFileName] = previewCode;
+        return result;
+    },
+
+    // called on every keypress to update preview editor view
+    updateTemplate: () => {
+        let rendered = GUI.getRenderedProgram();
+        window.preview.setValue(rendered[GUI.currentFileName], -1);
+    },
 };
 
 window.onload = function() {
     const editor = ace.edit('editor', { minLines: 10, maxLines: 50 });
     editor.session.setMode('ace/mode/l42');
     window.editor = editor;
+    editor.getSession().on('change', e => {
+        if (GUI.isTemplate()) {
+            GUI.updateTemplate();
+        }
+    });
+
+    const preview = ace.edit('preview', { minLines: 10, maxLines: 50 });
+    preview.session.setMode('ace/mode/l42');
+    preview.setReadOnly(true);
+    window.preview = preview;
 
     const output = ace.edit('output', { minLines: 5, maxLines: 20 });
     output.session.setMode('ace/mode/text');
@@ -230,6 +295,9 @@ function loadSampleProgram() {
         case 'Simple Invariant':
             code = SIMPLE_INVARIANT;
             break;
+        case 'Hello World challenge':
+            code = PRINT_HELLO_WORLD_CHALLENGE;
+            break;
     }
     GUI.loadProgram(code);
 }
@@ -316,10 +384,14 @@ async function execute() {
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
         clearOutput();
+        let program = JSON.parse(JSON.stringify(GUI.getRenderedProgram()));
+        if (program["template"]) {
+            delete program["template"];
+        }
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
-                files: GUI.getProgram(),
+                files: program,
             }),
         });
         if (!result) {
@@ -339,6 +411,14 @@ const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
 Main=(
   Debug(S"Hello world from 42")
   )`;
+
+const PRINT_HELLO_WORLD_CHALLENGE = {
+    "This.L42": `reuse [L42.is/AdamsTowel]
+Main=(
+  Debug(S"???")
+  )`,
+    template: true,
+};
 
 const POINT = {
     "This.L42": `reuse [L42.is/AdamsTowel]
