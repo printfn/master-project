@@ -112,7 +112,11 @@ const GUI = {
         if (typeof GUI.currentProgram == "string") {
             GUI.currentProgram = {
                 "This.L42": GUI.currentProgram,
+                "Setti.ngs": DEFAULT_SETTINGS,
             }
+        }
+        if (!GUI.currentProgram["Setti.ngs"]) {
+            GUI.currentProgram["Setti.ngs"] = DEFAULT_SETTINGS;
         }
         let fileTreeHtml = '';
         let initialFilename = GUI.currentProgram["This.L42"] ? "This.L42" : null;
@@ -147,6 +151,11 @@ const GUI = {
         GUI.currentProgram[GUI.currentFileName] = editor.getValue();
         GUI.currentFileName = filename;
         window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
+        if (filename.toLowerCase().endsWith('.l42')) {
+            window.editor.session.setMode('ace/mode/l42');
+        } else {
+            window.editor.session.setMode('ace/mode/text');
+        }
     },
 
     getProgram: () => {
@@ -211,7 +220,7 @@ window.onload = function() {
 }
 
 async function loadFile(program, name, fileContent) {
-    if (name.toLowerCase().endsWith('.l42')) {
+    if (name.toLowerCase().endsWith('.l42') || name.toLowerCase() == 'setti.ngs') {
         let fileString = null;
         if ('text' in fileContent) {
             fileString = await fileContent.text();
@@ -255,8 +264,6 @@ async function loadFile(program, name, fileContent) {
             let fileContent = await file.file.async('text');
             program[file.name] = fileContent;
         }
-    } else if (name.toLowerCase().endsWith('setti.ngs')) {
-        return;
     } else {
         console.log('Ignoring unsupported file type ' + name);
     }
@@ -351,11 +358,10 @@ async function multiFetch(options) {
 }
 
 function showResultOutput(result) {
-    if (!result.ok) {
-        return "Error: " + result.message;
-    }
     let resultString = '';
-    if (result.stderr && !result.stdout) {
+    if (!result.ok) {
+        resultString = "Error: " + result.message;
+    } else if (result.stderr && !result.stdout) {
         resultString = result.stderr;
     } else if (result.stdout && !result.stderr) {
         resultString = result.stdout;
@@ -366,7 +372,11 @@ function showResultOutput(result) {
     window.output.setValue(resultString, -1);
 
     document.getElementById('duration-paragraph').style.display = 'inline';
-    document.getElementById('duration').innerHTML = result.duration + ' seconds';
+    if ('duration' in result) {
+        document.getElementById('duration').innerHTML = result.duration + ' seconds';
+    } else {
+        document.getElementById('duration').innerHTML = 'unknown';
+    }
     if (result.returncode == 0) {
         document.getElementById('output').style.color = 'black';
     } else {
@@ -408,6 +418,17 @@ async function execute() {
         executeButton.value = "Run";
     }
 }
+
+const DEFAULT_SETTINGS = `/*
+  *** 42 settings ***
+  You can change the stack and memory limitations and add security mappings
+*/
+maxStackSize = 1G
+initialMemorySize = 256M
+maxMemorySize = 2G
+//For example, this would allow MyMain to call #$of() on an FS.Real
+//coming from L42.is/FileSystem
+//MyMain = [L42.is/FileSystem]`;
 
 </script>
 

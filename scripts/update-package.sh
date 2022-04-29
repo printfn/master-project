@@ -32,11 +32,6 @@ unzip artifacts/L42PortableLinux.zip \
     L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
     -d artifacts
 
-# Inside L42.jar we unfortunately need to fix handling of GitHub URLs
-unzip artifacts/L42PortableLinux/L42Internals/L42.jar \
-    is/L42/common/ToNameUrl.class \
-    -d artifacts
-
 (cd l42-server && mvn install:install-file \
     -Dfile=../artifacts/L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
     -Dversion=0.0.0 \

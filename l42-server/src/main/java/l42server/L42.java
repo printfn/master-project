@@ -82,16 +82,16 @@ class L42 {
         System.err.println("Clearing temp dir " + tempDir);
         clearTempDir();
 
-        System.err.println("Creating Setti.ngs file");
-        var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
-        settingsFile.createNewFile();
-        var settingsWriter = new FileWriter(settingsFile);
-        settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
-        settingsWriter.close();
+//        System.err.println("Creating Setti.ngs file");
+//        var settingsFile = tempDir.resolve(Path.of("Setti.ngs")).toFile();
+//        settingsFile.createNewFile();
+//        var settingsWriter = new FileWriter(settingsFile);
+//        settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
+//        settingsWriter.close();
 
         JSONObject files = input.getJSONObject("files");
         for (var filename : files.keySet()) {
-            if (!filename.matches("[a-zA-Z0-9.\\-_]{1,20}\\.L42")) {
+            if (!filename.matches("[a-zA-Z0-9.\\-_]{1,20}\\.L42|Setti\\.ngs")) {
                 throw new RuntimeException("Invalid filename " + filename);
             }
             System.err.println("Creating " + filename + " file");
