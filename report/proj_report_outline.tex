@@ -7,6 +7,7 @@
               , a4paper
               , twoside
               , openright
+              , table
               ]{report}
 
 
@@ -74,7 +75,7 @@
 
 \begin{abstract}
 
-42 is a programming language created by Marco Servetto that is designed to be secure, easy to optimise and customisable. It includes support for enforcing certain guarantees: for example, programs can require constraints like “names must start with an upper-case letter,” or “these lists must always have the same length”. The 42 compiler ensures that these guarantees, once specified, always hold.
+42 is a programming language created by Marco Servetto that is designed to be secure, easy to optimise and customisable. It includes support for enforcing certain guarantees: for example, programs can require constraints like "names must start with an upper-case letter," or "these lists must always have the same length". The 42 compiler ensures that these guarantees, once specified, always hold.
 \\[12pt]
 While these security features have been shown to work in theory, the goal of this project is to provide infrastructure for a bug bounty programme to attract members of the public to try and break these guarantees. This is done by creating a public-facing website where users can submit arbitrary 42 code, that will then be executed in a constrained environment. This project implements the infrastructure using cloud computing, making it easy to deploy quickly and scale as needed. Costs and high availability are also taken into account.
 
