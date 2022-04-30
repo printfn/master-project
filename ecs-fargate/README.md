@@ -2,7 +2,7 @@
 
 ## ECS Fargate Architecture
 
-![architecture](../docs/ecs-fargate.drawio.png)
+![architecture](../diagrams/ecs-fargate.drawio.png)
 
 The HTTPS encryption will take place between your external clients (anyone in the internet) and the load balancer, and the load balancer nodes will communicate to your Fargate tasks over HTTP using their private IP addresses.
 

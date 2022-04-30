@@ -2,7 +2,7 @@
 
 ## Lambda Architecture
 
-![lambda](../docs/lambda.drawio.png)
+![lambda](../diagrams/lambda.drawio.png)
 
 To get started, run these commands:
 
