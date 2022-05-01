@@ -316,7 +316,7 @@ Local costs in USD per month:
 Minimal solution with a Raspberry Pi:
 
 \begin{itemize}
-\item \$1 in power usage (5W power usage) (Neukirchen, 2021)
+\item \$1 in power usage (5W power usage) \cite{neukirchen-2021}
 \item \$1.5 for hardware (\$100 over 5 years)
 \item Assuming a pre-existing internet connection (i.e. \$0)
 \item Total: \$2.50/month
@@ -336,7 +336,7 @@ Here is a diagram describing the architecture of the server back-end for this pr
 
 To access the back-end server, we are using function URLs, a recent feature of AWS, instead of an API Gateway.
 \\[12pt]
-Function URLs are best for use cases where you must implement a single-function microservice with a public endpoint that doesn’t require the advanced functionality of API Gateway, such as request validation, throttling, custom authorizers, custom domain names, usage plans, or caching. For example, when you are implementing webhook handlers, form validators, mobile payment processing, advertisement placement, machine learning inference, and so on. It is also the simplest way to invoke your Lambda functions during research and development without leaving the Lambda console or integrating additional services.
+Function URLs are best for use cases where you must implement a single-function microservice with a public endpoint that doesn't require the advanced functionality of API Gateway, such as request validation, throttling, custom authorizers, custom domain names, usage plans, or caching. For example, when you are implementing webhook handlers, form validators, mobile payment processing, advertisement placement, machine learning inference, and so on. It is also the simplest way to invoke your Lambda functions during research and development without leaving the Lambda console or integrating additional services.
 \\[12pt]
 Amazon API Gateway is a fully managed service that makes it easy for you to create, publish, maintain, monitor, and secure APIs at any scale. Use API Gateway to take advantage of capabilities like JWT/custom authorizers, request/response validation and transformation, usage plans, built-in AWS WAF support, and so on. \cite{casalboni-2022}
 \\[12pt]
@@ -459,25 +459,22 @@ Similar to the Fargate solution, this implementation is also largely independent
 
 \section{Comparison}
 
-%\begin{tabular}{l|lll}
-%Hi & Monthly Costs & Latency / Responsiveness & Scalability & Availability & Complexity \\
-%\end{tabular}
-
 \begin{fig}[H]
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|}
 \hline
 \rowcolor{lightpink}
-& \multicolumn{1}{l|}{Monthly} & \multicolumn{1}{l|}{Latency /} & \multicolumn{1}{l|}{Scalability} & \multicolumn{1}{l|}{Availability} & \multicolumn{1}{l|}{Complexity} \\
+& \multicolumn{1}{l|}{Monthly} & \multicolumn{1}{l|}{Latency / Res-} & \multicolumn{1}{l|}{Scalability} & \multicolumn{1}{l|}{Availability} & \multicolumn{1}{l|}{Complexity} \\
 \rowcolor{lightpink}
-& \multicolumn{1}{l|}{Costs} & \multicolumn{1}{l|}{Responsiveness} & & & \\ \hline
-Local & \$30 & \code{+} & \code{-} & \code{-} & \code{+} \\
-Local (Raspberry Pi) & \$2.50 & \code{o} & \code{-} & \code{-} & \code{+} \\
-Lambda (low usage) & \$0 & \code{-} & \code{+} & \code{+} & \code{o} \\
-Lambda (high usage) & \$43 & \code{+} & \code{+} & \code{+} & \code{o} \\
-ECS Fargate (minimal) & \$43 & \code{+} & \code{o} & \code{+} & \code{o} \\
-ECS Fargate (high security) & \$258 & \code{+} & \code{+} & \code{+} & \code{o} \\
-EC2 (minimal) & \$39 & \code{+} & \code{o} & \code{+} & \code{o} \\
+& \multicolumn{1}{l|}{Costs} & \multicolumn{1}{l|}{ponsiveness} & & & \\ \hline
+Local & \$30 & \code{+} & \code{-} & \code{-} & \code{+} \\ \hline
+Local (Raspberry Pi) & \$2.50 & \code{o} & \code{-} & \code{-} & \code{+} \\ \hline
+Lambda (low usage) & \$0 & \code{-} & \code{+} & \code{+} & \code{o} \\ \hline
+Lambda (high usage) & \$43 & \code{+} & \code{+} & \code{+} & \code{o} \\ \hline
+ECS Fargate (minimal) & \$43 & \code{+} & \code{o} & \code{+} & \code{o} \\ \hline
+ECS Fargate (high& \$258 & \code{+} & \code{+} & \code{+} & \code{o} \\
+security) & & & & & \\ \hline
+EC2 (minimal) & \$39 & \code{+} & \code{o} & \code{+} & \code{o} \\ \hline
 EC2 (high security) & \$124 & \code{+} & \code{+} & \code{+} & \code{-} \\ \hline
 \end{tabular}
 \caption{Price and feature comparison of the different implementations}
@@ -488,30 +485,82 @@ I evaluated four different server solutions, in both low-usage and high-usage sc
 \\[12pt]
 Both local setups suffer from a lack of scalability and availability, so they are not suitable for a production-grade setup. The Raspberry Pi solution does offer an incredibly low cost even in a high-usage scenario, in addition to being easier to test and deploy to compared to the cloud implementations. During development, the local solutions offer a quick turn-around time and are easiest to experiment with.
 \\[12pt]
-If we can tolerate the reduced responsiveness due to cold starts of AWS Lambda, we can recommend it in a low-usage scenario as it doesn’t come with any costs. In a high-usage scenario, it benefits from a high level of scalability, in addition to having higher responsiveness due to fewer cold starts.
+If we can tolerate the reduced responsiveness due to cold starts of AWS Lambda, we can recommend it in a low-usage scenario as it doesn't come with any costs. In a high-usage scenario, it benefits from a high level of scalability, in addition to having higher responsiveness due to fewer cold starts.
 \\[12pt]
 ECS Fargate benefits from being a managed service, which makes it highly available and secure. In comparison to Lambda we can guarantee high responsiveness regardless of usage. If demand were to increase considerably beyond the high-usage scenario, it would become cheaper than AWS Lambda.
 \\[12pt]
 EC2 provides a maximum level of control, but at the cost of having to manage security updates ourselves. Similar to the Fargate solution, the level of security and associated costs can be changed as needed. The level of complexity is similar to the Fargate solution.
 
+\section{Queuing Requests}
 
+It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
 
+Our solution is a JAR file that has two entrypoints. The first solution starts an HTTP server, and processes incoming requests from the front-end. It is used when testing or running the server locally, and when running it via ECS Fargate or on an EC2 instance in a Docker container.
 
+The second solution, implemented as a separate entrypoint into our JAR file, uses the Amazon Lambda Runtime Interface Client library to listen for Lambda requests using an AWS-specific API, and processes the requests in a similar way to the first solution. This approach is needed because of the way AWS Lambda works: rather than being able to run our own HTTP server to listen on the public internet, requests are received in a "serverless" way, which makes it possible for the Lambda runtime to only be initialised when an incoming request arrives, rather than having it running 24/7.
 
+The 42 implementation has no inbuilt support for parallel requests, so both server implementations need to consider how simultaneous incoming requests should be queued.
 
+In the case of the standard HTTP server, I added a queue from the standard library to ensure that requests are only processed one at a time. For the second solution, the queuing behaviour is already taken care of by the Lambda environment, which ensures that no additional requests are passed to our program while the previous request is still being processed.
 
+I tested the queuing behaviour of both implementations using a custom script. The scripts sends 10 different requests in parallel to either the deployed Lambda function or to a local 42 server.
 
+For the local 42 server, we see that the requests are processed one at a time, in an arbitrary order. Every requests takes approximately the same amount of time.
 
+\img{images/queuing-test-2.png}{Note the consistent execution times of simultaneous requests on the local 42 server}
 
+Running the script against the Lambda implementation, we can see that the first request was processed on an already-warmed-up server. The other 9 requests ran on different servers, each of which had a cold start, thus resulting in higher execution times.
 
+\img{images/queuing-test-1.png}{Most requests require a cold start, resulting in higher execution times}
 
+This shows that queuing works for all of the implementations, and that parallel requests are handled in a safe and correct way.
 
+\chapter{Improving Responsiveness with Caching}
 
+\begin{itemize}
+\item Lambda comes with a built-in runtime environment with Java 11
+\item We want to use Java 16, with preview features, so we need to build our own runtime environment (Docker image) from scratch
+\item Amazon provides a Runtime Client Library that implements most of the Lambda API functionality we need, so we include that library in our custom docker image
+\item We write a lambda handler class that maps API Gateway calls to run the 42 compiler
+\item In the same docker image we also include the AWS Runtime Interface Emulator to test the lambda integration/server/caching locally
+\item We also include our own web server for ECS/Fargate so the same docker image can be deployed there as well
+\item Advantages of Lambda:
+\begin{itemize}
+\item Pay-as-you-go pricing, with no incurred costs when there are no requests. Thus it is significantly cheaper if usage is low
+\item Autoscaling
+\item Higher security
+\end{itemize}
+\item Advantages of ECS Fargate:
+\begin{itemize}
+\item Managed service (security updates and the like are applied automatically), with autoscaling etc.
+\item We can take greater advantage of caching since the service is always running, reduced latency
+\end{itemize}
+\item Advantages of EC2:
+\begin{itemize}
+\item Cheaper than ECS Fargate
+\item Greater customisability
+\end{itemize}
+\end{itemize}
 
+\section{Performance Measurements}
 
+For each setup I did 5 measurements, and worked out the minimum, maximum and mean execution times. In each case only the execution time of the 42 program itself was measured, and not the network overhead, request parsing, or other overhead.
 
+\begin{fig}[H]
+\begin{center}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\rowcolor{lightpink}
+& \multicolumn{1}{l|}{Setup} & \multicolumn{1}{l|}{Performance} & \multicolumn{1}{l|}{Performance} & \multicolumn{1}{l|}{Teardown} \\
+\rowcolor{lightpink}
+& & \multicolumn{1}{l|}{(uncached)} & \multicolumn{1}{l|}{(cached)} & \\ \hline
+Local & N/A & 6.61 s & 0.11 s & N/A \\ \hline
+AWS Lambda & 29.10 s & 14.48 s & 0.38 s & 9.19 s \\ \hline
+ECS Fargate & 242.88 s & 17.33 s & 0.29 s & 165.69 s \\ \hline
+EC2 & 274.06 s & 15.18 s & 0.33 s & 80.04 s \\ \hline
+\end{tabular}
+\caption{Performance measurements of all 4 implementations}
+\end{center}
+\end{fig}
 
-
-
-
-
+\chapter{Conclusion and Future Work}
