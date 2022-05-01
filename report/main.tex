@@ -1,7 +1,7 @@
 % !TEX encoding = UTF-8 Unicode
 \newcommand{\code}[1]{\texttt{\textbf{#1}}}
 \newcommand{\img}[2]{
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[width=\textwidth]{#1}
 \caption{#2}
 \end{figure}}
@@ -313,7 +313,32 @@ Local costs in USD per month:
 \item Total: \$30/month
 \end{itemize}
 
-Minimal solution with a Raspberry Pi:
+Assuming we can respond in an average of two seconds per request, we can serve up to 1.3 million requests per month using self-hosted infrastructure.
+
+\section{Self-hosting on a Raspberry Pi}
+
+A minimalistic deployment is possible on a Raspberry Pi. Raspberry Pi is a low-cost, credit-card sized single-board computer. \cite{raspberry-pi-foundation-2015}. It has a 1.5 GHz 64-bit ARM CPU and 8 GB of RAM. Connections include USB ports, Ethernet, Wi-Fi and Bluetooth. It comes with a full desktop Linux installation.
+\\[12pt]
+I set up the Raspberry Pi with a Java 16 JDK and the 42 server JAR file. Since the Raspberry Pi uses a standard Wi-Fi connection, the 42 server running on it can be reached over the internet.
+
+\img{images/raspberry-pi.jpg}{Raspberry Pi 4B capable of running the 42 server}
+
+Advantages:
+
+\begin{itemize}
+\item Minimal costs
+\item Easy set-up and deployment
+\end{itemize}
+
+Disadvantages:
+
+\begin{itemize}
+\item Reduced performance compared to the other implementations
+\item Less reliable
+\item Less scalable
+\end{itemize}
+
+Costs:
 
 \begin{itemize}
 \item \$1 in power usage (5W power usage) \cite{neukirchen-2021}
@@ -321,8 +346,6 @@ Minimal solution with a Raspberry Pi:
 \item Assuming a pre-existing internet connection (i.e. \$0)
 \item Total: \$2.50/month
 \end{itemize}
-
-Assuming we can respond in an average of two seconds per request, we can serve up to 1.3 million requests per month using self-hosted infrastructure.
 
 \section{AWS Lambda}
 
@@ -555,6 +578,7 @@ For each setup I did 5 measurements, and worked out the minimum, maximum and mea
 \rowcolor{lightpink}
 & & \multicolumn{1}{l|}{(uncached)} & \multicolumn{1}{l|}{(cached)} & \\ \hline
 Local & N/A & 6.61 s & 0.11 s & N/A \\ \hline
+Raspberry Pi & N/A & 39.31 s & 0.72 s & N/A \\ \hline
 AWS Lambda & 29.10 s & 14.48 s & 0.38 s & 9.19 s \\ \hline
 ECS Fargate & 242.88 s & 17.33 s & 0.29 s & 165.69 s \\ \hline
 EC2 & 274.06 s & 15.18 s & 0.33 s & 80.04 s \\ \hline
