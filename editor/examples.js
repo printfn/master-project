@@ -1,7 +1,20 @@
 const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
 Main=(
+  _=Log"".#$reader()
+
   Debug(S"Hello world from 42")
   )`;
+
+const LOGGER_SETTINGS = `/*
+  *** 42 settings ***
+  You can change the stack and memory limitations and add security mappings
+*/
+maxStackSize = 1G
+initialMemorySize = 256M
+maxMemorySize = 2G
+
+Main = [L42.is/AdamsTowel/Log]
+`;
 
 const PRINT_HELLO_WORLD_CHALLENGE = {
     "This.L42": `reuse [L42.is/AdamsTowel]
@@ -58,7 +71,14 @@ Main=(
 `;
 
 const EXAMPLES = [
-    { name: "Hello World", default: true, files: HELLO_WORLD },
+    {
+      name: "Hello World",
+      default: true,
+      files: {
+        "This.L42": HELLO_WORLD,
+        "Setti.ngs": LOGGER_SETTINGS
+      }
+    },
     { name: "Point", files: POINT },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },

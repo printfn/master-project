@@ -1,6 +1,9 @@
 package l42server;
 
 import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
+import is.L42.common.Parse;
+import is.L42.main.Settings;
+import is.L42.platformSpecific.javaTranslation.Resources;
 import is.L42.top.CachedTop;
 
 import java.io.FileWriter;
@@ -103,6 +106,11 @@ class L42 {
         }
     }
 
+    private Settings parseSettings() {
+        Path settingsPath = tempDir.resolve("Setti.ngs");
+        return Parse.sureSettings(settingsPath);
+    }
+
     private Result executeL42() {
         System.err.println("Starting to execute 42...");
         OutputHandler out = new OutputHandler();
@@ -110,7 +118,8 @@ class L42 {
         int returnCode = 0;
         try {
             System.err.println("Executing 42...");
-            var res = is.L42.main.Main.run(this.tempDir.resolve("This.L42"), cache);
+            Resources.setSettings(parseSettings());
+            var res = is.L42.main.Main.run(this.tempDir, cache);
             System.err.println("... finished executing 42");
         } catch(Throwable t) {
             t.printStackTrace();
