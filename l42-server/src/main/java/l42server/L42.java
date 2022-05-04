@@ -18,8 +18,6 @@ import java.util.Objects;
 class L42 {
     CachedTop cache;
     Path tempDir;
-    Result cachedResult = null;
-    String cachedInput = null;
 
     public static final String HELLO_WORLD = """
             reuse [L42.is/AdamsTowel]
@@ -63,10 +61,6 @@ class L42 {
 
     Result runL42FromCode(JSONObject input) {
         long startTime = System.nanoTime();
-        if (Objects.equals(this.cachedInput, input.toString())) {
-            this.cachedResult.executionTimeNanos = 0;
-            return this.cachedResult;
-        }
         try {
             writeInputToTempDir(input);
         } catch (IOException e) {
@@ -76,8 +70,6 @@ class L42 {
         var result = executeL42();
         long endTime = System.nanoTime();
         result.executionTimeNanos = endTime - startTime;
-        this.cachedResult = result;
-        this.cachedInput = input.toString();
         return result;
     }
 
@@ -117,8 +109,13 @@ class L42 {
         out.setHandlers();
         int returnCode = 0;
         try {
-            System.err.println("Executing 42...");
             Resources.setSettings(parseSettings());
+        } catch(Throwable t) {
+            t.printStackTrace();
+            return new Result("", t.getMessage(), 1);
+        }
+        try {
+            System.err.println("Executing 42...");
             var res = is.L42.main.Main.run(this.tempDir, cache);
             System.err.println("... finished executing 42");
         } catch(Throwable t) {

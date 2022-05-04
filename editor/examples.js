@@ -16,6 +16,23 @@ maxMemorySize = 2G
 Main = [L42.is/AdamsTowel/Log]
 `;
 
+const POINT_CHALLENGE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+Point = Data:{
+  Num x
+  Num y
+  ???
+}
+
+Main=(
+  Debug(S"Hello world from 42!")
+
+  imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
+  Debug(S"p = %p")
+  )`,
+  template: true
+}
+
 const PRINT_HELLO_WORLD_CHALLENGE = {
     "This.L42": `reuse [L42.is/AdamsTowel]
 Main=(
@@ -79,6 +96,7 @@ const EXAMPLES = [
         "Setti.ngs": LOGGER_SETTINGS
       }
     },
+    { name: "Point Testing", files: POINT_CHALLENGE },
     { name: "Point", files: POINT },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
