@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
-        var l42 = new L42(Path.of("/tmp/L42/L42Server"));
+        var l42 = new L42(Path.of("/tmp/L42/L42Server"), true);
         int port = 8000;
         var warmCache = false;
 

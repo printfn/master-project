@@ -5,19 +5,29 @@ import is.L42.common.Parse;
 import is.L42.main.Settings;
 import is.L42.platformSpecific.javaTranslation.Resources;
 import is.L42.top.CachedTop;
+import safeNativeCode.slave.Functions;
+import safeNativeCode.slave.Slave;
+import safeNativeCode.slave.host.ProcessSlave;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 class L42 {
     CachedTop cache;
-    Path tempDir;
+    URI tempDir;
+    Slave slave = null;
+    Settings settings = null;
+    final boolean useRMI;
 
     public static final String HELLO_WORLD = """
             reuse [L42.is/AdamsTowel]
@@ -25,14 +35,15 @@ class L42 {
               Debug(S"Hello world from 42")
               )""";
 
-    public L42(Path tempDir) {
+    public L42(Path tempDir, boolean useRMI) {
         try {
             // on macOS, /tmp is a symbolic link that points to /private/tmp/,
             // which causes L42 to get confused
             tempDir.toFile().mkdirs();
-            this.tempDir = tempDir.toRealPath();
+            this.useRMI = useRMI;
+            this.tempDir = new URI(String.format("file://%s", tempDir.toRealPath()));
             clearTempDir();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -41,6 +52,7 @@ class L42 {
     }
 
     private void clearTempDir() throws IOException {
+        var tempDir = Path.of(this.tempDir);
         var tempDirFile = tempDir.toFile();
 
         if (tempDirFile.exists()) {
@@ -83,7 +95,7 @@ class L42 {
 //        var settingsWriter = new FileWriter(settingsFile);
 //        settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
 //        settingsWriter.close();
-
+        var tempDir = Path.of(this.tempDir);
         JSONObject files = input.getJSONObject("files");
         for (var filename : files.keySet()) {
             if (!filename.matches("[a-zA-Z0-9.\\-_]{1,20}\\.L42|Setti\\.ngs")) {
@@ -99,34 +111,78 @@ class L42 {
     }
 
     private Settings parseSettings() {
+        var tempDir = Path.of(this.tempDir);
         Path settingsPath = tempDir.resolve("Setti.ngs");
         return Parse.sureSettings(settingsPath);
     }
 
     private Result executeL42() {
         System.err.println("Starting to execute 42...");
-        OutputHandler out = new OutputHandler();
-        out.setHandlers();
-        int returnCode = 0;
+        settings = parseSettings();
+        var out = new OutputHandler();
         try {
-            Resources.setSettings(parseSettings());
-        } catch(Throwable t) {
+            URI tempDir = this.tempDir;
+            var cache = this.cache;
+            var settings = this.settings;
+            Result result;
+            Functions.Supplier<Result> execute = () -> {
+                out.setHandlers();
+                int returnCode = 0;
+                try {
+                    Resources.setSettings(settings);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return new Result("", t.getMessage(), 1);
+                }
+                try {
+                    System.err.println("Executing 42...");
+                    var res = is.L42.main.Main.run(Path.of(tempDir), cache);
+                    System.err.println("... finished executing 42");
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    returnCode = 1;
+                }
+                return new Result(
+                        out.stdout.toString(),
+                        out.stderr.toString(),
+                        returnCode);
+            };
+            if (useRMI) {
+                if (this.slave == null) {
+                    makeSlave(settings);
+                }
+                result = slave.call(execute).get();
+            } else {
+                result = execute.get();
+            }
+            return result;
+        } catch (Throwable t) {
             t.printStackTrace();
             return new Result("", t.getMessage(), 1);
-        }
-        try {
-            System.err.println("Executing 42...");
-            var res = is.L42.main.Main.run(this.tempDir, cache);
-            System.err.println("... finished executing 42");
-        } catch(Throwable t) {
-            t.printStackTrace();
-            returnCode = 1;
         } finally {
             this.cache = cache.toNextCache();
         }
-        return new Result(
-                out.stdout.toString(),
-                out.stderr.toString(),
-                returnCode);
+    }
+
+    void makeSlave(Settings settings) {
+        this.slave = new ProcessSlave(-1, new String[] {}, ClassLoader.getPlatformClassLoader()) {
+            @Override protected List<String> getJavaArgs(String libLocation) {
+                var res = super.getJavaArgs(libLocation);
+                res.add(0,"--enable-preview");
+                settings.options().addOptions(res);
+                System.err.println("getJavaArgs: " + res);
+                return res;
+            }
+        };
+    }
+
+    void terminate() {
+        try {
+            if (slave != null && slave.isAlive()) {
+                slave.terminate();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

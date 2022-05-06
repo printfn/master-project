@@ -2,7 +2,9 @@ package l42server;
 
 import com.amazonaws.lambda.thirdparty.org.json.JSONObject;
 
-class Result {
+import java.io.Serializable;
+
+class Result implements Serializable {
     public long executionTimeNanos = -1;
     public String stdout;
     public String stderr;

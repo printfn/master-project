@@ -90,4 +90,10 @@ resource "aws_lambda_function" "l42_lambda" {
 resource "aws_lambda_function_url" "l42_lambda_url" {
   function_name      = aws_lambda_function.l42_lambda.function_name
   authorization_type = "NONE"
+
+  cors {
+    allow_origins     = ["*"]
+    allow_methods     = ["*"]
+    max_age           = 86400
+  }
 }

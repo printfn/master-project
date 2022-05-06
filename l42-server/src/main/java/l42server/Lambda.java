@@ -35,7 +35,7 @@ import java.util.Base64;
 
 /// AWS Lambda entry point
 public class Lambda implements RequestStreamHandler {
-    L42 client = new L42(Path.of("/tmp/L42testing"));
+    L42 client = new L42(Path.of("/tmp/L42testing"), false);
 
     JSONObject SCHEDULED_EVENT = new JSONObject().put("type", "Scheduled Event");
 
@@ -87,7 +87,15 @@ public class Lambda implements RequestStreamHandler {
             result.put("body", resultBody);
             result.put("statusCode", statusCode);
             var headers = new JSONObject();
-            headers.put("Access-Control-Allow-Origin", "*");
+
+            // We don't need to set the CORS header here because it's set
+            // in the AWS Lambda Function URL configuration instead
+            // (via terraform). In fact, setting this header twice causes
+            // web browsers to reject cross-origin requests.
+            // See https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSAllowOriginNotMatchingOrigin
+            // for details.
+
+            //headers.put("Access-Control-Allow-Origin", "*");
             result.put("headers", headers);
             writer.write(result.toString());
             logger.log("Response: \n" + result);

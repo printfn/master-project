@@ -409,7 +409,11 @@ async function execute() {
         if (!result) {
             alert('Unable to contact server, see log for details');
         }
-        const jsonResult = await result.json();
+        const responseText = await result.text();
+        if (responseText == 'Internal Server Error') {
+            throw new Error('timeout or server error');
+        }
+        const jsonResult = JSON.parse(responseText);
         showResultOutput(jsonResult);
     } catch (e) {
         window.output.setValue(e.toString(), -1);
