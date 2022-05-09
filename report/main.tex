@@ -517,17 +517,17 @@ EC2 provides a maximum level of control, but at the cost of having to manage sec
 \section{Queuing Requests}
 
 It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
-
+\\[12pt]
 Our solution is a JAR file that has two entrypoints. The first solution starts an HTTP server, and processes incoming requests from the front-end. It is used when testing or running the server locally, and when running it via ECS Fargate or on an EC2 instance in a Docker container.
-
+\\[12pt]
 The second solution, implemented as a separate entrypoint into our JAR file, uses the Amazon Lambda Runtime Interface Client library to listen for Lambda requests using an AWS-specific API, and processes the requests in a similar way to the first solution. This approach is needed because of the way AWS Lambda works: rather than being able to run our own HTTP server to listen on the public internet, requests are received in a "serverless" way, which makes it possible for the Lambda runtime to only be initialised when an incoming request arrives, rather than having it running 24/7.
-
+\\[12pt]
 The 42 implementation has no inbuilt support for parallel requests, so both server implementations need to consider how simultaneous incoming requests should be queued.
-
+\\[12pt]
 In the case of the standard HTTP server, I added a queue from the standard library to ensure that requests are only processed one at a time. For the second solution, the queuing behaviour is already taken care of by the Lambda environment, which ensures that no additional requests are passed to our program while the previous request is still being processed.
-
+\\[12pt]
 I tested the queuing behaviour of both implementations using a custom script. The scripts sends 10 different requests in parallel to either the deployed Lambda function or to a local 42 server.
-
+\\[12pt]
 For the local 42 server, we see that the requests are processed one at a time, in an arbitrary order. Every requests takes approximately the same amount of time.
 
 \img{images/queuing-test-2.png}{Note the consistent execution times of simultaneous requests on the local 42 server}
@@ -537,6 +537,34 @@ Running the script against the Lambda implementation, we can see that the first 
 \img{images/queuing-test-1.png}{Most requests require a cold start, resulting in higher execution times}
 
 This shows that queuing works for all of the implementations, and that parallel requests are handled in a safe and correct way.
+
+\section{Handling Timeouts}
+
+We need to consider the case that the user might send a 42 program that never terminates, which could prevent the server from handling other requests.
+\\[12pt]
+When the server is deployed to an AWS Lambda function, the Lambda runtime already supports setting execution timeouts. After a predefined interval, the Lambda function is terminated automatically, with the caller receiving an error message. The next request would start a new Lambda function environment.
+\\[12pt]
+However, when running locally or in a Docker container, we need to handle timeouts ourselves. This is done by starting a background thread that will terminate the running 42 program after a predefined length of time. Details can be seen in the diagram below:
+
+\img{../diagrams/Handling Timeouts.png}{Handling Timeouts}
+
+The 42 server consists of two processes (i.e. two separate JVMs). The first JVM contains the main thread, which receives incoming requests from users and returns responses, as well as orchestrating the 42 runtime. The second process runs the JVM that actually executes the 42 code.
+\\[12pt]
+When a user sends a requests containing a 42 program, the main thread begins by initialising a second JVM that will contain the 42 runtime. The main thread then starts a background thread for monitoring the 42 execution and waiting for any potential timeout. If the second JVM has not finished executing the 42 program when the timeout expires, the timeout thread immediately kills that process, which results in the main thread receiving a cancellation exception. The main thread then sends a timeout error message to the user.
+\\[12pt]
+If, on the other hand, the 42 program finishes in time, the main thread sends an interrupt to the timeout thread. Upon receiving this interrupt, the background thread cleanly shuts itself down. The main thread then returns the successful execution result to the user.
+
+\begin{mylisting}{Infinite Loop in 42}
+reuse [L42.is/AdamsTowel]
+Main=(
+  _=Log"".#$reader()
+
+  Debug(S"Starting an infinite loop...")
+  
+  while Bool.true() void
+  
+  )
+\end{mylisting}
 
 \chapter{Improving Responsiveness with Caching}
 
