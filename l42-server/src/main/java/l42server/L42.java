@@ -20,6 +20,7 @@ import java.rmi.registry.LocateRegistry;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 class L42 {
@@ -28,6 +29,7 @@ class L42 {
     Slave slave = null;
     Settings settings = null;
     final boolean useRMI;
+    Thread backgroundThread = null;
 
     public static final String HELLO_WORLD = """
             reuse [L42.is/AdamsTowel]
@@ -151,11 +153,15 @@ class L42 {
                 if (this.slave == null) {
                     makeSlave(settings);
                 }
+                startBackgroundThread();
                 result = slave.call(execute).get();
+                backgroundThread.interrupt();
             } else {
                 result = execute.get();
             }
             return result;
+        } catch (CancellationException e) {
+            return new Result("", "Error: timeout while executing 42", 1);
         } catch (Throwable t) {
             t.printStackTrace();
             return new Result("", t.getMessage(), 1);
@@ -174,6 +180,23 @@ class L42 {
                 return res;
             }
         };
+    }
+
+    void startBackgroundThread() {
+        backgroundThread = new Thread(() -> {
+            System.out.println("Started background thread");
+            try {
+                Thread.sleep(30 * 1000);
+            } catch (InterruptedException e) {
+                System.out.println("Background thread was interrupted");
+                return;
+            }
+            System.out.println("Terminating after 30 seconds");
+            terminate();
+        });
+        // allow the JVM to exit even if this thread is still running
+        backgroundThread.setDaemon(true);
+        backgroundThread.start();
     }
 
     void terminate() {
