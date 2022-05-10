@@ -101,10 +101,7 @@ const GUI = {
     currentFileName: null,
 
     isTemplate: () => {
-        if (GUI.currentProgram["template"]) {
-            return true;
-        }
-        return false;
+        return typeof GUI.currentProgram[GUI.currentFileName] != 'string';
     },
 
     loadProgram: (program) => {
@@ -118,11 +115,16 @@ const GUI = {
         if (!GUI.currentProgram["Setti.ngs"]) {
             GUI.currentProgram["Setti.ngs"] = DEFAULT_SETTINGS;
         }
+        for (let filename in GUI.currentProgram) {
+            if (typeof GUI.currentProgram[filename] != 'string') {
+                if (!GUI.currentProgram[filename].value) {
+                    GUI.currentProgram[filename].value = '';
+                }
+            }
+        }
         let fileTreeHtml = '';
         let initialFilename = GUI.currentProgram["This.L42"] ? "This.L42" : null;
         for (let filename in GUI.currentProgram) {
-            if (filename == "template")
-                continue;
             if (initialFilename == null) {
                 initialFilename = filename;
             }
@@ -135,46 +137,62 @@ const GUI = {
             initialFilename = "This.L42";
         }
 
-        GUI.currentFileName = initialFilename;
-        
+        GUI.openFile(initialFilename);
+    },
+
+    saveUserContent: () => {
         if (GUI.isTemplate()) {
-            document.getElementById('preview').style.display = 'block';
-            window.preview.setValue(GUI.currentProgram[GUI.currentFileName], -1);
-            window.editor.setValue('', -1);
+            GUI.currentProgram[GUI.currentFileName].value = editor.getValue();
         } else {
-            document.getElementById('preview').style.display = 'none';
-            window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
+            GUI.currentProgram[GUI.currentFileName] = editor.getValue();
         }
     },
 
     switchToFile: (filename) => {
-        GUI.currentProgram[GUI.currentFileName] = editor.getValue();
+        GUI.saveUserContent();
+        GUI.openFile(filename);
+    },
+
+    openFile: (filename) => {
         GUI.currentFileName = filename;
-        window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
+        if (GUI.isTemplate()) {
+            document.getElementById('preview').style.display = 'block';
+            window.preview.setValue(GUI.currentProgram[GUI.currentFileName].template, -1);
+            window.editor.setValue(GUI.currentProgram[GUI.currentFileName].value, -1);
+        } else {
+            document.getElementById('preview').style.display = 'none';
+            window.editor.setValue(GUI.currentProgram[GUI.currentFileName], -1);
+        }
         if (filename.toLowerCase().endsWith('.l42')) {
             window.editor.session.setMode('ace/mode/l42');
+            window.preview.session.setMode('ace/mode/l42');
         } else {
             window.editor.session.setMode('ace/mode/text');
+            window.preview.session.setMode('ace/mode/text');
         }
     },
 
     getProgram: () => {
-        GUI.currentProgram[GUI.currentFileName] = editor.getValue();
+        GUI.saveUserContent();
         return GUI.currentProgram;
     },
 
     getRenderedProgram: () => {
-        if (!GUI.isTemplate()) {
-            return GUI.getProgram();
-        }
-        let template = GUI.currentProgram[GUI.currentFileName];
-        let editorCode = window.editor.getValue()
-        let previewCode = template;
-        if (editorCode.length > 0) {
-            previewCode = template.replaceAll('???', editorCode);
-        }
+        GUI.saveUserContent();
         let result = {};
-        result[GUI.currentFileName] = previewCode;
+        for (let filename in GUI.currentProgram) {
+            if (typeof GUI.currentProgram[filename] == 'string') {
+                result[filename] = GUI.currentProgram[filename];
+            } else {
+                let template = GUI.currentProgram[filename].template;
+                let value = GUI.currentProgram[filename].value;
+                let previewCode = template;
+                if (value.length > 0) {
+                    previewCode = template.replaceAll('???', value);
+                }
+                result[filename] = previewCode;
+            }
+        }
         return result;
     },
 
@@ -284,7 +302,8 @@ async function loadFileHandler() {
 
 async function downloadAsZip() {
     let zip = new JSZip();
-    let program = GUI.getProgram();
+    // TODO: find a way to properly export templates
+    let program = GUI.getRenderedProgram();
     for (let filename in program) {
         zip.file(filename, program[filename]);
     }
@@ -430,9 +449,9 @@ const DEFAULT_SETTINGS = `/*
 maxStackSize = 1G
 initialMemorySize = 256M
 maxMemorySize = 2G
-//For example, this would allow MyMain to call #$of() on an FS.Real
-//coming from L42.is/FileSystem
-//MyMain = [L42.is/FileSystem]`;
+
+Main = [L42.is/AdamsTowel/Log]
+`;
 
 </script>
 

@@ -17,7 +17,8 @@ Main = [L42.is/AdamsTowel/Log]
 `;
 
 const POINT_CHALLENGE = {
-  "This.L42": `reuse [L42.is/AdamsTowel]
+  "This.L42": {
+    template: `reuse [L42.is/AdamsTowel]
 Point = Data:{
   Num x
   Num y
@@ -30,15 +31,16 @@ Main=(
   imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
   Debug(S"p = %p")
   )`,
-  template: true
+    value: `// write a sum() method that returns the sum of two points
+`,
+  },
 }
 
 const PRINT_HELLO_WORLD_CHALLENGE = {
-    "This.L42": `reuse [L42.is/AdamsTowel]
+    "This.L42": { template: `reuse [L42.is/AdamsTowel]
 Main=(
   Debug(S"???")
-  )`,
-    template: true,
+  )` },
 };
 
 const POINT = {
@@ -91,10 +93,7 @@ const EXAMPLES = [
     {
       name: "Hello World",
       default: true,
-      files: {
-        "This.L42": HELLO_WORLD,
-        "Setti.ngs": LOGGER_SETTINGS
-      }
+      files: { "This.L42": HELLO_WORLD }
     },
     { name: "Point Testing", files: POINT_CHALLENGE },
     { name: "Point", files: POINT },
