@@ -42,9 +42,7 @@ class Server {
         try {
             this.l42 = l42;
             if (warmCache) {
-                var input = new JSONObject();
-                input.put("files", new JSONObject().put("This.L42", L42.HELLO_WORLD));
-                l42.runL42FromCode(input);
+                l42.runL42FromCode(L42.HELLO_WORLD);
             }
             httpServer = HttpServer.create(new InetSocketAddress(bind, port), 0);
             httpServer.createContext("/health", new HealthHandler());

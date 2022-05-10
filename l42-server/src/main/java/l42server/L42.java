@@ -31,11 +31,27 @@ class L42 {
     final boolean useRMI;
     Thread backgroundThread = null;
 
-    public static final String HELLO_WORLD = """
+    private static final String HELLO_WORLD_CODE = """
             reuse [L42.is/AdamsTowel]
             Main=(
+              _=Log"".#$reader()
+            
               Debug(S"Hello world from 42")
               )""";
+    private static final String SETTINGS_CODE = """
+            /*
+              *** 42 settings ***
+              You can change the stack and memory limitations and add security mappings
+            */
+            maxStackSize = 1G
+            initialMemorySize = 256M
+            maxMemorySize = 2G
+                        
+            Main = [L42.is/AdamsTowel/Log]
+            """;
+    public static final JSONObject HELLO_WORLD =
+            new JSONObject().put("files",
+                    new JSONObject().put("This.L42", HELLO_WORLD_CODE).put("Setti.ngs", SETTINGS_CODE));
 
     public L42(Path tempDir, boolean useRMI) {
         try {

@@ -114,8 +114,7 @@ public class Lambda implements RequestStreamHandler {
     public JSONObject executeHandler(JSONObject event, LambdaLogger logger) {
         try {
             if (event.has("type") && event.get("type") == "Scheduled Event") {
-                event = new JSONObject();
-                event.put("files", new JSONObject().put("This.L42", L42.HELLO_WORLD));
+                event = L42.HELLO_WORLD;
             } else if (event.has("isBase64Encoded") && event.getBoolean("isBase64Encoded")) {
                 var base64 = event.getString("body");
                 var body = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);

@@ -26,6 +26,8 @@ Point = Data:{
 }
 
 Main=(
+  _=Log"".#$reader()
+
   Debug(S"Hello world from 42!")
 
   imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
@@ -48,6 +50,8 @@ const POINT = {
 Point = Data:{...}
 
 Main=(
+  _=Log"".#$reader()
+
   Debug(S"Hello world from 42!")
 
   imm Point p = (Point(x=5\\, y=2\\).sum(Point(x=3\\, y=1\\)))
@@ -82,6 +86,8 @@ Point = Data:{
   }
 
 Main=(
+  _=Log"".#$reader()
+
   Point p = Point(x=Double"5", y=Double"3")
   // This would result in an error:
   //Point p2 = Point(x=Double"5", y=Double"-3")
