@@ -1,5 +1,7 @@
 package l42server;
 
+import is.L42.common.Parse;
+
 import java.nio.file.Path;
 
 public class Main {
@@ -7,6 +9,15 @@ public class Main {
         var l42 = new L42(Path.of("/tmp/L42/L42Server"), true);
         int port = 8000;
         var warmCache = false;
+
+        Parse.sureProgram(Path.of(l42.tempDir), """
+            {reuse [L42.is/AdamsTowel]
+            Main=(
+              _=Log"".#$reader()
+            
+              Debug(S"Hello world from 42")
+              )
+              }""");
 
         if (args.length == 0) {
             printUsage();

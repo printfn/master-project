@@ -50,7 +50,7 @@ class L42 {
             Main = [L42.is/AdamsTowel/Log]
             """;
     public static final JSONObject HELLO_WORLD =
-            new JSONObject().put("files",
+            new JSONObject().put("program",
                     new JSONObject().put("This.L42", HELLO_WORLD_CODE).put("Setti.ngs", SETTINGS_CODE));
 
     public L42(Path tempDir, boolean useRMI) {
@@ -90,9 +90,10 @@ class L42 {
     }
 
     Result runL42FromCode(JSONObject input) {
+        var rendered = renderProgram(input);
         long startTime = System.nanoTime();
         try {
-            writeInputToTempDir(input);
+            writeInputToTempDir(rendered);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -114,7 +115,7 @@ class L42 {
 //        settingsWriter.write("maxStackSize = 32M\ninitialMemorySize = 100M\nmaxMemorySize = 256M\n");
 //        settingsWriter.close();
         var tempDir = Path.of(this.tempDir);
-        JSONObject files = input.getJSONObject("files");
+        JSONObject files = input.getJSONObject("program");
         for (var filename : files.keySet()) {
             if (!filename.matches("[a-zA-Z0-9.\\-_]{1,20}\\.L42|Setti\\.ngs")) {
                 throw new RuntimeException("Invalid filename " + filename);
@@ -126,6 +127,26 @@ class L42 {
             codeWriter.write(files.getString(filename));
             codeWriter.close();
         }
+    }
+
+    private JSONObject renderProgram(JSONObject templatedProgram) {
+        var inputFiles = templatedProgram.getJSONObject("program");
+        var resultFiles = new JSONObject();
+        for (var filename : inputFiles.keySet()) {
+            Object inputFile = inputFiles.get(filename);
+            if (inputFile instanceof String) {
+                resultFiles.put(filename, inputFile);
+            } else if (inputFile instanceof JSONObject) {
+                var template = ((JSONObject)inputFile).getString("template");
+                var value = ((JSONObject)inputFile).getString("value");
+                var rendered = template;
+                if (!value.isEmpty()) {
+                    rendered = template.replaceAll("\\?\\?\\?", value);
+                }
+                resultFiles.put(filename, rendered);
+            }
+        }
+        return new JSONObject().put("program", resultFiles);
     }
 
     private Settings parseSettings() {

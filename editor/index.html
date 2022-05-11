@@ -415,14 +415,11 @@ async function execute() {
         executeButton.disabled = true;
         executeButton.value = 'Please wait...';
         clearOutput();
-        let program = JSON.parse(JSON.stringify(GUI.getRenderedProgram()));
-        if (program["template"]) {
-            delete program["template"];
-        }
+        let program = JSON.parse(JSON.stringify(GUI.getProgram()));
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
-                files: program,
+                program: program,
             }),
         });
         if (!result) {
