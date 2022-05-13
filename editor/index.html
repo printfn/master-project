@@ -36,6 +36,10 @@
     padding: 1em;
 }
 
+.current-file {
+    font-weight: bold;
+}
+
 body {
     font-family: system, -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
 }
@@ -71,6 +75,10 @@ body {
     <label for="open-file-picker" title="Open .L42 files, or .zip files">Open File:</label>
     <input type="file" id="open-file-picker" multiple title="Choose one or more files to load into the editor. They can be .L42 files or ZIP files.">
     <input type="button" value="Load File" title="Load the selected file(s) into the editor" onclick="loadFileHandler()">
+</p>
+
+<p>
+    <input type="button" value="New file" onclick="newFileHandler()">
 </p>
 
 <ul id="file-tree">
@@ -122,22 +130,36 @@ const GUI = {
                 }
             }
         }
-        let fileTreeHtml = '';
         let initialFilename = GUI.currentProgram["This.L42"] ? "This.L42" : null;
-        for (let filename in GUI.currentProgram) {
-            if (initialFilename == null) {
+        if (initialFilename == null) {
+            for (let filename in GUI.currentProgram) {
                 initialFilename = filename;
+                break;
             }
-            fileTreeHtml += `<li><a href="javascript:GUI.switchToFile('${filename}')">${filename}</a></li>`;
         }
-        document.getElementById('file-tree').innerHTML = fileTreeHtml;
         if (initialFilename == null) {
             alert("Error: the selected 42 project does not contain any files!");
             GUI.currentProgram = { "This.L42": "" };
             initialFilename = "This.L42";
         }
-
         GUI.openFile(initialFilename);
+    },
+
+    updateFileTree: () => {
+        let allFilenames = [];
+        for (let filename in GUI.currentProgram) {
+            allFilenames.push(filename);
+        }
+        let fileTreeHtml = '';
+        allFilenames.sort();
+        for (let filename of allFilenames) {
+            let classes = "";
+            if (filename == GUI.currentFileName) {
+                classes += "current-file";
+            }
+            fileTreeHtml += `<li class="${classes}"><a href="javascript:GUI.switchToFile('${filename}')">${filename}</a></li>`;
+        }
+        document.getElementById('file-tree').innerHTML = fileTreeHtml;
     },
 
     saveUserContent: () => {
@@ -170,6 +192,7 @@ const GUI = {
             window.editor.session.setMode('ace/mode/text');
             window.preview.session.setMode('ace/mode/text');
         }
+        GUI.updateFileTree();
     },
 
     getProgram: () => {
@@ -310,6 +333,20 @@ async function downloadAsZip() {
     let base64 = await zip.generateAsync({ type: 'base64' });
     let filename = `${new Date().toLocaleString()}.zip`;
     location.href = 'data:application/zip;base64,' + base64;
+}
+
+async function newFileHandler() {
+    let filename = prompt("Enter a filename (without an extension):", "");
+    if (filename == null || filename == "") return;
+    filename += ".L42";
+    let program = GUI.getProgram();
+    if (filename in program) {
+        alert(`Error: ${filename} already exists in the current program`);
+        return;
+    }
+    program[filename] = "";
+    GUI.loadProgram(program);
+    GUI.openFile(filename);
 }
 
 function loadSampleProgram() {
