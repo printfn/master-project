@@ -139,6 +139,8 @@ class L42 {
             } else if (inputFile instanceof JSONObject) {
                 var template = ((JSONObject)inputFile).getString("template");
                 var value = ((JSONObject)inputFile).getString("value");
+                // this will throw an exception if 'value' does not represent a valid program
+                Parse.sureProgram(Path.of(tempDir), "{" + value + "}");
                 var rendered = template;
                 if (!value.isEmpty()) {
                     rendered = template.replaceAll("\\?\\?\\?", value);

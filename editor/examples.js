@@ -16,7 +16,7 @@ maxMemorySize = 2G
 Main = [L42.is/AdamsTowel/Log]
 `;
 
-const POINT_CHALLENGE = {
+const POINT_SUM_METHOD = {
   "This.L42": {
     template: `reuse [L42.is/AdamsTowel]
 Point = Data:{
@@ -101,7 +101,7 @@ const EXAMPLES = [
       default: true,
       files: { "This.L42": HELLO_WORLD }
     },
-    { name: "Point Testing", files: POINT_CHALLENGE },
+    { name: "Point Sum Method", files: POINT_SUM_METHOD },
     { name: "Point", files: POINT },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
