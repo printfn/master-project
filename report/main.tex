@@ -514,6 +514,42 @@ ECS Fargate benefits from being a managed service, which makes it highly availab
 \\[12pt]
 EC2 provides a maximum level of control, but at the cost of having to manage security updates ourselves. Similar to the Fargate solution, the level of security and associated costs can be changed as needed. The level of complexity is similar to the Fargate solution.
 
+\section{Preventing malicious code injection}
+
+For the bug bounty program, we want to allow arbitrary code to be executed on the 42 server. To enable this, we have a code editor front-end that accepts any user code. However, we want to protect the server from malicious code, as well as preventing users from trivially bypassing the security restrictions via code injection. This is similar to the well-known SQL injection attacks \cite{halfond2006classification}.
+\\[12pt]
+For example, if we want users to be able to customise a Hello World-like program by modifying the string, we might have a code template like this one:
+\\[12pt]
+\begin{mylisting}{Hello World-like program template}
+reuse [L42.is/AdamsTowel]
+Main=(
+  Debug(S"???")
+  )
+\end{mylisting}
+
+Now if users can insert arbitrary content where the "???" placeholder is, it would be trivial to circumvent the restriction that only the string contents should be modifiable. For example, by including unescaped quote characters, arbitrary code could be executed, as shown here:
+\\[12pt]
+\begin{mylisting}{Code injection example}
+/*
+    inserted string:
+    ") error X"Error" //
+*/
+
+reuse [L42.is/AdamsTowel]
+Main=(
+  _=Log"".#$reader()
+
+  Debug(S"") error X"Error" //")
+  
+  )
+\end{mylisting}
+
+Rather than printing a custom string, the above program terminates with an unexpected exception.
+\\[12pt]
+To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed. Non-terminating multiline comments are also forbidden. A rudimentary syntax check is also performed.
+
+\img{../diagrams/Code Validation Flowchart.drawio.png}{Code Validation}
+
 \section{Queuing Requests}
 
 It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
