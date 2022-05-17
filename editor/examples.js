@@ -95,6 +95,44 @@ Main=(
   )
 `;
 
+const MUTATION = {
+  "This.L42": { template: `reuse [L42.is/AdamsTowel]
+
+Point=Data:{var Num x, var Num y}
+Square=Data:{var mut Point that}
+
+???
+
+Main=(
+  mut Any stuff=Make()
+  Square p1 = Do1(stuff)
+  S s1 = S"x = %p1.x(), y = %%p1.y()"
+  Do2(p1, stuff=stuff)
+  S s2 = p1.toS()
+  X[s1 != s2]
+  )` },
+};
+
+const INVARIANT = {
+  "This.L42": { template: `reuse [L42.is/AdamsTowel]
+
+I = {interface read method Bool isOk()}
+
+A = Data:{capsule I inner
+  @Cache.Now class method Void invariant(read I inner)=X[inner.isOk()]}
+
+???
+
+Main=(
+  capsule I inner=MakeInner.#$()
+  a = A(inner=inner)
+  Operation.#$(a)
+
+  // we believe it is always going to be X[a.inner().isOk()], for any MakeInner and Operation
+  Debug(S"--secret--")
+  )` },
+}
+
 const EXAMPLES = [
     {
       name: "Hello World",
@@ -105,4 +143,6 @@ const EXAMPLES = [
     { name: "Point", files: POINT },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
+    { name: "Mutation", files: MUTATION },
+    { name: "Invariant", files: MUTATION },
 ];
