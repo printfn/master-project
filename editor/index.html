@@ -327,7 +327,6 @@ async function loadFileHandler() {
 
 async function downloadAsZip() {
     let zip = new JSZip();
-    // TODO: find a way to properly export templates
     let program = GUI.getRenderedProgram();
     for (let filename in program) {
         zip.file(filename, program[filename]);
