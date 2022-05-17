@@ -275,6 +275,16 @@ async function loadFile(program, name, fileContent) {
         // handle zip files
         let zip = await JSZip.loadAsync(fileContent);
 
+        // check for a templated program file
+        const templatedProgram = zip.file('templated-program.json');
+        if (templatedProgram) {
+            let contents = JSON.parse(await templatedProgram.async("string"));
+            for (let filename in contents) {
+                program[filename] = contents[filename];
+            }
+            return;
+        }
+
         // check for a single top-level folder
         let topLevelFolder = null;
         zip.forEach((path, file) => {
@@ -296,7 +306,6 @@ async function loadFile(program, name, fileContent) {
             if (relPath.startsWith('/')) {
                 relPath = relPath.substring(1);
             }
-            if (relPath == "Setti.ngs") return;
             fileList.push({
                 name: relPath,
                 file: file,
@@ -331,6 +340,7 @@ async function downloadAsZip() {
     for (let filename in program) {
         zip.file(filename, program[filename]);
     }
+    zip.file('templated-program.json', JSON.stringify(GUI.getProgram()));
     let base64 = await zip.generateAsync({ type: 'base64' });
     let filename = `${new Date().toLocaleString()}.zip`;
     location.href = 'data:application/zip;base64,' + base64;
