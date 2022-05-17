@@ -81,6 +81,7 @@ body {
 
 <p>
     <input type="button" value="New file" onclick="newFileHandler()">
+    <input type="button" value="Delete file" onclick="deleteFileHandler()">
 </p>
 
 <ul id="file-tree">
@@ -358,6 +359,20 @@ async function newFileHandler() {
     program[filename] = "";
     GUI.loadProgram(program);
     GUI.openFile(filename);
+}
+
+async function deleteFileHandler() {
+    let filename = GUI.currentFileName;
+    if (filename.toLowerCase() == "setti.ngs" || filename.toLowerCase() == "this.l42") {
+        alert(`Error: cannot delete ${filename}`);
+        return;
+    }
+    if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+        return;
+    }
+    let program = GUI.getProgram();
+    delete program[filename];
+    GUI.loadProgram(program);
 }
 
 function loadSampleProgram() {
