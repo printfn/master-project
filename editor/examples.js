@@ -144,5 +144,5 @@ const EXAMPLES = [
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
     { name: "Mutation", files: MUTATION },
-    { name: "Invariant", files: MUTATION },
+    { name: "Invariant", files: INVARIANT },
 ];
