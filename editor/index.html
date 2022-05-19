@@ -96,6 +96,7 @@ body {
 <p>
     <input type="button" id="execute" value="Run" onclick="execute()" title="Execute the program on the 42 server in the cloud">
     <input type="button" value="Download as ZIP" onclick="downloadAsZip()" title="Click here to save your program as a ZIP file to your computer">
+    <input type="button" value="Modify template" onclick="modifyTemplateHandler()" title="Make a template program fully editable">
     <span id="duration-paragraph">
         <label for="duration">Duration: </label>
         <span id="duration">1.234 seconds</span>
@@ -374,6 +375,13 @@ async function deleteFileHandler() {
     let program = GUI.getProgram();
     delete program[filename];
     GUI.loadProgram(program);
+}
+
+async function modifyTemplateHandler() {
+    let filename = GUI.currentFileName;
+    let program = GUI.getRenderedProgram();
+    GUI.loadProgram(program);
+    GUI.openFile(filename);
 }
 
 function loadSampleProgram() {
