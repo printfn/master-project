@@ -117,7 +117,8 @@ Main=(
   Debug(S"--secret--")
   )`, value: `class method Any make() = void
 class method Square do1(Any that) = Square(p=Point(x=1Num, y=2Num))
-class method Void do2(Square that, Any stuff) = void` },
+class method Void do2(Square that, Any stuff) = void
+` },
 };
 
 const INVARIANT = {
@@ -146,11 +147,12 @@ Main=(
   X[!a.inner().isOk()]
   Debug(S"--secret--")
   )`, value: `AlwaysOk = Data:{[IsOK]
-    read method Bool isOk() = Bool.true()
+  read method Bool isOk() = Bool.true()
 }
 
 class method AlwaysOk makeInner() = AlwaysOk()
-class method Void operation(A that) = void` },
+class method Void operation(A that) = void
+` },
 }
 
 const EXAMPLES = [
