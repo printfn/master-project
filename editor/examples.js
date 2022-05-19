@@ -99,38 +99,58 @@ const MUTATION = {
   "This.L42": { template: `reuse [L42.is/AdamsTowel]
 
 Point=Data:{var Num x, var Num y}
-Square=Data:{var mut Point that}
+Square=Data:{var mut Point p}
+
+Code = {
 
 ???
 
+}
+
 Main=(
-  mut Any stuff=Make()
-  Square p1 = Do1(stuff)
-  S s1 = S"x = %p1.x(), y = %%p1.y()"
-  Do2(p1, stuff=stuff)
+  Any stuff=Code.make()
+  Square p1 = Code.do1(stuff)
+  S s1 = p1.toS()
+  Code.do2(p1, stuff=stuff)
   S s2 = p1.toS()
   X[s1 != s2]
-  )` },
+  Debug(S"--secret--")
+  )`, value: `class method Any make() = void
+class method Square do1(Any that) = Square(p=Point(x=1Num, y=2Num))
+class method Void do2(Square that, Any stuff) = void` },
 };
 
 const INVARIANT = {
   "This.L42": { template: `reuse [L42.is/AdamsTowel]
 
-I = {interface read method Bool isOk()}
+IsOK = {interface read method Bool isOk()}
 
-A = Data:{capsule I inner
-  @Cache.Now class method Void invariant(read I inner)=X[inner.isOk()]}
+A = Data:{IsOK inner
+  @Cache.Now class method Void invariant(read IsOK inner)=X[inner.isOk()]}
+
+Code = {
 
 ???
 
-Main=(
-  capsule I inner=MakeInner.#$()
-  a = A(inner=inner)
-  Operation.#$(a)
+}
 
-  // we believe it is always going to be X[a.inner().isOk()], for any MakeInner and Operation
+Main=(
+  _=Log"".#$reader()
+
+  IsOK inner=Code.makeInner()
+  a = A(inner=inner)
+  Code.operation(a)
+
+  // we believe it is always going to be X[a.inner().isOk()],
+  // for any MakeInner and Operation
+  X[!a.inner().isOk()]
   Debug(S"--secret--")
-  )` },
+  )`, value: `AlwaysOk = Data:{[IsOK]
+    read method Bool isOk() = Bool.true()
+}
+
+class method AlwaysOk makeInner() = AlwaysOk()
+class method Void operation(A that) = void` },
 }
 
 const EXAMPLES = [
