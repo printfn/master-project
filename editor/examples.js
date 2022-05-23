@@ -1,4 +1,5 @@
 const HELLO_WORLD = `reuse [L42.is/AdamsTowel]
+
 Main=(
   _=Log"".#$reader()
 
@@ -39,10 +40,22 @@ Main=(
 }
 
 const PRINT_HELLO_WORLD_CHALLENGE = {
-    "This.L42": { template: `reuse [L42.is/AdamsTowel]
+    "This.L42": {
+  template: `reuse [L42.is/AdamsTowel]
+
+Code = {
+???
+}
+
 Main=(
-  Debug(S"???")
-  )` },
+  _=Log"".#$reader()
+
+  Debug(Code.hello())
+  )`,
+  value: `class method S hello() = {
+  return S"Hello world from 42"
+}
+`},
 };
 
 const POINT = {
@@ -159,10 +172,10 @@ const EXAMPLES = [
       default: true,
       files: { "This.L42": HELLO_WORLD }
     },
-    { name: "Point Sum Method", files: POINT_SUM_METHOD },
+    { name: "Hello World (template)", files: PRINT_HELLO_WORLD_CHALLENGE },
     { name: "Point", files: POINT },
+    { name: "Point Sum Method challenge", files: POINT_SUM_METHOD },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
-    { name: "Hello World challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
 ];
