@@ -176,8 +176,9 @@ class L42 {
                     return new Result("", t.getMessage(), 1);
                 }
                 try {
-                    System.err.println("Executing 42...");
-                    var res = is.L42.main.Main.run(Path.of(tempDir), cache);
+                    var path = Path.of(tempDir).resolve("This.L42");
+                    System.err.println("Executing 42 in " + path + "...");
+                    var res = is.L42.main.Main.run(path, cache);
                     System.err.println("... finished executing 42");
                 } catch (Throwable t) {
                     t.printStackTrace();
