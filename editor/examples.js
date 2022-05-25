@@ -121,16 +121,16 @@ Code = {
 }
 
 Main=(
-  Any stuff=Code.make()
+  mut Any stuff=Code.make()
   Square p1 = Code.do1(stuff)
   S s1 = p1.toS()
   Code.do2(p1, stuff=stuff)
   S s2 = p1.toS()
   X[s1 != s2]
   Debug(S"--secret--")
-  )`, value: `class method Any make() = void
-class method Square do1(Any that) = Square(p=Point(x=1Num, y=2Num))
-class method Void do2(Square that, Any stuff) = void` },
+  )`, value: `class method mut Any make() = S.List()
+class method Square do1(mut Any that) = Square(p=Point(x=1Num, y=2Num))
+class method Void do2(Square that, mut Any stuff) = void` },
 };
 
 const INVARIANT = {
@@ -138,8 +138,15 @@ const INVARIANT = {
 
 IsOK = {interface read method Bool isOk()}
 
-A = Data:{IsOK inner
-  @Cache.Now class method Void invariant(read IsOK inner)=X[inner.isOk()]}
+A = Data:{
+  capsule IsOK inner
+
+  @Cache.Now class method Void invariant(read IsOK inner) =
+    X[inner.isOk()]
+
+  @Cache.Clear class method
+  Void operation(mut IsOK inner) = Code.operation(inner)
+  }
 
 Code = {
 
@@ -150,20 +157,21 @@ Code = {
 Main=(
   _=Log"".#$reader()
 
-  IsOK inner=Code.makeInner()
+  capsule IsOK inner=Code.makeInner()
   a = A(inner=inner)
-  Code.operation(a)
+  a.operation()
 
   // we believe it is always going to be X[a.inner().isOk()],
   // for any MakeInner and Operation
   X[!a.inner().isOk()]
   Debug(S"--secret--")
   )`, value: `AlwaysOk = Data:{[IsOK]
+  var S name = S""
   read method Bool isOk() = Bool.true()
 }
 
-class method AlwaysOk makeInner() = AlwaysOk()
-class method Void operation(A that) = void` },
+class method capsule AlwaysOk makeInner() = AlwaysOk()
+class method Void operation(mut IsOK that) = void` },
 }
 
 const EXAMPLES = [

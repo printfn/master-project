@@ -1,0 +1,14 @@
+reuse [L42.is/AdamsTowel]
+Process = Load:{reuse[L42.is/Process]}
+
+Main=(
+  //_=Log"".#$reader()
+
+  Debug(S"Hello world from 42")
+  
+  mut Process pLinux=Process.Real.#$of(\[S"ls";S"-l"])
+  res=pLinux.start(input=S"")
+  Debug(res.out())
+  Debug(res.err())
+  catch Process.Fail f Debug(S"oh no!")
+  )

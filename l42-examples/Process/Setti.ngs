@@ -1,0 +1,9 @@
+/*
+  *** 42 settings ***
+  You can change the stack and memory limitations and add security mappings
+*/
+maxStackSize = 1G
+initialMemorySize = 256M
+maxMemorySize = 2G
+
+Main = [L42.is/Process]
