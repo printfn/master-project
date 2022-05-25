@@ -6,7 +6,8 @@ Main=(
   Debug(S"Hello world from 42")
   )`;
 
-const LOGGER_SETTINGS = `/*
+function makeBasicSettings(mainPermission) {
+  return `/*
   *** 42 settings ***
   You can change the stack and memory limitations and add security mappings
 */
@@ -14,8 +15,11 @@ maxStackSize = 1G
 initialMemorySize = 256M
 maxMemorySize = 2G
 
-Main = [L42.is/AdamsTowel/Log]
+Main = [${mainPermission}]
 `;
+}
+
+const LOGGER_SETTINGS = makeBasicSettings("L42.is/AdamsTowel/Log");
 
 const POINT_SUM_METHOD = {
   "This.L42": {
@@ -174,6 +178,19 @@ class method capsule AlwaysOk makeInner() = AlwaysOk()
 class method Void operation(mut IsOK that) = void` },
 }
 
+const FILE_SYSTEM_EXAMPLE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+Fs = Load:{reuse [L42.is/FileSystem]}
+
+Main=(
+  mut Fs f = Fs.Real.#$of()
+  S s=f.read(Url"data.txt")
+
+  Debug(s)
+  )`,
+  "Setti.ngs": makeBasicSettings('L42.is/FileSystem'),
+}
+
 const EXAMPLES = [
     {
       name: "Hello World",
@@ -184,6 +201,7 @@ const EXAMPLES = [
     { name: "Point", files: POINT },
     { name: "Point Sum Method challenge", files: POINT_SUM_METHOD },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
+    { name: "Filesystem Access", files: FILE_SYSTEM_EXAMPLE },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
 ];

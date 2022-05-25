@@ -1,6 +1,9 @@
 reuse [L42.is/AdamsTowel]
-Main=(
-  _=Log"".#$reader()
+Fs = Load:{reuse [L42.is/FileSystem]}
 
-  Debug(S"Hello world from 42")
+Main=(
+  mut Fs f = Fs.Real.#$of()
+  S s=f.read(Url"data.txt")
+
+  Debug(s)
   )

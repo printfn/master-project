@@ -6,4 +6,4 @@ maxStackSize = 1G
 initialMemorySize = 256M
 maxMemorySize = 2G
 
-Main = [L42.is/AdamsTowel/Log]
+Main = [L42.is/FileSystem]
