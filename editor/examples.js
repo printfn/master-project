@@ -191,6 +191,46 @@ Main=(
   "Setti.ngs": makeBasicSettings('L42.is/FileSystem'),
 }
 
+const JSON_EXAMPLE = `reuse [L42.is/AdamsTowel]
+Json = Load:{reuse[L42.is/Json]}
+Main=(
+  _=Log"".#$reader()
+
+  Json.Value v=Json"""
+    |[{ "a":1, "b":true, "c":["Hello","World"]}]
+    """
+  Debug(v)
+  )`;
+
+const PROCESS_EXAMPLE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+Process = Load:{reuse[L42.is/Process]}
+
+Main=(
+  //_=Log"".#$reader()
+
+  mut Process pLinux=Process.Real.#$of(\\[S"ls";S"-l"])
+  res=pLinux.start(input=S"")
+  Debug(res.out())
+  Debug(res.err())
+  catch Process.Fail f Debug(S"oh no!")
+  )`,
+  "Setti.ngs": makeBasicSettings('L42.is/Process'),
+};
+
+const TIME_EXAMPLE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+Time = Load:{reuse[L42.is/Time]}
+Main=(
+  t = Time.Real.#$of()
+  current = t.currentTime()
+  date = t.dateTime(zoneId=S"Pacific/Auckland",pattern=S"yyyy/MM/dd HH:mm:ss OOOO")
+  Debug(current)
+  Debug(date)
+  )`,
+  "Setti.ngs": makeBasicSettings('L42.is/Time'),
+};
+
 const EXAMPLES = [
     {
       name: "Hello World",
@@ -202,6 +242,9 @@ const EXAMPLES = [
     { name: "Point Sum Method challenge", files: POINT_SUM_METHOD },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Filesystem Access", files: FILE_SYSTEM_EXAMPLE },
+    { name: "JSON", files: JSON_EXAMPLE },
+    { name: "Processes", files: PROCESS_EXAMPLE },
+    { name: "Time", files: TIME_EXAMPLE },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
 ];
