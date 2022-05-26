@@ -73,7 +73,7 @@ resource "aws_lambda_function" "l42_lambda" {
   handler = "_"
 
   memory_size                    = 1536
-  timeout                        = 60
+  timeout                        = 30
   reserved_concurrent_executions = 20
 
   source_code_hash = filebase64sha256(aws_s3_object.l42_lambda.source)
