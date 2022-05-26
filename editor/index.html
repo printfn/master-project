@@ -69,19 +69,19 @@ body {
 <h1>42 Editor</h1>
 
 <p>
-    <label for="sample-program-select" title="Choose which sample program you would like to run from this list">Load sample program:</label>
+    <label for="sample-program-select" title="Choose which sample program you would like to run from this list">Samples &amp; Challenges:</label>
     <select id="sample-program-select" title="Choose which sample program you would like to run from this list"></select>
-    <input type="button" onclick="loadSampleProgram()" value="Load Sample" title="Load the selected sample program into the editor">
+    <input type="button" onclick="loadSampleProgram()" value="Load Program" title="Load the selected sample program into the editor">
 </p>
 
 <p>
-    <label for="open-file-picker" title="Open .L42 files, or .zip files">Open File:</label>
+    <label for="open-file-picker" title="Open .L42 files, or .zip files">Local file:</label>
     <input type="file" id="open-file-picker" multiple title="Choose one or more files to load into the editor. They can be .L42 files or ZIP files.">
     <input type="button" value="Load File" title="Load the selected file(s) into the editor" onclick="loadFileHandler()">
 </p>
 
 <p>
-    <input type="button" value="New file" onclick="newFileHandler()">
+    <input type="button" value="Add new file" onclick="newFileHandler()">
     <input type="button" value="Delete file" onclick="deleteFileHandler()">
 </p>
 
@@ -104,6 +104,26 @@ body {
 </p>
 
 <div id="output"></div>
+
+<h3>42 Bug Bounty Programme</h3>
+
+<p><a href="https://l42.is">42</a> is a programming language that is designed to be secure, easy to optimise and customisable.</p>
+
+<p>This website provides an easy-to-use editor for 42 code, as well as access to a bug bounty programme. Feel free to write 42 code that gets executed on the server. There are also a number of example programs to try. For more advanced programs, you might want to install 42 locally, which you can get <a href="https://l42.is/download.xhtml">here</a>.</p>
+
+<p>In addition to sample programs, you can also select a "Bug Bounty Challenge". To get started, pick one of the provided challenges from the dropdown list. This will open two editors side-by-side. The left-hand editor shows some starting code that you can modify, while the right-hand panel shows a preview of the overall code that will eventually be executed. In each scenario, the challenge is to get the Main function to fully execute, and reach the final Debug ("print") statement. However, when you run the original program, an exception is thrown. Can you come up with a program that gets to the final line? If you think you have found a solution, please send your code to <a href="mailto:marco.servetto@gmail.com">marco.servetto@gmail.com</a>.</p>
+
+<h4>Bug Bounty Challenge Rules:</h4>
+
+<ul>
+    <li>Only programs marked as "Bug Bounty Challenges" in the dropdown list are eligible</li>
+    <li>The template code must not have been modified (via the "modify template" button or otherwise)</li>
+    <li>Reaching the last line must be reliably reproducable</li>
+    <li>The submitted code must be free from copyright restrictions</li>
+    <li>Modifying the "Setti.ngs" file is permitted</li>
+    <li>Using other 42 libraries, or Java code, is also permitted. Starting other processes on the server and modifying files is permitted.</li>
+    <li>Acceptance is at the sole discretion of Marco Servetto</li>
+</ul>
 
 <script>
 
@@ -234,7 +254,9 @@ const GUI = {
 window.onload = function() {
     let sampleHTML = '';
     for (let example of EXAMPLES) {
-        if (example.default) {
+        if (example.section) {
+            sampleHTML += `<option disabled>${example.section}</option>`;
+        } else if (example.default) {
             sampleHTML += `<option selected>${example.name}</option>`
         } else {
             sampleHTML += `<option>${example.name}</option>`;

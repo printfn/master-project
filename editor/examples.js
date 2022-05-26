@@ -257,11 +257,8 @@ Main = (
 }
 
 const EXAMPLES = [
-    {
-      name: "Hello World",
-      default: true,
-      files: { "This.L42": HELLO_WORLD }
-    },
+    { section: "--- Sample Programs ---" },
+    { name: "Hello World", default: true, files: { "This.L42": HELLO_WORLD } },
     { name: "Hello World (template)", files: PRINT_HELLO_WORLD_CHALLENGE },
     { name: "Point", files: POINT },
     { name: "Point Sum Method challenge", files: POINT_SUM_METHOD },
@@ -271,6 +268,7 @@ const EXAMPLES = [
     { name: "Processes", files: PROCESS_EXAMPLE },
     { name: "Time", files: TIME_EXAMPLE },
     { name: "Java", files: JAVA_EXAMPLE },
+    { section: "--- Bug Bounty Challenges ---" },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
 ];
