@@ -452,15 +452,29 @@ function showResultOutput(result) {
     let resultString = '';
     if (!result.ok) {
         resultString = "Error: " + result.message;
-    } else if (result.stderr && !result.stdout) {
-        resultString = result.stderr;
-    } else if (result.stdout && !result.stderr) {
+    } else if (result.stdout && !result.stderr && !result.tests) {
         resultString = result.stdout;
-    } else if (result.stdout && result.stderr) {
-        resultString = `stdout:\n${result.stdout}\nstderr:\n${result.stderr}`;
+    } else if (!result.stdout && result.stderr && !result.tests) {
+        resultString = result.stderr;
+    } else if (!result.stdout && !result.stderr && result.tests) {
+        resultString = result.tests;
+    } else {
+        resultString = '';
+        if (result.stdout) {
+            resultString += 'stdout:\n';
+            resultString += result.stdout + '\n';
+        }
+        if (result.stderr) {
+            resultString += 'stderr:\n';
+            resultString += result.stderr + '\n';
+        }
+        if (result.tests) {
+            resultString += 'tests:\n';
+            resultString += result.tests + '\n';
+        }
     }
     // -1 to clear selection and move cursor to start of line
-    window.output.setValue(resultString, -1);
+    window.output.setValue(resultString.trimEnd(), -1);
 
     document.getElementById('duration-paragraph').style.display = 'inline';
     if ('duration' in result) {

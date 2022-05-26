@@ -173,7 +173,7 @@ class L42 {
                     Resources.setSettings(settings);
                 } catch (Throwable t) {
                     t.printStackTrace();
-                    return new Result("", t.getMessage(), 1);
+                    return Result.fromErrorMessage(t.getMessage());
                 }
                 try {
                     var path = Path.of(tempDir).resolve("This.L42");
@@ -187,6 +187,7 @@ class L42 {
                 return new Result(
                         out.stdout.toString(),
                         out.stderr.toString(),
+                        out.tests.toString(),
                         returnCode);
             };
             if (useRMI) {
@@ -201,10 +202,10 @@ class L42 {
             }
             return result;
         } catch (CancellationException e) {
-            return new Result("", "Error: timeout while executing 42", 1);
+            return Result.fromErrorMessage("Error: timeout while executing 42");
         } catch (Throwable t) {
             t.printStackTrace();
-            return new Result("", t.getMessage(), 1);
+            return Result.fromErrorMessage(t.getMessage());
         } finally {
             this.cache = cache.toNextCache();
         }

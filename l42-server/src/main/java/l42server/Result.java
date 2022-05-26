@@ -8,12 +8,18 @@ class Result implements Serializable {
     public long executionTimeNanos = -1;
     public String stdout;
     public String stderr;
+    public String tests;
     public int returnCode;
 
-    public Result(String stdout, String stderr, int returnCode) {
+    public Result(String stdout, String stderr, String tests, int returnCode) {
         this.stdout = stdout;
         this.stderr = stderr;
+        this.tests = tests;
         this.returnCode = returnCode;
+    }
+
+    public static Result fromErrorMessage(String err) {
+        return new Result("", err, "", 1);
     }
 
     public double executionTime() {
@@ -29,6 +35,7 @@ class Result implements Serializable {
         response.put("ok", true);
         response.put("stdout", stdout);
         response.put("stderr", stderr);
+        response.put("tests", tests);
         response.put("returncode", returnCode);
         response.put("duration", formattedTime());
         return response;

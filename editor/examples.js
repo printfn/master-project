@@ -231,6 +231,31 @@ Main=(
   "Setti.ngs": makeBasicSettings('L42.is/Time'),
 };
 
+const JAVA_EXAMPLE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+J0 = Load:{reuse [L42.is/JavaServer]}
+J = J0(slaveName=S"mySlave{}")
+
+Main = (
+  j = J.#$of()
+  j.loadCode(fullName=S"foo.Bar1",code=S"""
+    |package foo;
+    |import is.L42.platformSpecific.javaEvents.Event;
+    |public record Bar1(Event event){//class Bar1 will be instantiated by 42
+    |  public Bar1{                  //and the Event parameter is provided
+    |    event.registerAskEvent("BarAsk",(id,msg)->
+    |      "any string computed in Java using "+id+" and "+msg);
+    |    }
+    |  }
+    """)
+  S.Opt text = j.askEvent(key=S"BarAsk", id=S"anId",msg=S"aMsg")
+  {}:Test"OptOk"(actual=text, expected=S"""
+    |<"any string computed in Java using anId and aMsg">
+    """.trim())
+  )`,
+  "Setti.ngs": makeBasicSettings('L42.is/JavaServer'),
+}
+
 const EXAMPLES = [
     {
       name: "Hello World",
@@ -245,6 +270,7 @@ const EXAMPLES = [
     { name: "JSON", files: JSON_EXAMPLE },
     { name: "Processes", files: PROCESS_EXAMPLE },
     { name: "Time", files: TIME_EXAMPLE },
+    { name: "Java", files: JAVA_EXAMPLE },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
 ];

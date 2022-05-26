@@ -7,6 +7,7 @@ import java.io.Serializable;
 class OutputHandler implements Serializable {
     StringBuilder stdout = new StringBuilder();
     StringBuilder stderr = new StringBuilder();
+    StringBuilder tests = new StringBuilder();
 
     void setHandlers() {
         Resources.setOutHandler(s -> {
@@ -17,8 +18,14 @@ class OutputHandler implements Serializable {
         });
         Resources.setErrHandler(s -> {
             synchronized (OutputHandler.class) {
-                System.out.println("RECEIVED " + s);
+                System.out.println("errHandler " + s);
                 stderr.append(s);
+            }
+        });
+        Resources.setTestHandler(s -> {
+            synchronized (OutputHandler.class) {
+                System.out.println("testHandler " + s);
+                tests.append(s);
             }
         });
     }
