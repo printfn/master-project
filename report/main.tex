@@ -274,6 +274,10 @@ When the 42 program contains errors, they are shown in red as below. In that exa
 
 The web page is built with HTML, CSS and JavaScript. It uses asynchronous AJAX requests to communicate with the server. The editing UI is built around the Ace editor, and has support for syntax highlighting and themes. I have tested it in all modern web browsers (i.e. Chrome, Firefox and Safari).
 
+\img{images/42-editor-template.png}{One of the challenges in the bug bounty programme}
+
+The above screenshot shows one of the challenges that users can attempt to solve as part of the bug bounty programme. The code on the left-hand side is modifiable, while the code on the right-hand side shows the complete program (note that the 'Code' section contains the copied user input). In this challenge, users need to try to modify the 'Square' instance, which would break the immutability guarantee of 42. At the bottom we can see the program output, which currently shows that an exception was thrown because the challenge has not been solved.
+
 \chapter{Design and Implementation}
 
 \img{images/architecture.png}{42 Server Architecture}
@@ -307,7 +311,8 @@ POST /execute
 
 {
     "files": {
-        "This.L42":"reuse [L42.is/AdamsTowel]\nMain=(\n  Debug(S\"Hello world from 42\")\n  )"
+        "This.L42":"reuse [L42.is/AdamsTowel]\nMain=(\n  _=Log"".#\$reader()\n  Debug(S\"Hello world from 42\")\n  )",
+        "Setti.ngs": "Main = [L42.is/AdamsTowel/Log]"
     }
 }
 \end{mylisting}
@@ -321,6 +326,7 @@ Access-Control-Allow-Origin: *
     "duration": "0.180",
     "stdout": "Hello world from 42\n",
     "returncode": 0,
+    "tests": "",
     "ok": true,
     "stderr": ""
 }
