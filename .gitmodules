@@ -1,6 +1,0 @@
-[submodule "submodules/L42IDE"]
-	path = submodules/L42IDE
-	url = git@github.com:ElvisResearchGroup/L42IDE.git
-[submodule "submodules/L42"]
-	path = submodules/L42
-	url = git@github.com:ElvisResearchGroup/L42.git
