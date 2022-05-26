@@ -131,7 +131,37 @@ Message This.X(This.Message, This.HasToS, This.Message.Assert):
 
 \section{Mutability}
 
-TODO: Explain 'mut', 'imm', etc. keywords and how they are enforced
+42 also has support for enforcing immutability. Immutability means that properties cannot be changed after an object has been created.
+\\[12pt]
+In the below example, we are creating Point and Square instances that are immutable. Regardless of how the \texttt{make}, \texttt{do1} and \texttt{do2} methods are implemented, the squares \texttt{s1} and \texttt{s2} will always be identical.
+
+\begin{mylisting}{Immutability}
+reuse [L42.is/AdamsTowel]
+
+Point=Data:{var Num x, var Num y}
+Square=Data:{var mut Point p}
+
+Code = {
+  class method mut Any make() = S.List()
+  class method Square do1(mut Any that) =
+    Square(p=Point(x=1Num, y=2Num))
+  class method Void do2(Square that, mut Any stuff) = void
+}
+
+Main=(
+  mut Any stuff=Code.make()
+  Square p1 = Code.do1(stuff)
+  S s1 = p1.toS()
+  Code.do2(p1, stuff=stuff)
+  S s2 = p1.toS()
+  X[s1 != s2]
+  Debug(S"--secret--")
+  )
+\end{mylisting}
+
+We introduce two classes, \texttt{Point} and \texttt{Square}. \texttt{Point} consists of x and y co-ordinates, while \texttt{Square} contains a \texttt{Point} instance. The \texttt{Code} block is modifiable by the user, while everything else cannot be changed. The challenge that we provide is to override the \texttt{make}, \texttt{do1} and \texttt{do2} methods to attempt to modify an immutable Square instance.
+\\[12pt]
+In the \texttt{Main} method, we generate a \texttt{Point} instance, and pass it to the \texttt{do2} method. The immutability guarantees of 42 should prevent users from being able to modify the \texttt{Point} instance. \texttt{X} is an assertion that throws an exception if the two squares \texttt{s1} and \texttt{s2} are different, so the final line in \texttt{Main} should never be reached. If this line is printed, the mutability guarantee of 42 will have been broken.
 
 \chapter{Bug Bounty Programmes}
 
@@ -546,7 +576,28 @@ Main=(
 
 Rather than printing a custom string, the above program terminates with an unexpected exception.
 \\[12pt]
-To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed. Non-terminating multiline comments are also forbidden. A rudimentary syntax check is also performed.
+To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed.  A rudimentary syntax check is also performed.
+\\[12pt]
+This is an example of a Hello World program with those checks:
+
+\begin{mylisting}{Templated Hello World program}
+reuse [L42.is/AdamsTowel]
+
+// this 'Code' block is modifiable by the user
+Code = {
+  class method S hello() = {
+    return S"Hello world from 42"
+  }
+}
+
+Main=(
+  _=Log"".#$reader()
+
+  Debug(Code.hello())
+  )
+\end{mylisting}
+
+The following flowchart shows how the code validation is integrated.
 
 \img{../diagrams/Code Validation Flowchart.drawio.png}{Code Validation}
 
@@ -602,36 +653,17 @@ Main=(
   )
 \end{mylisting}
 
-\chapter{Improving Responsiveness with Caching}
+\section{Caching \& Performance Measurements}
 
-\begin{itemize}
-\item Lambda comes with a built-in runtime environment with Java 11
-\item We want to use Java 16, with preview features, so we need to build our own runtime environment (Docker image) from scratch
-\item Amazon provides a Runtime Client Library that implements most of the Lambda API functionality we need, so we include that library in our custom docker image
-\item We write a lambda handler class that maps API Gateway calls to run the 42 compiler
-\item In the same docker image we also include the AWS Runtime Interface Emulator to test the lambda integration/server/caching locally
-\item We also include our own web server for ECS/Fargate so the same docker image can be deployed there as well
-\item Advantages of Lambda:
-\begin{itemize}
-\item Pay-as-you-go pricing, with no incurred costs when there are no requests. Thus it is significantly cheaper if usage is low
-\item Autoscaling
-\item Higher security
-\end{itemize}
-\item Advantages of ECS Fargate:
-\begin{itemize}
-\item Managed service (security updates and the like are applied automatically), with autoscaling etc.
-\item We can take greater advantage of caching since the service is always running, reduced latency
-\end{itemize}
-\item Advantages of EC2:
-\begin{itemize}
-\item Cheaper than ECS Fargate
-\item Greater customisability
-\end{itemize}
-\end{itemize}
-
-\section{Performance Measurements}
-
-For each setup I did 5 measurements, and worked out the minimum, maximum and mean execution times. In each case only the execution time of the 42 program itself was measured, and not the network overhead, request parsing, or other overhead.
+Looking at performance, we notice that the first query is significantly slower than the following ones.
+\\[12pt]
+This is due to 42's slow startup time. During this initial startup, 42 is downloading and parsing the standard library. We can use caching to speed up subsequent requests, which avoids the need to continually redownload and parse those libraries.
+\\[12pt]
+Caching does not only include storing the libraries in memory, but also includes return values of pure functions. Pure functions are those without side effects. In 42, functions are considered pure by default. Only those methods that include \texttt{\#\$} are impure, and will not have their return values cached.
+\\[12pt]
+To ensure that users get faster responses, we preemptively run a "Hello World" program to ensure the standard library is cached.
+\\[12pt]
+For each deployment I did five performance measurements, and worked out the average execution time. In each case only the execution time of the 42 program itself was measured, and not the network overhead, request parsing, or other overhead. I also measured the setup and teardown times (with Terraform).
 
 \begin{fig}[H]
 \begin{center}
@@ -647,8 +679,34 @@ AWS Lambda & 29.10 s & 14.48 s & 0.38 s & 9.19 s \\ \hline
 ECS Fargate & 242.88 s & 17.33 s & 0.29 s & 165.69 s \\ \hline
 EC2 & 274.06 s & 15.18 s & 0.33 s & 80.04 s \\ \hline
 \end{tabular}
-\caption{Performance measurements of all 4 implementations}
+\caption{Performance measurements of all five implementations}
 \end{center}
 \end{fig}
 
-\chapter{Conclusion and Future Work}
+We can see that ECS Fargate and EC2 have the longest setup and teardown times, and are significantly slower compared to Lambda. The three AWS solutions have comparable cached and uncached performance, while Raspberry Pi is a bit slower and the local implementation is faster. Setup and teardown times are not measured for the local and Raspberry Pi solutions, since these do not use Terraform's automated deployment.
+
+\chapter{Conclusion}
+
+This project has demonstrated how to set up a bug bounty programme to challenge 42's security features.
+\\[12pt]
+After a quick introduction into the security features of 42 (i.e. support for invariants and immutability), we looked at existing bug bounty programmes. Here we were able to see that they are a valuable tool to involve outside developers and security experts to fortify the security mechanisms of software. For example, in 2018 an outside researcher found a security vulnerability in Facebook, which resulted in a \$50,000 payout. This may have saved Facebook millions of dollars if that vulnerability had been exploited and caused a data breach\cite{newman-2018}. In addition, the potential reputation damage and subsequent loss of trust could also have a large impact on their customer base. This shows the usefulness of bug bounty programmes for improving code quality.
+\\[12pt]
+To involve users in the bug bounty programme, we need a nice user interface to a REPL system. While this is not strictly necessary, it lowers the barrier to entry and makes it easier for users unfamiliar with 42 to get started and engage with the programme. We evaluated numerous existing REPL systems for other programming languages. The primary features those systems had, which we ended up implementing for 42 as well, include syntax highlighting, fast responsiveness, and template support (i.e. splitting the code into read-only and modifiable sections). We also provide a number of 42 example programs across different areas (e.g. basic classes, filesystem access, Java compatibility) which helps users get started. This REPL makes it easy to get started, but users can also download 42 onto their own computers which may be needed for more complex code. To participate, all they need is a web browser and internet access, so no software installation is required. The REPL user interface also supports importing and exporting of 42 programs.
+\\[12pt]
+We looked at different ways to implement the 42 bug bounty server. The server code is written in Java, and it supports a number of different deployment scenarios. It can easily be run locally on any computer, or even on a Raspberry Pi. Alternatively it can be run in the cloud. We picked Amazon Web Services as it the most widely-used cloud provider. The deployment is automated using Terraform, an infrastructure-as-code tool. Rather than setting up infrastructure manually, we can instead describe it in code under version control.
+\\[12pt]
+We looked at three different deployment setups in AWS: serverless deployment with AWS Lambda, container deployment using ECS Fargate, and traditional server execution using EC2 instances. We compared costs, scalability, availability, performance and security of all approaches.
+\\[12pt]
+Local deployments are not very suitable for high-usage scenarios as they do not scale. To scale vertically, you could run it on a more powerful computer, horizontal scaling is not supported. Availability is limited: in case of a hardware failure, the server would need to be fixed manually. On the upside, local deployments can be very cost-effective, especially if a Raspberry Pi is sufficient.
+\\[12pt]
+All three cloud solutions were designed for scalability and high availability. Horizontal scalability is achieved by running more container tasks in ECS Fargate, additional instances behing an autoscaling mechanism and load balancer for EC2, and automatically for AWS Lambda. Regional distribution supports availability even in the case of hazards like fire or power outages. An AWS Lambda solution was shown to be both cost-effective and highly reliable, as well as having the highest security due to running in a sandbox environment.
+\\[12pt]
+To improve the responsiveness, the implementation includes multiple additional features. Queueing incoming requests ensures reliability even during usage spikes. Timeouts, whereby client programs are automatically killed, help against malicious or accidental attacks. To ensure fairness in the bug bounty programme, we prevent code injection by separately evaluating the user's code. Since the system is slow to respond to a first request (cold start phenomenon), we use 42's inbuilt support for caching of libraries and code to speed up subsequent responses.
+\\[12pt]
+In the future, the bug bounty system can be expanded by adding more examples and challenges. This can be used to test additional guarantees of 42. It could also have community features, such as a discussion forum or a chat function, which would make it easier for users to discuss ideas.
+\\[12pt]
+The bug bounty REPL could also be extended with tutorial questions, which could then be integrated into the main 42 tutorial. For example, there could be tutorial exercises that users could try and solve using the REPL.
+\\[12pt]
+While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens.
+\\[12pt]
+Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard.
