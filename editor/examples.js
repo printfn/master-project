@@ -184,7 +184,7 @@ Fs = Load:{reuse [L42.is/FileSystem]}
 
 Main=(
   mut Fs f = Fs.Real.#$of()
-  S s=f.read(Url"data.txt")
+  S s=f.read(Url"This.L42")
 
   Debug(s)
   )`,
