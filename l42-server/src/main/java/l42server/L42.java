@@ -55,6 +55,7 @@ class L42 {
 
     public L42(Path tempDir, boolean useRMI) {
         try {
+            System.setProperty("java.rmi.server.hostname", "127.0.0.1");
             // on macOS, /tmp is a symbolic link that points to /private/tmp/,
             // which causes L42 to get confused
             tempDir.toFile().mkdirs();
@@ -202,6 +203,9 @@ class L42 {
             }
             return result;
         } catch (CancellationException e) {
+            e.printStackTrace();
+            System.err.println(e);
+            System.err.println(e.getCause());
             return Result.fromErrorMessage("Error: timeout while executing 42");
         } catch (Throwable t) {
             t.printStackTrace();
@@ -227,7 +231,7 @@ class L42 {
         backgroundThread = new Thread(() -> {
             System.out.println("Started background thread");
             try {
-                Thread.sleep(30 * 1000);
+                Thread.sleep(60 * 1000);
             } catch (InterruptedException e) {
                 System.out.println("Background thread was interrupted");
                 return;

@@ -35,7 +35,7 @@ import java.util.Base64;
 
 /// AWS Lambda entry point
 public class Lambda implements RequestStreamHandler {
-    L42 client = new L42(Path.of("/tmp/L42testing"), false);
+    L42 client = new L42(Path.of("/tmp/L42testing"), true);
 
     JSONObject SCHEDULED_EVENT = new JSONObject().put("type", "Scheduled Event");
 

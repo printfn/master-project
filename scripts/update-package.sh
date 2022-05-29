@@ -32,8 +32,15 @@ unzip artifacts/L42PortableLinux.zip \
     L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
     -d artifacts
 
+SAVE_NATIVE_CODE_JAR=../artifacts/L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar
+if [[ -f "artifacts/safe-native-code/build/libs/safeNativeCode-1.0-SNAPSHOT.jar" ]]; then
+    SAVE_NATIVE_CODE_JAR=../artifacts/safe-native-code/build/libs/safeNativeCode-1.0-SNAPSHOT.jar
+fi
+
+echo "Using $SAVE_NATIVE_CODE_JAR as the safeNativeCode JAR file"
+
 (cd l42-server && mvn install:install-file \
-    -Dfile=../artifacts/L42PortableLinux/L42Internals/L42_lib/safeNativeCode.jar \
+    -Dfile="$SAVE_NATIVE_CODE_JAR" \
     -Dversion=0.0.0 \
     -DgroupId=is.L42 \
     -DartifactId=safeNativeCode \
