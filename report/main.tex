@@ -449,7 +449,7 @@ To increase security, we created a Virtual Private Cloud (VPC) where our contain
 \\[12pt]
 The service is behind a load balancer that evenly distributes incoming requests to the cluster nodes. We also use VPC virtual endpoints to communicate with AWS services (e.g. logging, monitoring and the container repository) over a private link \cite{amazon-2022F}.
 
-\img{../diagrams/ecs-fargate.drawio.png}{Architecture for our ECS Fargate solution}
+\img{../diagrams/ecs-fargate.drawio.png}{Architecture for the ECS Fargate solution}
 
 Advantages:
 \begin{itemize}
@@ -628,7 +628,7 @@ I tested the queuing behaviour of both implementations using a custom script. Th
 \\[12pt]
 For the local 42 server, we see that the requests are processed one at a time, in an arbitrary order. Every requests takes approximately the same amount of time.
 
-\img{images/queuing-test-2.png}{Note the consistent execution times of simultaneous requests on the local 42 server}
+\img{images/queuing-test-2.png}{Consistent execution times of simultaneous requests on the local 42 server}
 
 Running the script against the Lambda implementation, we can see that the first request was processed on an already-warmed-up server. The other 9 requests ran on different servers, each of which had a cold start, thus resulting in higher execution times.
 
