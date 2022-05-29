@@ -171,7 +171,7 @@ Bug Bounty programmes are one technique to incentivise the general public to hel
 \\[12pt]
 A current example of a bug bounty programme is Microsoft, which pays up to US\$250,000 in the case of Hyper-V remote code execution \cite{microsoft-2022}. Google has a similar program, with a maximum amount of US\$1,000,000 for Android vulnerabilites \cite{google-2022} and Apple similarly pays up to US\$1 million for kernel code execution bugs \cite{apple-inc-2022}.
 \\[12pt]
-In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed private user data \cite{newman-2018}. The vulnerability made it possible to see who liked or commented on particular posts on Facebook. Facebook has more than 2 billion active users \cite{datareportal-2022}, any of whom could have had their private data exposed as part of an attack using this vulnerability. Not only oppressive regimes, but also employers and other third-parties might have been able to access this sensitive data.
+In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed private user data \cite{newman-2018}. The vulnerability made it possible to see who liked or commented on particular posts on Facebook. Facebook has more than 2 billion active users \cite{datareportal-2022}, any of whom could have had their private data exposed as part of an attack using this vulnerability. Not only oppressive regimes, but also employers and other third parties might have been able to access this sensitive data.
 \\[12pt]
 42 is a language designed for high security. It supports constraints and invariants to enforce restrictions on parts of the code. For example, the 42 compiler makes it possible to include third-party code, but only give it limited permissions. File system or memory access can be restricted on a granular basis, which makes it considerably safer compared to other programming languages. However, these restrictions need to be implemented correctly in the compiler, which is a comparatively small project on a limited budget. A bug bounty programme for the 42 compiler could therefore be useful in increasing security similar to the programmes listed above.
 
@@ -190,7 +190,7 @@ In order to see what kinds of features would be most useful, I decided to take a
 
 \section{Replit}
 
-\emph{Replit} \cite{replit-2022} always uses a web socket to communicate with the server. While it lacks a user interface option for directly switching between Java versions or specifying command-line arguments, it instead provides direct access to a complete Ubuntu installation, making it possible to run arbitrary shell scripts or programs in other languages (e.g. Python or Ruby). It also fully supports interactive CLI programs. Replit uses the CodeMirror editor.
+\emph{Replit} \cite{replit-2022} always uses a web socket to communicate with the server. While it lacks a user interface option for directly switching between Java versions or specifying command-line arguments, it instead provides direct access to a complete Ubuntu installation, making it possible to run arbitrary shell scripts or programs in other languages (e.g., Python or Ruby). It also fully supports interactive CLI programs. Replit uses the CodeMirror editor.
 
 \img{images/replit.png}{Replit}
 
@@ -214,7 +214,7 @@ In order to see what kinds of features would be most useful, I decided to take a
 
 \section{Online GDB}
 
-\emph{Online GDB} uses the Ace editor for code editing \cite{gdb-online-2022}. It uses web sockets for communicating with the backend, but supports both an interactive input mode in addition to specifying static input. It supports customising the CLI arguments passed to the program, and also allows for custom Java compiler flags.
+\emph{Online GDB} uses the Ace editor for code editing \cite{gdb-online-2022}. It uses web sockets for communicating with the backend, but supports an interactive input mode in addition to specifying static input. It supports customising the CLI arguments passed to the program, and also allows for custom Java compiler flags.
 
 \img{images/online-gdb.png}{Online GDB}
 
@@ -252,7 +252,11 @@ The \emph{Online-Java} compiler uses the Ace editor, and communicates with web s
 
 \img{images/repl-comparison.png}{REPL Comparison}
 
-Based on this comparison, I decided to start by using the Ace editor \cite{mozilla-2022}, along with AJAX HTTP requests. This way my project can easily implement syntax highlighting and code indentation, while making communication with the back-end easy. While specifying command-line arguments would be straightforward with this approach, interactive input would likely require using web sockets, which I decided not to use in my initial implementation since that would add a significant amount of complexity.
+Based on this comparison, I decided to start by using the Ace editor \cite{mozilla-2022}, along with AJAX HTTP requests. This way my project can easily implement syntax highlighting and code indentation, while making communication with the back-end easy. Using web sockets for communication would add a significant amount of complexity without too much benefit for a bug bounty programme, so I decided against implementing this feature.
+\\[12pt]
+Loading third-party libraries is supported via ZIP files or by referencing them over the Internet. Support for interactive and static input was out of scope for this project, although this could be a good future extension.
+\\[12pt]
+Support for multiple Java versions is not relevant to 42 since it is a separate language that requires a specific Java version to run. Command-line arguments for the JVM can be specified by the user.
 
 \chapter{User Interface}
 
@@ -310,10 +314,11 @@ Here is an example request:
 POST /execute
 
 {
-    "files": {
+    "program": {
         "This.L42":"reuse [L42.is/AdamsTowel]\nMain=(\n  _=Log"".#\$reader()\n  Debug(S\"Hello world from 42\")\n  )",
         "Setti.ngs": "Main = [L42.is/AdamsTowel/Log]"
-    }
+    },
+    "use42Cache": true
 }
 \end{mylisting}
 
@@ -323,12 +328,12 @@ HTTP 200 OK
 Access-Control-Allow-Origin: *
 
 {
+    "ok": true,
     "duration": "0.180",
     "stdout": "Hello world from 42\n",
-    "returncode": 0,
+    "stderr": "",
     "tests": "",
-    "ok": true,
-    "stderr": ""
+    "returncode": 0
 }
 \end{mylisting}
 
@@ -416,14 +421,14 @@ Disadvantages:
 
 \begin{itemize}
 \item Costs are calculated on a per-request basis, which means that high levels of usage could make this solution more expensive than the alternatives
-\item When no requests have been received for a while (approx. 10-15 minutes), the underlying server is terminated and the next call will take an additional 10-15 seconds since there is no cache
+\item When no requests have been received for a while (approx. 10-15 minutes), the underlying server is terminated. The next call will then take an additional 10-15 seconds since there will be no cache.
 \item There is no direct control over the provided compute power. We can only adjust the amount of memory and disk space, not the underlying CPU.
 \end{itemize}
 
 I used the AWS Pricing Calculator \cite{amazon-web-services-inc-2022C} to work out a cost estimate.
-
+\\[12pt]
 AWS Lambda has a free tier that includes 1 million requests and 400,000 GB-seconds of compute time \cite{amazon-web-services-inc-2022A}.
-
+\\[12pt]
 In a low-usage scenario of 1000 requests per month, approximately half of all Lambda invocations will require a cold start, in which case it takes ~15 seconds for Lambda to return a response. In the other cases it takes ~2 seconds. Since Lambda is configured to allocate 1.5 GB of memory to my function, this allows for up to ~30000 requests within the free tier limit.
 \\[12pt]
 AWS also charges for outgoing bandwidth at 0.09 USD per GB, but with a free tier of 100 GB per month, which is more than enough for the 42 server: its only outgoing bandwidth is the JSON response object, which contains the program's status code, standard output and standard error, and a duration measurement, all of which adds up to typically less than a hundred bytes.
@@ -490,11 +495,11 @@ The 42 server code itself is stored inside of a docker image that we can create 
 The layer-7 application load balancer is in charge of handling HTTPS requests. It has access to the HTTPS certificate, which allows it to terminate incoming HTTPS requests and forward them to the EC2 instances.
 \\[12pt]
 To handle varying levels of demand, the setup uses an autoscaling group that can increase or decrease the number of running EC2 instances in response to CPU load. There is also the option of using a schedule to automatically adjust the load based on time of day if necessary (e.g. during work hours).
-
+\\[12pt]
 Advantages:
 \begin{itemize}
 \item Using EC2 instances provides a high level of control over our setup. We can customise the exact instance type, storage, memory, networking, and over aspects.
-\item The autoscaling group provides a lot of freedom in regards to performance vs. costs
+\item The autoscaling group provides a lot of freedom in regard to performance vs. costs
 \item When there is very high demand, this solution can be more cost-effective compared to the others
 \end{itemize}
 
@@ -582,7 +587,7 @@ Main=(
 
 Rather than printing a custom string, the above program terminates with an unexpected exception.
 \\[12pt]
-To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed.  A rudimentary syntax check is also performed.
+To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed. A rudimentary syntax check is also performed.
 \\[12pt]
 This is an example of a Hello World program with those checks:
 
@@ -611,9 +616,9 @@ The following flowchart shows how the code validation is integrated.
 
 It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
 \\[12pt]
-Our solution is a JAR file that has two entrypoints. The first solution starts an HTTP server, and processes incoming requests from the front-end. It is used when testing or running the server locally, and when running it via ECS Fargate or on an EC2 instance in a Docker container.
+Our solution is a JAR file that has two entry points. The first solution starts an HTTP server, and processes incoming requests from the front-end. It is used when testing or running the server locally, and when running it via ECS Fargate or on an EC2 instance in a Docker container.
 \\[12pt]
-The second solution, implemented as a separate entrypoint into our JAR file, uses the Amazon Lambda Runtime Interface Client library to listen for Lambda requests using an AWS-specific API, and processes the requests in a similar way to the first solution. This approach is needed because of the way AWS Lambda works: rather than being able to run our own HTTP server to listen on the public internet, requests are received in a "serverless" way, which makes it possible for the Lambda runtime to only be initialised when an incoming request arrives, rather than having it running 24/7.
+The second solution, implemented as a separate entry point into our JAR file, uses the Amazon Lambda Runtime Interface Client library to listen for Lambda requests using an AWS-specific API, and processes the requests in a similar way to the first solution. This approach is needed because of the way AWS Lambda works: rather than being able to run our own HTTP server to listen on the public internet, requests are received in a "serverless" way, which makes it possible for the Lambda runtime to only be initialised when an incoming request arrives, rather than having it running 24/7.
 \\[12pt]
 The 42 implementation has no inbuilt support for parallel requests, so both server implementations need to consider how simultaneous incoming requests should be queued.
 \\[12pt]
@@ -663,11 +668,11 @@ Main=(
 
 Looking at performance, we notice that the first query is significantly slower than the following ones.
 \\[12pt]
-This is due to 42's slow startup time. During this initial startup, 42 is downloading and parsing the standard library. We can use caching to speed up subsequent requests, which avoids the need to continually redownload and parse those libraries.
+This is due to 42's slow start-up time. During this initial start-up, 42 is downloading and parsing the standard library. We can use caching to speed up subsequent requests, which avoids the need to continually redownload and parse those libraries.
 \\[12pt]
 Caching does not only include storing the libraries in memory, but also includes return values of pure functions. Pure functions are those without side effects. In 42, functions are considered pure by default. Only those methods that include \texttt{\#\$} are impure, and will not have their return values cached.
 \\[12pt]
-To ensure that users get faster responses, we preemptively run a "Hello World" program to ensure the standard library is cached.
+To ensure that users get faster responses, we pre-emptively run a "Hello World" program to ensure the standard library is cached.
 \\[12pt]
 For each deployment I did five performance measurements, and worked out the average execution time. In each case only the execution time of the 42 program itself was measured, and not the network overhead, request parsing, or other overhead. I also measured the setup and teardown times (with Terraform).
 
@@ -695,17 +700,17 @@ We can see that ECS Fargate and EC2 have the longest setup and teardown times, a
 
 This project has demonstrated how to set up a bug bounty programme to challenge 42's security features.
 \\[12pt]
-After a quick introduction into the security features of 42 (i.e. support for invariants and immutability), we looked at existing bug bounty programmes. Here we were able to see that they are a valuable tool to involve outside developers and security experts to fortify the security mechanisms of software. For example, in 2018 an outside researcher found a security vulnerability in Facebook, which resulted in a \$50,000 payout. This may have saved Facebook millions of dollars if that vulnerability had been exploited and caused a data breach\cite{newman-2018}. In addition, the potential reputation damage and subsequent loss of trust could also have a large impact on their customer base. This shows the usefulness of bug bounty programmes for improving code quality.
+After a quick introduction into the security features of 42 (i.e. support for invariants and immutability), we looked at existing bug bounty programmes. Here we were able to see that they are a valuable tool to involve outside developers and security experts to fortify the security mechanisms of software. For example, in 2018 an outside researcher found a security vulnerability in Facebook, which resulted in a \$50,000 pay-out. This may have saved Facebook millions of dollars if that vulnerability had been exploited and caused a data breach\cite{newman-2018}. In addition, the potential reputation damage and subsequent loss of trust could also have a large impact on their customer base. This shows the usefulness of bug bounty programmes for improving code quality.
 \\[12pt]
-To involve users in the bug bounty programme, we need a nice user interface to a REPL system. While this is not strictly necessary, it lowers the barrier to entry and makes it easier for users unfamiliar with 42 to get started and engage with the programme. We evaluated numerous existing REPL systems for other programming languages. The primary features those systems had, which we ended up implementing for 42 as well, include syntax highlighting, fast responsiveness, and template support (i.e. splitting the code into read-only and modifiable sections). We also provide a number of 42 example programs across different areas (e.g. basic classes, filesystem access, Java compatibility) which helps users get started. This REPL makes it easy to get started, but users can also download 42 onto their own computers which may be needed for more complex code. To participate, all they need is a web browser and internet access, so no software installation is required. The REPL user interface also supports importing and exporting of 42 programs.
+To involve users in the bug bounty programme, we need a nice user interface to a REPL (read-evaluate-print-loop) system. While this is not strictly necessary, it lowers the barrier to entry and makes it easier for users unfamiliar with 42 to get started and engage with the programme. We evaluated numerous existing REPL systems for other programming languages. The primary features those systems had, which we ended up implementing for 42 as well, include syntax highlighting, fast responsiveness, and template support (i.e. splitting the code into read-only and modifiable sections). We also provide a number of 42 example programs across different areas (e.g. basic classes, filesystem access, Java compatibility) to help users get started. This REPL makes it easy to get started, but users can also download 42 onto their own computers which may be needed for more complex code. To participate, all they need is a web browser and internet access, so no software installation is required. The REPL user interface also supports importing and exporting of 42 programs.
 \\[12pt]
-We looked at different ways to implement the 42 bug bounty server. The server code is written in Java, and it supports a number of different deployment scenarios. It can easily be run locally on any computer, or even on a Raspberry Pi. Alternatively it can be run in the cloud. We picked Amazon Web Services as it the most widely-used cloud provider. The deployment is automated using Terraform, an infrastructure-as-code tool. Rather than setting up infrastructure manually, we can instead describe it in code under version control.
+We looked at different ways to implement the 42 bug bounty server. The server code is written in Java, and it supports a number of different deployment scenarios. It can easily be run locally on any computer, or even on a Raspberry Pi. Alternatively it can be run in the cloud. We picked Amazon Web Services as it is the most widely-used cloud provider. The deployment is automated with Terraform, an infrastructure-as-code tool. Rather than setting up infrastructure manually, we can instead describe it in code under version control.
 \\[12pt]
-We looked at three different deployment setups in AWS: serverless deployment with AWS Lambda, container deployment using ECS Fargate, and traditional server execution using EC2 instances. We compared costs, scalability, availability, performance and security of all approaches.
+We subsequently considered three different deployment setups in AWS: serverless deployment with AWS Lambda, container deployment using ECS Fargate, and traditional server execution using EC2 instances. We compared costs, scalability, availability, performance and security of all approaches.
 \\[12pt]
-Local deployments are not very suitable for high-usage scenarios as they do not scale. To scale vertically, you could run it on a more powerful computer, horizontal scaling is not supported. Availability is limited: in case of a hardware failure, the server would need to be fixed manually. On the upside, local deployments can be very cost-effective, especially if a Raspberry Pi is sufficient.
+Local deployments are not very suitable for high-usage scenarios as they do not scale. To scale vertically, it could be run on a more powerful computer; horizontal scaling is not supported. Availability is limited: in case of a hardware failure, the server would need to be fixed manually. On the upside, local deployments can be very cost-effective, especially if a Raspberry Pi is sufficient.
 \\[12pt]
-All three cloud solutions were designed for scalability and high availability. Horizontal scalability is achieved by running more container tasks in ECS Fargate, additional instances behing an autoscaling mechanism and load balancer for EC2, and automatically for AWS Lambda. Regional distribution supports availability even in the case of hazards like fire or power outages. An AWS Lambda solution was shown to be both cost-effective and highly reliable, as well as having the highest security due to running in a sandbox environment.
+All three cloud solutions were designed for scalability and high availability. Horizontal scalability is achieved by running more container tasks in ECS Fargate, additional instances behind an autoscaling mechanism and load balancer for EC2, and automatically for AWS Lambda. Regional distribution supports availability even in the case of hazards like fire or power outages. An AWS Lambda solution was shown to be both cost-effective and reliable, as well as having the highest security due to running in a sandbox environment.
 \\[12pt]
 To improve the responsiveness, the implementation includes multiple additional features. Queueing incoming requests ensures reliability even during usage spikes. Timeouts, whereby client programs are automatically killed, help against malicious or accidental attacks. To ensure fairness in the bug bounty programme, we prevent code injection by separately evaluating the user's code. Since the system is slow to respond to a first request (cold start phenomenon), we use 42's inbuilt support for caching of libraries and code to speed up subsequent responses.
 \\[12pt]
@@ -713,6 +718,8 @@ In the future, the bug bounty system can be expanded by adding more examples and
 \\[12pt]
 The bug bounty REPL could also be extended with tutorial questions, which could then be integrated into the main 42 tutorial. For example, there could be tutorial exercises that users could try and solve using the REPL.
 \\[12pt]
-While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens.
+While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens. We could also work more on accessibility features.
 \\[12pt]
-Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard.
+Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard. This would also make it possible to set up alert for system downtime.
+\\[12pt]
+Support for interactive and static input was out of scope for this project, although this could be a good future extension.
