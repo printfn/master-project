@@ -5,21 +5,22 @@
 \includegraphics[width=\textwidth]{#1}
 \caption{#2}
 \end{figure}}
+\setlength{\parindent}{0pt}
 
 \definecolor{lightpink}{rgb}{0.9569,0.8,0.8}
 
 \chapter{Introduction}\label{C:intro}
 
 42 is a programming language created by Marco Servetto that is designed to be secure, easy to optimise and customisable \cite{servetto-2022A}.
-\\[12pt]
+
 Most modern, mainstream programming languages have features designed to prevent accidental errors from being introduced. For example, the static type system in Java is capable of producing compile-time errors in common cases of invalid code, which prevents those errors from causing bugs at runtime. 
-\\[12pt]
+
 The 42 language takes this idea further: it supports specifying arbitrary constraints, such as "names must start with an upper-case letter", or "these two lists must have the same length". When constraints like these are used in 42, the compiler can guarantee that those constraints will never be observed broken.
-\\[12pt]
+
 42 also supports fine-grained permissions, where parts of the program can specify what actions other parts will be able to perform. This can used be to, for example, prevent invalid data from being saved to a file or database. When one part of the program specifies constraints in this way, no other part of the code will be able to break them. With the compiler ensuring that the specified constraints are always enforced, large programs become safer, and easier to audit, while third-party libraries are less capable of potentially introducing security vulnerabilities.
-\\[12pt]
+
 Another unique feature of 42 is the ability to customise, extend or replace the standard library. While the default library, "Adam's Towel" \cite{servetto-2022B}, contains a wide selection of data types and methods, these can be further extended by users as needed.
-\\[12pt]
+
 The goal of this project is to demonstrate those constraints and security guarantees in practice. This is done by creating a public-facing website where users can submit arbitrary 42 code, that will then be executed in a constrained environment. Similar to a bug bounty programme, users will be encouraged to try and break the security guarantees of 42.
 
 
@@ -60,10 +61,10 @@ Main=(
   )
 \end{mylisting}
 
-In this program, in addition to defining a \code{Point} class in much the same way as one would in Java, we have created an additional "\code{invariant}" method, annotated with "\code{@Cache.Now}. The annotation causes 42 to automatically call this method whenever an instance of \code{Point} is created. The method itself throws an error if \code{x} or \code{y} have unexpected values, and the compiler ensures that this constraint is checked both when a Point instance is constructed, and also whenever instances are modified.
-\\[12pt]
+In this program, in addition to defining a \code{Point} class in much the same way as one would in Java, we have created an additional "\code{invariant}" method, annotated with "\code{@Cache.Now}. The annotation causes 42 to automatically call this method whenever an instance of \code{Point} is created. The method itself throws an error if \code{x} or \code{y} have unexpected values, and the compiler ensures that this constraint is checked both when a \code{Point} instance is constructed, and also whenever instances are modified.
+
 If an exception does get thrown due to the invariant being broken, it can still be caught, but 42 ensures that no part of the code will ever be able to access a \code{Point} instance with a broken constraint.
-\\[12pt]
+
 While the previous example used a \code{Point} class with immutable fields, constraints can also be used with fully mutable fields, like in this example:
 
 \begin{mylisting}{Constraint with mutable fields}
@@ -132,8 +133,8 @@ Message This.X(This.Message, This.HasToS, This.Message.Assert):
 \section{Mutability}
 
 42 also has support for enforcing immutability. Immutability means that properties cannot be changed after an object has been created.
-\\[12pt]
-In the below example, we are creating Point and Square instances that are immutable. Regardless of how the \texttt{make}, \texttt{do1} and \texttt{do2} methods are implemented, the squares \texttt{s1} and \texttt{s2} will always be identical.
+
+In the below example, we are creating Point and Square instances that are immutable. Regardless of how the \code{make}, \code{do1} and \code{do2} methods are implemented, the squares \code{s1} and \code{s2} will always be identical.
 
 \begin{mylisting}{Immutability}
 reuse [L42.is/AdamsTowel]
@@ -159,20 +160,20 @@ Main=(
   )
 \end{mylisting}
 
-We introduce two classes, \texttt{Point} and \texttt{Square}. \texttt{Point} consists of x and y co-ordinates, while \texttt{Square} contains a \texttt{Point} instance. The \texttt{Code} block is modifiable by the user, while everything else cannot be changed. The challenge that we provide is to override the \texttt{make}, \texttt{do1} and \texttt{do2} methods to attempt to modify an immutable Square instance.
-\\[12pt]
-In the \texttt{Main} method, we generate a \texttt{Point} instance, and pass it to the \texttt{do2} method. The immutability guarantees of 42 should prevent users from being able to modify the \texttt{Point} instance. \texttt{X} is an assertion that throws an exception if the two squares \texttt{s1} and \texttt{s2} are different, so the final line in \texttt{Main} should never be reached. If this line is printed, the mutability guarantee of 42 will have been broken.
+We introduce two classes, \code{Point} and \code{Square}. \code{Point} consists of x and y co-ordinates, while \code{Square} contains a \code{Point} instance. The \code{Code} block is modifiable by the user, while everything else cannot be changed. The challenge that we provide is to override the \code{make}, \code{do1} and \code{do2} methods to attempt to modify an immutable Square instance.
+
+In the \code{Main} method, we generate a \code{Point} instance, and pass it to the \code{do2} method. The immutability guarantees of 42 should prevent users from being able to modify the \code{Point} instance. \code{X} is an assertion that throws an exception if the two squares \code{s1} and \code{s2} are different, so the final line in \code{Main} should never be reached. If this line is printed, the mutability guarantee of 42 will have been broken.
 
 \chapter{Bug Bounty Programmes}
 
 Software has become significantly more complex. It's become ever easier to add third-party libraries and dependencies to software projects, any of which can add security vulnerabilities to existing code. The size of software projects, measured in lines of code, has continued to grow. For example, the initial 1.0 release of Linux comprised of approx. 180,000 lines of code \cite{mccandless-2020, perry-2012}, whereas in 2020 the kernel had grown to more than 27 million \cite{larabel-2020}. The increased use of third-party libraries comes hand-in-hand with an increase in contributor numbers, which raises the risk of supply-chain attacks \cite{sharma-2021}. Another example of a recent high-profile security vulnerability is the Log4J vulnerability \cite{apache-2021}, which led to arbitrary code execution and had hundreds of thousands of exploit attempts within days of being publicised \cite{raveendran-2021}.
-\\[12pt]
+
 Bug Bounty programmes are one technique to incentivise the general public to help search for security bugs. They enable individuals to receive compensation and recognition for finding such bugs. The first bug bounty programme started in 1983 \cite{hackerone-2017}, where anyone finding a bug in the VRTX operating system would receive a VW Beetle as compensation \cite{hunter-ready-inc-1983}. They are often used in combination with existing best practices like code reviews, pen tests, automated scanning, and security audits by third-party cybersecurity companies.
-\\[12pt]
+
 A current example of a bug bounty programme is Microsoft, which pays up to US\$250,000 in the case of Hyper-V remote code execution \cite{microsoft-2022}. Google has a similar program, with a maximum amount of US\$1,000,000 for Android vulnerabilites \cite{google-2022} and Apple similarly pays up to US\$1 million for kernel code execution bugs \cite{apple-inc-2022}.
-\\[12pt]
+
 In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed private user data \cite{newman-2018}. The vulnerability made it possible to see who liked or commented on particular posts on Facebook. Facebook has more than 2 billion active users \cite{datareportal-2022}, any of whom could have had their private data exposed as part of an attack using this vulnerability. Not only oppressive regimes, but also employers and other third parties might have been able to access this sensitive data.
-\\[12pt]
+
 42 is a language designed for high security. It supports constraints and invariants to enforce restrictions on parts of the code. For example, the 42 compiler makes it possible to include third-party code, but only give it limited permissions. File system or memory access can be restricted on a granular basis, which makes it considerably safer compared to other programming languages. However, these restrictions need to be implemented correctly in the compiler, which is a comparatively small project on a limited budget. A bug bounty programme for the 42 compiler could therefore be useful in increasing security similar to the programmes listed above.
 
 
@@ -253,17 +254,17 @@ The \emph{Online-Java} compiler uses the Ace editor, and communicates with web s
 \img{images/repl-comparison.png}{REPL Comparison}
 
 Based on this comparison, I decided to start by using the Ace editor \cite{mozilla-2022}, along with AJAX HTTP requests. This way my project can easily implement syntax highlighting and code indentation, while making communication with the back-end easy. Using web sockets for communication would add a significant amount of complexity without too much benefit for a bug bounty programme, so I decided against implementing this feature.
-\\[12pt]
+
 Loading third-party libraries is supported via ZIP files or by referencing them over the Internet. Support for interactive and static input was out of scope for this project, although this could be a good future extension.
-\\[12pt]
+
 Support for multiple Java versions is not relevant to 42 since it is a separate language that requires a specific Java version to run. Command-line arguments for the JVM can be specified by the user.
 
 \chapter{User Interface}
 
 The user interacts with the 42 bug bounty programme via a web page.
-\\[12pt]
+
 The website allows users to choose between several example programs, to import a 42 program from their computer, or to type one directly into the editing interface.
-\\[12pt]
+
 The user can pick an example program from the dropdown list, and load it into the editor. It can then be freely edited afterwards. Pressing the "Run" button sends the source code to the server. The server compiles and executes the user's code, and returns the output as a JSON object. The browser displays the result and the overall execution time.
 
 \img{images/42-editor-hello-world.png}{The front-end user interface after executing a "Hello World" program}
@@ -287,17 +288,17 @@ The above screenshot shows one of the challenges that users can attempt to solve
 \img{images/architecture.png}{42 Server Architecture}
 
 I considered various ways of implementing and deploying the project. For testing and developing, I started with a local solution, but to increase reliability, availability and scalability, I decided to leverage Amazon's cloud computing service AWS \cite{amazon-2022A}.
-\\[12pt]
+
 Rather than setting up the cloud infrastructure manually via the AWS Console, I decided to use \emph{Terraform} \cite{hashicorp-2022}. Terraform is a tool that makes it easy to automate cloud infrastructure by describing it in code (a.k.a. "infrastructure as code"). We can describe the exact resources that are needed in a document.
-\\[12pt]
+
 Here is an example of a Terraform document that sets up the necessary cloud storage ("bucket") for storing the 42 server code ("bucket object"):
 
 \img{images/terraform.png}{Terraform code that creates an S3 bucket \cite{amazon-2022B} and uploads a ZIP file}
 
 To deploy the infrastructure to the cloud, we can run a \code{terraform apply} command with the Terraform document. Likewise, to tear down the deployed resources, a \code{terraform destroy} command can be used.
-\\[12pt]
+
 Terraform has the advantage of guaranteeing a consistent set-up without manual intervention. Deployment is idempotent, meaning that running the same deployment command several times has no additional effect. It also follows the idea of immutable infrastructure. Rather than manually changing the configuration after deployment, we can deploy a new set of resources that replaces the existing ones. The Terraform documents are part of the source code repository, which allows all changes to be tracked. This makes it easy to go back to an earlier version of the code which represents the infrastructure.
-\\[12pt]
+
 It can also be a time-saver when we want to set up the infrastructure again, such as moving to a different geographical region.
 
 \section{Local Deployment}
@@ -338,13 +339,13 @@ Access-Control-Allow-Origin: *
 \end{mylisting}
 
 Because the 42 editor front-end runs on a different domain to the backend server, we need to use a CORS (cross-origin resource sharing) header to allow these cross-domain requests. Otherwise web browsers would block these requests as it has potential security risks.
-\\[12pt]
+
 This local solution speeds up the development and testing process due to quick deployment and direct access, including support for debugging with IntelliJ. Its disadvantages include a lack of scalability and availability, and a lack of HTTPS support (though this can be worked around with an nginx reverse proxy). Support for multiple geographic regions to reduce latency would also not be possible with this approach. It has the additional advantage of incurring minimal costs.
-\\[12pt]
+
 Setting up this local server requires only a JDK, the l42-controller JAR file, and internet connectivity. Due to the cross-platform nature of Java, this works on any operating system with no need for Docker.
-\\[12pt]
+
 To work out the approximate costs of running a 42 server locally, we need to consider power usage, server and router hardware and internet access costs.
-\\[12pt]
+
 Local costs in USD per month:
 
 \begin{itemize}
@@ -359,7 +360,7 @@ Assuming we can respond in an average of two seconds per request, we can serve u
 \section{Self-hosting on a Raspberry Pi}
 
 A minimalistic deployment is possible on a Raspberry Pi. Raspberry Pi is a low-cost, credit-card sized single-board computer. \cite{raspberry-pi-foundation-2015}. It has a 1.5 GHz 64-bit ARM CPU and 8 GB of RAM. Connections include USB ports, Ethernet, Wi-Fi and Bluetooth. It comes with a full desktop Linux installation.
-\\[12pt]
+
 I set up the Raspberry Pi with a Java 16 JDK and the 42 server JAR file. Since the Raspberry Pi uses a standard Wi-Fi connection, the 42 server running on it can be reached over the internet.
 
 \img{images/raspberry-pi.jpg}{Raspberry Pi 4B capable of running the 42 server}
@@ -391,21 +392,21 @@ Costs:
 \section{AWS Lambda}
 
 AWS Lambda is a serverless computing platform that is part of Amazon Web Services. Rather than having a server constantly running, Lambda functions make it possible to write code that responds to web requests in an event-driven way, without needing to manually provision servers \cite{amazon-web-services-inc-2022A}.
-\\[12pt]
+
 I decided to use AWS Lambda to set up the 42 web service, since it is more cost-effective, scalable and potentially more secure compared to the alternatives. In particular, since users will need to be able to submit arbitrary 42 code to be executed server-side, a Lambda function means that the submitted 42 code will be running within a temporary, secure environment. In comparison, if the server were to use Docker containers or virtual machines as the 42 execution environment, the risk of malicious code interfering with the server might increase.
-\\[12pt]
+
 Here is a diagram describing the architecture of the server back-end for this project:
 
 \img{../diagrams/lambda.drawio.png}{AWS Lambda Architecture}
 
 To access the back-end server, we are using function URLs, a recent feature of AWS, instead of an API Gateway.
-\\[12pt]
+
 Function URLs are best for use cases where you must implement a single-function microservice with a public endpoint that doesn't require the advanced functionality of API Gateway, such as request validation, throttling, custom authorizers, custom domain names, usage plans, or caching. For example, when you are implementing webhook handlers, form validators, mobile payment processing, advertisement placement, machine learning inference, and so on. It is also the simplest way to invoke your Lambda functions during research and development without leaving the Lambda console or integrating additional services.
-\\[12pt]
+
 Amazon API Gateway is a fully managed service that makes it easy for you to create, publish, maintain, monitor, and secure APIs at any scale. Use API Gateway to take advantage of capabilities like JWT/custom authorizers, request/response validation and transformation, usage plans, built-in AWS WAF support, and so on. \cite{casalboni-2022}
-\\[12pt]
+
 The client, implemented via a static webpage, can make cross-origin AJAX requests to the Lambda function via its function URL.
-\\[12pt]
+
 Advantages:
 
 \begin{itemize}
@@ -426,27 +427,27 @@ Disadvantages:
 \end{itemize}
 
 I used the AWS Pricing Calculator \cite{amazon-web-services-inc-2022C} to work out a cost estimate.
-\\[12pt]
+
 AWS Lambda has a free tier that includes 1 million requests and 400,000 GB-seconds of compute time \cite{amazon-web-services-inc-2022A}.
-\\[12pt]
+
 In a low-usage scenario of 1000 requests per month, approximately half of all Lambda invocations will require a cold start, in which case it takes ~15 seconds for Lambda to return a response. In the other cases it takes ~2 seconds. Since Lambda is configured to allocate 1.5 GB of memory to my function, this allows for up to ~30000 requests within the free tier limit.
-\\[12pt]
+
 AWS also charges for outgoing bandwidth at 0.09 USD per GB, but with a free tier of 100 GB per month, which is more than enough for the 42 server: its only outgoing bandwidth is the JSON response object, which contains the program's status code, standard output and standard error, and a duration measurement, all of which adds up to typically less than a hundred bytes.
-\\[12pt]
+
 Therefore, in this low-usage scenario, the Lambda solution is within the limits of the AWS Free Tier, so it does not incur any costs.
-\\[12pt]
+
 In a high-usage scenario of 1,000,000 requests per month, we can assume that the vast majority of incoming requests will be able to take advantage of caching, reducing the average response time to ~2s. While we are still within the free tier limit of 1M requests/month, we now require 3 million GB-seconds of compute time (1.5 GB memory * 2 seconds execution time * 1 million requests). In the Sydney region, this amounts to ~US\$43.
-\\[12pt]
+
 No extra costs for function URLs exist \cite{casalboni-2022}. Even at 1 million requests, there is no extra networking charge due to the 100 GB free tier. The lambda code stored as a ZIP file in S3 is ~80 MB in size, the cost of which can be neglected since it is below \$0.01 (Amazon, 2022a).
 
 \section{ECS Fargate}
 
 ECS Fargate (Elastic Container Service) is a AWS service for running Docker containers in the cloud \cite{amazon-2022E}. It's highly available and scalable. We are using the option to run it with Fargate in a serverless way, managed by AWS. This makes it possible for the service to be restarted automatically in case of errors or crashes.
-\\[12pt]
+
 We packaged the 42 server and runtime in a Docker container which can then be deployed onto the ECS Fargate service. We can directly configure the amount of CPU and RAM available for the server task (i.e. container), the number of nodes in the ECS cluster, and how we want to increase or decrease the number of deployed server in response to traffic.
-\\[12pt]
+
 To increase security, we created a Virtual Private Cloud (VPC) where our containers can run in a private subnet. This means that we are in a segmented network with no direct access to the public internet except via a NAT gateway. We added security groups that act as a virtual firewall.
-\\[12pt]
+
 The service is behind a load balancer that evenly distributes incoming requests to the cluster nodes. We also use VPC virtual endpoints to communicate with AWS services (e.g. logging, monitoring and the container repository) over a private link \cite{amazon-2022F}.
 
 \img{../diagrams/ecs-fargate.drawio.png}{Architecture for the ECS Fargate solution}
@@ -475,27 +476,27 @@ Costs:
 \end{itemize}
 
 The total cost of the Fargate solution is approx. US\$ 258/month. Some of the resources that are part of this solution are optional and can be disabled to reduce costs (i.e. the load balancer, the NAT gateway and the VPC endpoints), in which case the total cost would be reduced to ~\$43/month.
-\\[12pt]
+
 Interestingly enough, the total cost of this solution is largely independent of the number of requests, since even at 1 million monthly requests a single Fargate instance will still be able to handle the entire load. Thus in both the low-usage and high-usage scenarios, the total cost is \$258 or \$43 (depending on the number of services used and the level of security required).
 
 \section{EC2 Instance}
 
 Elastic Compute Cloud (EC2) is an AWS service that provides access to virtual machines in the cloud \cite{amazon-2022C}. It provides a large selection of different machine types with different amounts of storage and high-performance networking at various price points.
-\\[12pt]
+
 While EC2 supports Windows, Mac and Linux machines, we decided to use Linux for the 42 server since that it the best-supported option.
 
 \img{../diagrams/ec2.drawio.png}{Architecture for the EC2 solution}
 
 Our solution includes a virtual private cloud with two subnets each in two different availability zones. Amazon operates 26 distinct geographical regions across the world \cite{amazon-2022D}. Each region contains three or more availability zones, which are separate isolated data centres connected through low-latency links. This setup provides high availability: when one data centre goes down due to a power outage, fire, or similar, the other availability zones within that region will be able to take over the load.
-\\[12pt]
+
 Each availability zone contains both a private and a public subnet, where only the public subnet is directly connected to the outside internet via an Internet Gateway as shown in the diagram above. The private subnet allows outgoing (egress) traffic via a NAT Gateway. Incoming traffic is only permitted from the public subnet via the load balancer shown in the diagram. To control incoming and outgoing traffic we use security groups which act as a virtual firewall.
-\\[12pt]
+
 The 42 server code itself is stored inside of a docker image that we can create locally and upload to the Amazon Container Registry service, from where each EC2 instance (virtual machine) can download it securely from a private endpoint. For logs we use the AWS Cloudwatch service.
-\\[12pt]
+
 The layer-7 application load balancer is in charge of handling HTTPS requests. It has access to the HTTPS certificate, which allows it to terminate incoming HTTPS requests and forward them to the EC2 instances.
-\\[12pt]
+
 To handle varying levels of demand, the setup uses an autoscaling group that can increase or decrease the number of running EC2 instances in response to CPU load. There is also the option of using a schedule to automatically adjust the load based on time of day if necessary (e.g. during work hours).
-\\[12pt]
+
 Advantages:
 \begin{itemize}
 \item Using EC2 instances provides a high level of control over our setup. We can customise the exact instance type, storage, memory, networking, and over aspects.
@@ -518,7 +519,7 @@ Costs:
 \end{itemize}
 
 The total cost of this EC2 solution is \$39/month to \$124/month. The NAT gateway can be disabled to reduce costs, but at the disadvantage of reduced security.
-\\[12pt]
+
 Similar to the Fargate solution, this implementation is also largely independent of the number of requests, since a single t2.small instance is likely enough for up to 1 million requests per month.
 
 \section{Comparison}
@@ -546,21 +547,21 @@ EC2 (high security) & \$124 & \code{+} & \code{+} & \code{+} & \code{-} \\ \hlin
 \end{fig}
 
 I evaluated four different server solutions, in both low-usage and high-usage scenarios, and low- and high-security settings. The low-usage scenarios assume 1000 requests per month, while the high-usage scenarios assume 1 million monthly requests. The high-security setting keeps the compute power in a private network segment, with no direct connection to the outside internet. We use AWS security groups and NAT gateways as a virtual firewall to control ingress and egress traffic.
-\\[12pt]
+
 Both local setups suffer from a lack of scalability and availability, so they are not suitable for a production-grade setup. The Raspberry Pi solution does offer an incredibly low cost even in a high-usage scenario, in addition to being easier to test and deploy to compared to the cloud implementations. During development, the local solutions offer a quick turn-around time and are easiest to experiment with.
-\\[12pt]
+
 If we can tolerate the reduced responsiveness due to cold starts of AWS Lambda, we can recommend it in a low-usage scenario as it doesn't come with any costs. In a high-usage scenario, it benefits from a high level of scalability, in addition to having higher responsiveness due to fewer cold starts.
-\\[12pt]
+
 ECS Fargate benefits from being a managed service, which makes it highly available and secure. In comparison to Lambda we can guarantee high responsiveness regardless of usage. If demand were to increase considerably beyond the high-usage scenario, it would become cheaper than AWS Lambda.
-\\[12pt]
+
 EC2 provides a maximum level of control, but at the cost of having to manage security updates ourselves. Similar to the Fargate solution, the level of security and associated costs can be changed as needed. The level of complexity is similar to the Fargate solution.
 
 \section{Preventing malicious code injection}
 
 For the bug bounty program, we want to allow arbitrary code to be executed on the 42 server. To enable this, we have a code editor front-end that accepts any user code. However, we want to protect the server from malicious code, as well as preventing users from trivially bypassing the security restrictions via code injection. This is similar to the well-known SQL injection attacks \cite{halfond2006classification}.
-\\[12pt]
+
 For example, if we want users to be able to customise a Hello World-like program by modifying the string, we might have a code template like this one:
-\\[12pt]
+
 \begin{mylisting}{Hello World-like program template}
 reuse [L42.is/AdamsTowel]
 Main=(
@@ -569,7 +570,7 @@ Main=(
 \end{mylisting}
 
 Now if users can insert arbitrary content where the "???" placeholder is, it would be trivial to circumvent the restriction that only the string contents should be modifiable. For example, by including unescaped quote characters, arbitrary code could be executed, as shown here:
-\\[12pt]
+
 \begin{mylisting}{Code injection example}
 /*
     inserted string:
@@ -586,9 +587,9 @@ Main=(
 \end{mylisting}
 
 Rather than printing a custom string, the above program terminates with an unexpected exception.
-\\[12pt]
-To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\texttt{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed. A rudimentary syntax check is also performed.
-\\[12pt]
+
+To prevent these code injection attacks, we use an inbuilt function from the 42 compiler (\code{Parse.sureProgram}) to validate the template contents independently of the rest of the program. This ensures that the given code is entirely self-contained, and does not escape its environment. For example, opening braces and closing braces must match, and unterminated string literals are not allowed. A rudimentary syntax check is also performed.
+
 This is an example of a Hello World program with those checks:
 
 \begin{mylisting}{Templated Hello World program}
@@ -615,17 +616,17 @@ The following flowchart shows how the code validation is integrated.
 \section{Queuing Requests}
 
 It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
-\\[12pt]
+
 Our solution is a JAR file that has two entry points. The first solution starts an HTTP server, and processes incoming requests from the front-end. It is used when testing or running the server locally, and when running it via ECS Fargate or on an EC2 instance in a Docker container.
-\\[12pt]
+
 The second solution, implemented as a separate entry point into our JAR file, uses the Amazon Lambda Runtime Interface Client library to listen for Lambda requests using an AWS-specific API, and processes the requests in a similar way to the first solution. This approach is needed because of the way AWS Lambda works: rather than being able to run our own HTTP server to listen on the public internet, requests are received in a "serverless" way, which makes it possible for the Lambda runtime to only be initialised when an incoming request arrives, rather than having it running 24/7.
-\\[12pt]
+
 The 42 implementation has no inbuilt support for parallel requests, so both server implementations need to consider how simultaneous incoming requests should be queued.
-\\[12pt]
+
 In the case of the standard HTTP server, I added a queue from the standard library to ensure that requests are only processed one at a time. For the second solution, the queuing behaviour is already taken care of by the Lambda environment, which ensures that no additional requests are passed to our program while the previous request is still being processed.
-\\[12pt]
+
 I tested the queuing behaviour of both implementations using a custom script. The scripts sends 10 different requests in parallel to either the deployed Lambda function or to a local 42 server.
-\\[12pt]
+
 For the local 42 server, we see that the requests are processed one at a time, in an arbitrary order. Every requests takes approximately the same amount of time.
 
 \img{images/queuing-test-2.png}{Consistent execution times of simultaneous requests on the local 42 server}
@@ -639,17 +640,17 @@ This shows that queuing works for all of the implementations, and that parallel 
 \section{Handling Timeouts}
 
 We need to consider the case that the user might send a 42 program that never terminates, which could prevent the server from handling other requests.
-\\[12pt]
+
 When the server is deployed to an AWS Lambda function, the Lambda runtime already supports setting execution timeouts. After a predefined interval, the Lambda function is terminated automatically, with the caller receiving an error message. The next request would start a new Lambda function environment.
-\\[12pt]
+
 However, when running locally or in a Docker container, we need to handle timeouts ourselves. This is done by starting a background thread that will terminate the running 42 program after a predefined length of time. Details can be seen in the diagram below:
 
 \img{../diagrams/Handling Timeouts.png}{Handling Timeouts}
 
 The 42 server consists of two processes (i.e. two separate JVMs). The first JVM contains the main thread, which receives incoming requests from users and returns responses, as well as orchestrating the 42 runtime. The second process runs the JVM that actually executes the 42 code.
-\\[12pt]
+
 When a user sends a requests containing a 42 program, the main thread begins by initialising a second JVM that will contain the 42 runtime. The main thread then starts a background thread for monitoring the 42 execution and waiting for any potential timeout. If the second JVM has not finished executing the 42 program when the timeout expires, the timeout thread immediately kills that process, which results in the main thread receiving a cancellation exception. The main thread then sends a timeout error message to the user.
-\\[12pt]
+
 If, on the other hand, the 42 program finishes in time, the main thread sends an interrupt to the timeout thread. Upon receiving this interrupt, the background thread cleanly shuts itself down. The main thread then returns the successful execution result to the user.
 
 \begin{mylisting}{Infinite Loop in 42}
@@ -667,13 +668,13 @@ Main=(
 \section{Caching \& Performance Measurements}
 
 Looking at performance, we notice that the first query is significantly slower than the following ones.
-\\[12pt]
+
 This is due to 42's slow start-up time. During this initial start-up, 42 is downloading and parsing the standard library. We can use caching to speed up subsequent requests, which avoids the need to continually redownload and parse those libraries.
-\\[12pt]
-Caching does not only include storing the libraries in memory, but also includes return values of pure functions. Pure functions are those without side effects. In 42, functions are considered pure by default. Only those methods that include \texttt{\#\$} are impure, and will not have their return values cached.
-\\[12pt]
+
+Caching does not only include storing the libraries in memory, but also includes return values of pure functions. Pure functions are those without side effects. In 42, functions are considered pure by default. Only those methods that include \code{\#\$} are impure, and will not have their return values cached.
+
 To ensure that users get faster responses, we pre-emptively run a "Hello World" program to ensure the standard library is cached.
-\\[12pt]
+
 For each deployment I did five performance measurements, and worked out the average execution time. In each case only the execution time of the 42 program itself was measured, and not the network overhead, request parsing, or other overhead. I also measured the setup and teardown times (with Terraform).
 
 \begin{fig}[H]
@@ -699,27 +700,27 @@ We can see that ECS Fargate and EC2 have the longest setup and teardown times, a
 \chapter{Conclusion}
 
 This project has demonstrated how to set up a bug bounty programme to challenge 42's security features.
-\\[12pt]
+
 After a quick introduction into the security features of 42 (i.e. support for invariants and immutability), we looked at existing bug bounty programmes. Here we were able to see that they are a valuable tool to involve outside developers and security experts to fortify the security mechanisms of software. For example, in 2018 an outside researcher found a security vulnerability in Facebook, which resulted in a \$50,000 pay-out. This may have saved Facebook millions of dollars if that vulnerability had been exploited and caused a data breach\cite{newman-2018}. In addition, the potential reputation damage and subsequent loss of trust could also have a large impact on their customer base. This shows the usefulness of bug bounty programmes for improving code quality.
-\\[12pt]
+
 To involve users in the bug bounty programme, we need a nice user interface to a REPL (read-evaluate-print-loop) system. While this is not strictly necessary, it lowers the barrier to entry and makes it easier for users unfamiliar with 42 to get started and engage with the programme. We evaluated numerous existing REPL systems for other programming languages. The primary features those systems had, which we ended up implementing for 42 as well, include syntax highlighting, fast responsiveness, and template support (i.e. splitting the code into read-only and modifiable sections). We also provide a number of 42 example programs across different areas (e.g. basic classes, filesystem access, Java compatibility) to help users get started. This REPL makes it easy to get started, but users can also download 42 onto their own computers which may be needed for more complex code. To participate, all they need is a web browser and internet access, so no software installation is required. The REPL user interface also supports importing and exporting of 42 programs.
-\\[12pt]
+
 We looked at different ways to implement the 42 bug bounty server. The server code is written in Java, and it supports a number of different deployment scenarios. It can easily be run locally on any computer, or even on a Raspberry Pi. Alternatively it can be run in the cloud. We picked Amazon Web Services as it is the most widely-used cloud provider. The deployment is automated with Terraform, an infrastructure-as-code tool. Rather than setting up infrastructure manually, we can instead describe it in code under version control.
-\\[12pt]
+
 We subsequently considered three different deployment setups in AWS: serverless deployment with AWS Lambda, container deployment using ECS Fargate, and traditional server execution using EC2 instances. We compared costs, scalability, availability, performance and security of all approaches.
-\\[12pt]
+
 Local deployments are not very suitable for high-usage scenarios as they do not scale. To scale vertically, it could be run on a more powerful computer; horizontal scaling is not supported. Availability is limited: in case of a hardware failure, the server would need to be fixed manually. On the upside, local deployments can be very cost-effective, especially if a Raspberry Pi is sufficient.
-\\[12pt]
+
 All three cloud solutions were designed for scalability and high availability. Horizontal scalability is achieved by running more container tasks in ECS Fargate, additional instances behind an autoscaling mechanism and load balancer for EC2, and automatically for AWS Lambda. Regional distribution supports availability even in the case of hazards like fire or power outages. An AWS Lambda solution was shown to be both cost-effective and reliable, as well as having the highest security due to running in a sandbox environment.
-\\[12pt]
+
 To improve the responsiveness, the implementation includes multiple additional features. Queueing incoming requests ensures reliability even during usage spikes. Timeouts, whereby client programs are automatically killed, help against malicious or accidental attacks. To ensure fairness in the bug bounty programme, we prevent code injection by separately evaluating the user's code. Since the system is slow to respond to a first request (cold start phenomenon), we use 42's inbuilt support for caching of libraries and code to speed up subsequent responses.
-\\[12pt]
+
 In the future, the bug bounty system can be expanded by adding more examples and challenges. This can be used to test additional guarantees of 42. It could also have community features, such as a discussion forum or a chat function, which would make it easier for users to discuss ideas.
-\\[12pt]
+
 The bug bounty REPL could also be extended with tutorial questions, which could then be integrated into the main 42 tutorial. For example, there could be tutorial exercises that users could try and solve using the REPL.
-\\[12pt]
+
 While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens. We could also work more on accessibility features.
-\\[12pt]
+
 Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard. This would also make it possible to set up alert for system downtime.
-\\[12pt]
+
 Support for interactive and static input was out of scope for this project, although this could be a good future extension.
