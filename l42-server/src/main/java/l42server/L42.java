@@ -99,7 +99,7 @@ class L42 {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        var result = executeL42();
+        var result = executeL42(input);
         long endTime = System.nanoTime();
         result.executionTimeNanos = endTime - startTime;
         return result;
@@ -149,7 +149,8 @@ class L42 {
                 resultFiles.put(filename, rendered);
             }
         }
-        return new JSONObject().put("program", resultFiles);
+        templatedProgram.put("program", resultFiles);
+        return templatedProgram;
     }
 
     private Settings parseSettings() {
@@ -158,11 +159,19 @@ class L42 {
         return Parse.sureSettings(settingsPath);
     }
 
-    private Result executeL42() {
+    private Result executeL42(JSONObject input) {
         System.err.println("Starting to execute 42...");
         settings = parseSettings();
         var out = new OutputHandler();
         try {
+            if (!input.optBoolean("use42Cache", true)) {
+                // clear cache
+                if (this.slave != null) {
+                    this.slave.terminate();
+                }
+                cache = new CachedTop(List.of(), List.of());
+            }
+
             URI tempDir = this.tempDir;
             var cache = this.cache;
             var settings = this.settings;

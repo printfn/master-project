@@ -97,6 +97,8 @@ body {
     <input type="button" id="execute" value="Run" onclick="execute()" title="Execute the program on the 42 server in the cloud">
     <input type="button" value="Download as ZIP" onclick="downloadAsZip()" title="Click here to save your program as a ZIP file to your computer">
     <input type="button" value="Modify template" onclick="modifyTemplateHandler()" title="Make a template program fully editable">
+    <input type="checkbox" id="use42Cache" checked title="Use 42 cache">
+    <label for="use42Cache">Use 42 Cache</label>
     <span id="duration-paragraph">
         <label for="duration">Duration: </label>
         <span id="duration">1.234 seconds</span>
@@ -524,10 +526,12 @@ async function execute() {
         executeButton.value = 'Please wait...';
         clearOutput();
         let program = JSON.parse(JSON.stringify(GUI.getProgram()));
+        let use42Cache = document.getElementById('use42Cache').checked;
         const result = await multiFetch({
             method: 'POST',
             body: JSON.stringify({
-                program: program,
+                use42Cache,
+                program,
             }),
         });
         if (!result) {
