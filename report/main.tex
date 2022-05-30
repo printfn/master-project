@@ -2,10 +2,13 @@
 \newcommand{\code}[1]{\texttt{\textbf{#1}}}
 \newcommand{\img}[2]{
 \begin{figure}[H]
-\includegraphics[width=\textwidth]{#1}
+\fbox{\includegraphics[width=\textwidth]{#1}}
 \caption{#2}
 \end{figure}}
+
 \setlength{\parindent}{0pt}
+\setlength{\fboxsep}{0pt}
+\setlength{\fboxrule}{0.5pt}
 
 \definecolor{lightpink}{rgb}{0.9569,0.8,0.8}
 
@@ -442,7 +445,7 @@ No extra costs for function URLs exist \cite{casalboni-2022}. Even at 1 million 
 
 \section{ECS Fargate}
 
-ECS Fargate (Elastic Container Service) is a AWS service for running Docker containers in the cloud \cite{amazon-2022E}. It's highly available and scalable. We are using the option to run it with Fargate in a serverless way, managed by AWS. This makes it possible for the service to be restarted automatically in case of errors or crashes.
+ECS Fargate (Elastic Container Service) is an AWS service for running Docker containers in the cloud \cite{amazon-2022E}. It's highly available and scalable. We are using the option to run it with Fargate in a serverless way, managed by AWS. This makes it possible for the service to be restarted automatically in case of errors or crashes.
 
 We packaged the 42 server and runtime in a Docker container which can then be deployed onto the ECS Fargate service. We can directly configure the amount of CPU and RAM available for the server task (i.e. container), the number of nodes in the ECS cluster, and how we want to increase or decrease the number of deployed server in response to traffic.
 
