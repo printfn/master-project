@@ -233,27 +233,22 @@ Main=(
 
 const JAVA_EXAMPLE = {
   "This.L42": `reuse [L42.is/AdamsTowel]
-J0 = Load:{reuse [L42.is/JavaServer]}
-J = J0(slaveName=S"mySlave{}")
+
+MyClass = {
+  class method S #$hello() = native{
+    slave{}{
+      String result = "";
+      for (int i = 0; i < 10; ++i) {
+        result += i + " ";
+      }
+      return result;
+    }} error void
+}
 
 Main = (
-  j = J.#$of()
-  j.loadCode(fullName=S"foo.Bar1",code=S"""
-    |package foo;
-    |import is.L42.platformSpecific.javaEvents.Event;
-    |public record Bar1(Event event){//class Bar1 will be instantiated by 42
-    |  public Bar1{                  //and the Event parameter is provided
-    |    event.registerAskEvent("BarAsk",(id,msg)->
-    |      "any string computed in Java using "+id+" and "+msg);
-    |    }
-    |  }
-    """)
-  S.Opt text = j.askEvent(key=S"BarAsk", id=S"anId",msg=S"aMsg")
-  {}:Test"OptOk"(actual=text, expected=S"""
-    |<"any string computed in Java using anId and aMsg">
-    """.trim())
+  Debug(MyClass.#$hello())
   )`,
-  "Setti.ngs": makeBasicSettings('L42.is/JavaServer'),
+  "Setti.ngs": makeBasicSettings('This'),
 }
 
 const EXAMPLES = [
