@@ -9,7 +9,7 @@
 * Other necessary programs: `git`, `make`, `curl`, `zip`, `mvn`, and Java 8 and 16
 
 ```sh
-make patchSafeNativeCode
+make safeNativeCode
 make zip
 
 # Terraform

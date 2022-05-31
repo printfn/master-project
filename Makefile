@@ -19,11 +19,10 @@ docker: zip
 	cp docker/Dockerfile artifacts/docker_image/
 	docker build --network=host --tag l42 artifacts/docker_image
 
-patchSafeNativeCode:
+safeNativeCode:
 	mkdir -p artifacts
 	rm -rf artifacts/safe-native-code
-	git clone git@github.com:ElvisResearchGroup/safe-native-code.git artifacts/safe-native-code
-	cp patches/AbstractSlave.java artifacts/safe-native-code/src/main/java/safeNativeCode/slave/host/AbstractSlave.java
+	git clone git@github.com:sanjay900/safe-native-code.git artifacts/safe-native-code
 	(cd artifacts/safe-native-code && JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home ./gradlew jar)
 
 build: zip docker
@@ -40,4 +39,4 @@ docker_debug:
 logs:
 	aws --region ap-southeast-2 logs tail /aws/lambda/L42 --follow
 
-.PHONY: build clean deploy logs run patchSafeNativeCode
+.PHONY: build clean deploy logs run safeNativeCode
