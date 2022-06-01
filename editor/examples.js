@@ -47,9 +47,10 @@ const PRINT_HELLO_WORLD_CHALLENGE = {
     "This.L42": {
   template: `reuse [L42.is/AdamsTowel]
 
+// Can you change this program to print "Hello World"?
+
 Code = {
-???
-}
+???}
 
 Main=(
   _=Log"".#$reader()
@@ -57,7 +58,7 @@ Main=(
   Debug(Code.hello())
   )`,
   value: `class method S hello() = {
-  return S"Hello world from 42"
+  return S""
 }
 `},
 };
@@ -178,6 +179,47 @@ class method capsule AlwaysOk makeInner() = AlwaysOk()
 class method Void operation(mut IsOK that) = void` },
 }
 
+const INVARIANT2 = {
+  "This.L42": { template: `reuse [L42.is/AdamsTowel]
+
+IsOK = {interface read method Bool isOk()}
+
+A = Data:{
+  var capsule IsOK inner
+
+  @Cache.Now class method Void invariant(read IsOK inner) =
+    X[inner.isOk()]
+
+  @Cache.Clear class method
+  Void operation(mut IsOK inner) = Code.operation(inner)
+  }
+
+Code = {
+
+???
+
+}
+
+Main=(
+  _=Log"".#$reader()
+
+  capsule IsOK inner=Code.makeInner()
+  a = A(inner=inner)
+  a.operation()
+
+  // we believe it is always going to be X[a.inner().isOk()],
+  // for any MakeInner and Operation
+  X[!a.inner().isOk()]
+  Debug(S"--secret--")
+  )`, value: `AlwaysOk = Data:{[IsOK]
+  var S name = S""
+  read method Bool isOk() = Bool.true()
+}
+
+class method capsule AlwaysOk makeInner() = AlwaysOk()
+class method Void operation(mut IsOK that) = void` },
+}
+
 const FILE_SYSTEM_EXAMPLE = {
   "This.L42": `reuse [L42.is/AdamsTowel]
 Fs = Load:{reuse [L42.is/FileSystem]}
@@ -249,21 +291,56 @@ Main = (
   Debug(MyClass.#$hello())
   )`,
   "Setti.ngs": makeBasicSettings('This'),
-}
+};
+
+const POINT_LIST_EXAMPLE = {
+  "This.L42": `reuse [L42.is/AdamsTowel]
+
+Point = Data:{...}
+
+Nums = Collection.list(Num)
+Points = Collection.list(Point)
+
+Main=(
+  _=Log"".#$reader()
+  
+  xs = Nums[ 10\\; 20\\; 30\\ ]
+  ys = Nums[ \\"-1"; \\"2/3"; 3\\ ]
+  points = Points[]
+  for x in xs, y in ys (
+    points.add(\\(x=x, y=y))// here \\ is Point
+    )
+  Debug(points)
+  )`,
+  "Point.L42": `Num x
+Num y
+method
+Point add(Num x) = //long version
+  Point(x=x+this.x(), y=this.y())
+method
+Point add(Num y) = //shorter
+  this.with(y=y+this.y())
+method
+Point sum(Point that) =
+  Point(x=this.x()+that.x(), y=this.y()+that.y())\n`
+};
 
 const EXAMPLES = [
     { section: "--- Sample Programs ---" },
     { name: "Hello World", default: true, files: { "This.L42": HELLO_WORLD } },
-    { name: "Hello World (template)", files: PRINT_HELLO_WORLD_CHALLENGE },
     { name: "Point", files: POINT },
-    { name: "Point Sum Method challenge", files: POINT_SUM_METHOD },
+    { name: "List of Points", files: POINT_LIST_EXAMPLE },
     { name: "Simple Invariant", files: SIMPLE_INVARIANT },
     { name: "Filesystem Access", files: FILE_SYSTEM_EXAMPLE },
     { name: "JSON", files: JSON_EXAMPLE },
     { name: "Processes", files: PROCESS_EXAMPLE },
     { name: "Time", files: TIME_EXAMPLE },
     { name: "Java", files: JAVA_EXAMPLE },
+    { section: "--- Tutorial Challenges ---" },
+    { name: "Hello World Challenge", files: PRINT_HELLO_WORLD_CHALLENGE },
+    { name: "Point Sum Method", files: POINT_SUM_METHOD },
     { section: "--- Bug Bounty Challenges ---" },
     { name: "Mutation", files: MUTATION },
     { name: "Invariant", files: INVARIANT },
+    { name: "Invariant 2", files: INVARIANT2 },
 ];

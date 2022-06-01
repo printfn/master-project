@@ -727,3 +727,68 @@ While the REPL already works on mobile devices, including phones and tablets, it
 Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard. This would also make it possible to set up alert for system downtime.
 
 Support for interactive and static input was out of scope for this project, although this could be a good future extension.
+
+\chapter{Appendix A: 42 Example Programs and Bug Bounty Challenges}
+
+\begin{mylisting}{Bug Bounty Challenge #1}
+reuse [L42.is/AdamsTowel]
+
+IsOK = {interface read method Bool isOk()}
+
+A = Data:{
+  capsule IsOK inner
+
+  @Cache.Now class method Void invariant(read IsOK inner) =
+    X[inner.isOk()]
+
+  @Cache.Clear class method
+  Void operation(mut IsOK inner) = Code.operation(inner)
+  }
+
+// This `Code` section is modifiable
+Code = {
+  AlwaysOk = Data:{[IsOK]
+    var S name = S""
+    read method Bool isOk() = Bool.true()
+  }
+
+  class method capsule AlwaysOk makeInner() = AlwaysOk()
+  class method Void operation(mut IsOK that) = void
+}
+
+Main=(
+  _=Log"".#$reader()
+
+  capsule IsOK inner=Code.makeInner()
+  a = A(inner=inner)
+  a.operation()
+
+  // we believe it is always going to be X[a.inner().isOk()],
+  // for any MakeInner and Operation
+  X[!a.inner().isOk()]
+  Debug(S"--secret--")
+  )
+\end{mylisting}
+
+\begin{mylisting}{Bug Bounty Challenge #2}
+reuse [L42.is/AdamsTowel]
+
+Point=Data:{var Num x, var Num y}
+Square=Data:{var mut Point p}
+
+Code = {
+  class method mut Any make() = S.List()
+  class method Square do1(mut Any that) = Square(p=Point(x=1Num, y=2Num))
+  class method Void do2(Square that, mut Any stuff) = void
+}
+
+Main=(
+  mut Any stuff=Code.make()
+  Square p1 = Code.do1(stuff)
+  S s1 = p1.toS()
+  Code.do2(p1, stuff=stuff)
+  S s2 = p1.toS()
+  X[s1 != s2]
+  Debug(S"--secret--")
+  )
+\end{mylisting}
