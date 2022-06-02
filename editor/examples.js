@@ -308,7 +308,7 @@ Main=(
   ys = Nums[ \\"-1"; \\"2/3"; 3\\ ]
   points = Points[]
   for x in xs, y in ys (
-    points.add(\\(x=x, y=y))// here \\ is Point
+    points.add(\\(x=x, y=y)) // here \\ is Point
     )
   Debug(points)
   )`,
