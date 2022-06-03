@@ -36,6 +36,9 @@ ecr:
 docker_debug:
 	docker run --entrypoint /bin/sh -it l42
 
+docker_run:
+	docker run l42
+
 logs:
 	aws --region ap-southeast-2 logs tail /aws/lambda/L42 --follow
 

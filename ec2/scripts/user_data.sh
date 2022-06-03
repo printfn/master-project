@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# output is logged to `/var/log/cloud-init-output.log`
+
 yum update -y
 
 yum install -y docker
