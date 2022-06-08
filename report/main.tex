@@ -727,6 +727,8 @@ Support for interactive and static input was out of scope for this project, alth
 
 \chapter{Appendix: Bug Bounty Challenges}
 
+These are the bug bounty challenges. In each case, users are only allowed to modify the \code{Code} block. The goal of each of these challenges is to cause the \code{"--secret--"} string to be printed, which is intended to only be possible if users are able to exploit bugs in the 42 implementation.
+
 \begin{mylisting}{Bug Bounty Challenge \#1}
 reuse [L42.is/AdamsTowel]
 IsOK = {interface read method Bool isOk()}
@@ -767,6 +769,7 @@ reuse [L42.is/AdamsTowel]
 Point=Data:{var Num x, var Num y}
 Square=Data:{var mut Point p}
 
+// this `Code` section is modifiable
 Code = {
   class method mut Any make() = S.List()
   class method Square do1(mut Any that) =
@@ -781,6 +784,40 @@ Main=(
   Code.do2(p1, stuff=stuff)
   S s2 = p1.toS()
   X[s1 != s2]
+  Debug(S"--secret--")
+  )
+\end{mylisting}
+
+\begin{mylisting}{Bug Bounty Challenge \#3}
+reuse [L42.is/AdamsTowel]
+IsOK = {interface read method Bool isOk()}
+A = Data:{
+  var capsule IsOK inner
+  @Cache.Now class method Void invariant(read IsOK inner) =
+    X[inner.isOk()]
+  @Cache.Clear class method
+  Void operation(mut IsOK inner) = Code.operation(inner)
+  }
+// This `Code` section is modifiable
+Code = {
+  AlwaysOk = Data:{[IsOK]
+    var S name = S""
+    read method Bool isOk() = Bool.true()
+  }
+
+  class method capsule AlwaysOk makeInner() = AlwaysOk()
+  class method Void operation(mut IsOK that) = void
+}
+Main=(
+  _=Log"".#$reader()
+
+  capsule IsOK inner=Code.makeInner()
+  a = A(inner=inner)
+  a.operation()
+
+  // we believe it is always going to be X[a.inner().isOk()],
+  // for any MakeInner and Operation
+  X[!a.inner().isOk()]
   Debug(S"--secret--")
   )
 \end{mylisting}
