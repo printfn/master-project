@@ -42,6 +42,11 @@
     font-weight: bold;
 }
 
+code {
+    font-weight: bold;
+    font-family: monospace;
+}
+
 body {
     font-family: system, -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
 }
@@ -113,7 +118,9 @@ body {
 
 <p>This website provides an easy-to-use editor for 42 code, as well as access to a bug bounty programme. Feel free to write 42 code that gets executed on the server. There are also a number of example programs to try. For more advanced programs, you might want to install 42 locally, which you can get <a href="https://forty2.is/download.xhtml">here</a>.</p>
 
-<p>In addition to sample programs, you can also select a "Bug Bounty Challenge". To get started, pick one of the provided challenges from the dropdown list. This will open two editors side-by-side. The left-hand editor shows some starting code that you can modify, while the right-hand panel shows a preview of the overall code that will eventually be executed. In each scenario, the challenge is to get the Main function to fully execute, and reach the final Debug ("print") statement. However, when you run the original program, an exception is thrown. Can you come up with a program that gets to the final line? If you think you have found a solution, please send your code to <a href="mailto:marco.servetto@gmail.com">marco.servetto@gmail.com</a>.</p>
+<p>In addition to sample programs, you can also select a "Bug Bounty Challenge". To get started, pick one of the provided challenges from the dropdown list. This will open two editors side-by-side. The left-hand editor shows some starting code that you can modify, while the right-hand panel shows a preview of the overall code that will eventually be executed. In each scenario, the challenge is to get the Main function to fully execute, and reach the final Debug ("print") statement. However, when you run the original program, an exception is thrown.</p>
+
+<p>Can you come up with a program that exploits a bug in the 42 implementation, and causes the final line (i.e. <code>Debug(S"--secret--")</code>) to be executed? If you think you have found a solution, please send your code to <a href="mailto:marco.servetto@gmail.com">marco.servetto@gmail.com</a>.</p>
 
 <h4>Bug Bounty Challenge Rules:</h4>
 
