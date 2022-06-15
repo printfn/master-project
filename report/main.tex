@@ -26,8 +26,17 @@ Another unique feature of 42 is the ability to customise, extend or replace the 
 
 The goal of this project is to demonstrate those constraints and security guarantees in practice. This is done by creating a public-facing website where users can submit arbitrary 42 code, that will then be executed in a constrained environment. Similar to a bug bounty programme, users will be encouraged to try and break the security guarantees of 42.
 
+\chapter{Bug Bounty Programmes}
 
+Software has become significantly more complex. It's become ever easier to add third-party libraries and dependencies to software projects, any of which can add security vulnerabilities to existing code. The size of software projects, measured in lines of code, has continued to grow. For example, the initial 1.0 release of Linux comprised of approx. 180,000 lines of code \cite{mccandless-2020, perry-2012}, whereas in 2020 the kernel had grown to more than 27 million \cite{larabel-2020}. The increased use of third-party libraries comes hand-in-hand with an increase in contributor numbers, which raises the risk of supply-chain attacks \cite{sharma-2021}. Another example of a recent high-profile security vulnerability is the Log4J vulnerability \cite{apache-2021}, which led to arbitrary code execution and had hundreds of thousands of exploit attempts within days of being publicised \cite{raveendran-2021}.
 
+Bug Bounty programmes are one technique to incentivise the general public to help search for security bugs. They enable individuals to receive compensation and recognition for finding such bugs. The first bug bounty programme started in 1983 \cite{hackerone-2017}, where anyone finding a bug in the VRTX operating system would receive a VW Beetle as compensation \cite{hunter-ready-inc-1983}. They are often used in combination with existing best practices like code reviews, pen tests, automated scanning, and security audits by third-party cybersecurity companies.
+
+A current example of a bug bounty programme is Microsoft, which pays up to US\$250,000 in the case of Hyper-V remote code execution \cite{microsoft-2022}. Google has a similar program, with a maximum amount of US\$1,000,000 for Android vulnerabilites \cite{google-2022} and Apple similarly pays up to US\$1 million for kernel code execution bugs \cite{apple-inc-2022}.
+
+In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed private user data \cite{newman-2018}. The vulnerability made it possible to see who liked or commented on particular posts on Facebook. Facebook has more than 2 billion active users \cite{datareportal-2022}, any of whom could have had their private data exposed as part of an attack using this vulnerability. Not only oppressive regimes, but also employers and other third parties might have been able to access this sensitive data.
+
+42 is a language designed for high security. It supports constraints and invariants to enforce restrictions on parts of the code. For example, the 42 compiler makes it possible to include third-party code, but only give it limited permissions. File system or memory access can be restricted on a granular basis, which makes it considerably safer compared to other programming languages. However, these restrictions need to be implemented correctly in the compiler, which is a comparatively small project on a limited budget. A bug bounty programme for the 42 compiler could therefore be useful in increasing security similar to the programmes listed above.
 
 \chapter{Security Features in 42}\label{C:sec}
 
@@ -35,7 +44,7 @@ The goal of this project is to demonstrate those constraints and security guaran
 
 A key feature of 42 is the ability to create constraints. Since constraints can contain arbitrary code, they can be used in a wide range of situations. Here is an example of a small 42 program that defines a "Point" class, with an invariant that both the x- and y-coordinates must always be positive:
 
-\begin{mylisting}{Simple Constraint}
+\begin{lstlisting}[caption=Simple Constraint]
 reuse [L42.is/AdamsTowel]
 
 Point = Data:{
@@ -62,7 +71,7 @@ Main=(
   //Point p2 = Point(x=Double"5", y=Double"-3")
   Debug(S"p = %p")
   )
-\end{mylisting}
+\end{lstlisting}
 
 In this program, in addition to defining a \code{Point} class in much the same way as one would in Java, we have created an additional "\code{invariant}" method, annotated with "\code{@Cache.Now}. The annotation causes 42 to automatically call this method whenever an instance of \code{Point} is created. The method itself throws an error if \code{x} or \code{y} have unexpected values, and the compiler ensures that this constraint is checked both when a \code{Point} instance is constructed, and also whenever instances are modified.
 
@@ -70,7 +79,7 @@ If an exception does get thrown due to the invariant being broken, it can still 
 
 While the previous example used a \code{Point} class with immutable fields, constraints can also be used with fully mutable fields, like in this example:
 
-\begin{mylisting}{Constraint with mutable fields}
+\begin{lstlisting}[caption=Constraint with mutable fields]
 reuse [L42.is/AdamsTowel]
 Point = Data:{
   // `var` makes the `x` and `y` values modifiable
@@ -92,11 +101,11 @@ Main=(
   p.add(dx=Double"-6") // error on this line
   Debug(S"p = %p")
   )
-\end{mylisting}
+\end{lstlisting}
 
 This third example shows how to catch a constraint error:
 
-\begin{mylisting}{Catching a constraint error}
+\begin{lstlisting}[caption=Catching a constraint error]
 reuse [L42.is/AdamsTowel]
 Point = Data:{
   // `var` makes the `x` and `y` values modifiable
@@ -121,17 +130,17 @@ Main=(
      )
   Debug(S"p = %p")
   )
-\end{mylisting}
+\end{lstlisting}
 
 It prints the following output:
-\begin{mylisting}{Constraint error}
+\begin{lstlisting}[caption=Constraint error]
 We got an error:
 Message This.X(This.Message, This.HasToS, This.Message.Assert):
  Invalid state:
  x = -1.0
  y = 3.0
 
-\end{mylisting}
+\end{lstlisting}
 
 \section{Mutability}
 
@@ -139,7 +148,7 @@ Message This.X(This.Message, This.HasToS, This.Message.Assert):
 
 In the below example, we are creating Point and Square instances that are immutable. Regardless of how the \code{make}, \code{do1} and \code{do2} methods are implemented, the squares \code{s1} and \code{s2} will always be identical.
 
-\begin{mylisting}{Immutability}
+\begin{lstlisting}[caption=Immutability]
 reuse [L42.is/AdamsTowel]
 
 Point=Data:{var Num x, var Num y}
@@ -161,26 +170,11 @@ Main=(
   X[s1 != s2]
   Debug(S"--secret--")
   )
-\end{mylisting}
+\end{lstlisting}
 
 We introduce two classes, \code{Point} and \code{Square}. \code{Point} consists of x and y co-ordinates, while \code{Square} contains a \code{Point} instance. The \code{Code} block is modifiable by the user, while everything else cannot be changed. The challenge that we provide is to override the \code{make}, \code{do1} and \code{do2} methods to attempt to modify an immutable Square instance.
 
 In the \code{Main} method, we generate a \code{Point} instance, and pass it to the \code{do2} method. The immutability guarantees of 42 should prevent users from being able to modify the \code{Point} instance. \code{X} is an assertion that throws an exception if the two squares \code{s1} and \code{s2} are different, so the final line in \code{Main} should never be reached. If this line is printed, the mutability guarantee of 42 will have been broken.
-
-\chapter{Bug Bounty Programmes}
-
-Software has become significantly more complex. It's become ever easier to add third-party libraries and dependencies to software projects, any of which can add security vulnerabilities to existing code. The size of software projects, measured in lines of code, has continued to grow. For example, the initial 1.0 release of Linux comprised of approx. 180,000 lines of code \cite{mccandless-2020, perry-2012}, whereas in 2020 the kernel had grown to more than 27 million \cite{larabel-2020}. The increased use of third-party libraries comes hand-in-hand with an increase in contributor numbers, which raises the risk of supply-chain attacks \cite{sharma-2021}. Another example of a recent high-profile security vulnerability is the Log4J vulnerability \cite{apache-2021}, which led to arbitrary code execution and had hundreds of thousands of exploit attempts within days of being publicised \cite{raveendran-2021}.
-
-Bug Bounty programmes are one technique to incentivise the general public to help search for security bugs. They enable individuals to receive compensation and recognition for finding such bugs. The first bug bounty programme started in 1983 \cite{hackerone-2017}, where anyone finding a bug in the VRTX operating system would receive a VW Beetle as compensation \cite{hunter-ready-inc-1983}. They are often used in combination with existing best practices like code reviews, pen tests, automated scanning, and security audits by third-party cybersecurity companies.
-
-A current example of a bug bounty programme is Microsoft, which pays up to US\$250,000 in the case of Hyper-V remote code execution \cite{microsoft-2022}. Google has a similar program, with a maximum amount of US\$1,000,000 for Android vulnerabilites \cite{google-2022} and Apple similarly pays up to US\$1 million for kernel code execution bugs \cite{apple-inc-2022}.
-
-In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed private user data \cite{newman-2018}. The vulnerability made it possible to see who liked or commented on particular posts on Facebook. Facebook has more than 2 billion active users \cite{datareportal-2022}, any of whom could have had their private data exposed as part of an attack using this vulnerability. Not only oppressive regimes, but also employers and other third parties might have been able to access this sensitive data.
-
-42 is a language designed for high security. It supports constraints and invariants to enforce restrictions on parts of the code. For example, the 42 compiler makes it possible to include third-party code, but only give it limited permissions. File system or memory access can be restricted on a granular basis, which makes it considerably safer compared to other programming languages. However, these restrictions need to be implemented correctly in the compiler, which is a comparatively small project on a limited budget. A bug bounty programme for the 42 compiler could therefore be useful in increasing security similar to the programmes listed above.
-
-
-
 
 \chapter{Evaluation of Existing REPL Systems}
 
@@ -314,20 +308,24 @@ We have a Java server that includes the 42 compiler, and exposes it via an HTTP 
 \end{itemize}
 
 Here is an example request:
-\begin{mylisting}{42 API Request}
+\begin{lstlisting}[caption=42 API Request]
 POST /execute
 
 {
     "program": {
-        "This.L42":"reuse [L42.is/AdamsTowel]\nMain=(\n  _=Log"".#\$reader()\n  Debug(S\"Hello world from 42\")\n  )",
+        "This.L42":"reuse [L42.is/AdamsTowel]
+            Main=(
+                _=Log"".#\$reader()
+                Debug(S\"Hello world from 42\")
+                )",
         "Setti.ngs": "Main = [L42.is/AdamsTowel/Log]"
     },
     "use42Cache": true
 }
-\end{mylisting}
+\end{lstlisting}
 
 This yields the following response:
-\begin{mylisting}{42 API Response}
+\begin{lstlisting}[caption=42 API Response]
 HTTP 200 OK
 Access-Control-Allow-Origin: *
 
@@ -339,7 +337,7 @@ Access-Control-Allow-Origin: *
     "tests": "",
     "returncode": 0
 }
-\end{mylisting}
+\end{lstlisting}
 
 Because the 42 editor front-end runs on a different domain to the backend server, we need to use a CORS (cross-origin resource sharing) header to allow these cross-domain requests. Otherwise web browsers would block these requests as it has potential security risks.
 
@@ -565,16 +563,16 @@ For the bug bounty program, we want to allow arbitrary code to be executed on th
 
 For example, if we want users to be able to customise a Hello World-like program by modifying the string, we might have a code template like this one:
 
-\begin{mylisting}{Hello World-like program template}
+\begin{lstlisting}[caption=Hello World-like program template]
 reuse [L42.is/AdamsTowel]
 Main=(
   Debug(S"???")
   )
-\end{mylisting}
+\end{lstlisting}
 
 Now if users can insert arbitrary content where the "???" placeholder is, it would be trivial to circumvent the restriction that only the string contents should be modifiable. For example, by including unescaped quote characters, arbitrary code could be executed, as shown here:
 
-\begin{mylisting}{Code injection example}
+\begin{lstlisting}[caption=Code injection example]
 /*
     inserted string:
     ") error X"Error" //
@@ -587,7 +585,7 @@ Main=(
   Debug(S"") error X"Error" //")
   
   )
-\end{mylisting}
+\end{lstlisting}
 
 Rather than printing a custom string, the above program terminates with an unexpected exception.
 
@@ -595,7 +593,7 @@ To prevent these code injection attacks, we use an inbuilt function from the 42 
 
 This is an example of a Hello World program with those checks:
 
-\begin{mylisting}{Templated Hello World program}
+\begin{lstlisting}[caption=Templated Hello World program]
 reuse [L42.is/AdamsTowel]
 // this 'Code' block is modifiable by the user
 Code = {
@@ -607,7 +605,7 @@ Main=(
   _=Log"".#$reader()
   Debug(Code.hello())
   )
-\end{mylisting}
+\end{lstlisting}
 
 The following flowchart shows how the code validation is integrated.
 
@@ -653,7 +651,7 @@ When a user sends a requests containing a 42 program, the main thread begins by 
 
 If, on the other hand, the 42 program finishes in time, the main thread sends an interrupt to the timeout thread. Upon receiving this interrupt, the background thread cleanly shuts itself down. The main thread then returns the successful execution result to the user.
 
-\begin{mylisting}{Infinite Loop in 42}
+\begin{lstlisting}[caption=Infinite Loop in 42]
 reuse [L42.is/AdamsTowel]
 Main=(
   _=Log"".#$reader()
@@ -663,7 +661,7 @@ Main=(
   while Bool.true() void
   
   )
-\end{mylisting}
+\end{lstlisting}
 
 \section{Caching \& Performance Measurements}
 
@@ -729,7 +727,7 @@ Support for interactive and static input was out of scope for this project, alth
 
 These are the bug bounty challenges. In each case, users are only allowed to modify the \code{Code} block. The goal of each of these challenges is to cause the \code{"--secret--"} string to be printed, which is intended to only be possible if users are able to exploit bugs in the 42 implementation.
 
-\begin{mylisting}{Bug Bounty Challenge \#1}
+\begin{lstlisting}[caption=Bug Bounty Challenge \#1]
 reuse [L42.is/AdamsTowel]
 IsOK = {interface read method Bool isOk()}
 A = Data:{
@@ -761,9 +759,9 @@ Main=(
   X[!a.inner().isOk()]
   Debug(S"--secret--")
   )
-\end{mylisting}
+\end{lstlisting}
 
-\begin{mylisting}{Bug Bounty Challenge \#2}
+\begin{lstlisting}[caption=Bug Bounty Challenge \#2]
 reuse [L42.is/AdamsTowel]
 
 Point=Data:{var Num x, var Num y}
@@ -786,9 +784,9 @@ Main=(
   X[s1 != s2]
   Debug(S"--secret--")
   )
-\end{mylisting}
+\end{lstlisting}
 
-\begin{mylisting}{Bug Bounty Challenge \#3}
+\begin{lstlisting}[caption=Bug Bounty Challenge \#3]
 reuse [L42.is/AdamsTowel]
 IsOK = {interface read method Bool isOk()}
 A = Data:{
@@ -820,4 +818,4 @@ Main=(
   X[!a.inner().isOk()]
   Debug(S"--secret--")
   )
-\end{mylisting}
+\end{lstlisting}
