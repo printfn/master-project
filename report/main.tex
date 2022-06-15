@@ -10,7 +10,7 @@
 \setlength{\fboxsep}{0pt}
 \setlength{\fboxrule}{0.5pt}
 
-\definecolor{lightpink}{rgb}{0.9569,0.8,0.8}
+\definecolor{tableheadercolour}{rgb}{0.9569,0.9569,0.9569}
 
 \chapter{Introduction}\label{C:intro}
 
@@ -529,9 +529,9 @@ Similar to the Fargate solution, this implementation is also largely independent
 \begin{center}
 \begin{tabular}{|l|l|c|c|c|c|}
 \hline
-\rowcolor{lightpink}
+\rowcolor{tableheadercolour}
 & \multicolumn{1}{l|}{Monthly} & \multicolumn{1}{l|}{Latency / Res-} & \multicolumn{1}{l|}{Scalability} & \multicolumn{1}{l|}{Availability} & \multicolumn{1}{l|}{Complexity} \\
-\rowcolor{lightpink}
+\rowcolor{tableheadercolour}
 & \multicolumn{1}{l|}{Costs} & \multicolumn{1}{l|}{ponsiveness} & & & \\ \hline
 Local & \$30 & \code{+} & \code{-} & \code{-} & \code{+} \\ \hline
 Local (Raspberry Pi) & \$2.50 & \code{o} & \code{-} & \code{-} & \code{+} \\ \hline
@@ -679,9 +679,9 @@ For each deployment I did five performance measurements, and worked out the aver
 \begin{center}
 \begin{tabular}{|l|r|r|r|r|}
 \hline
-\rowcolor{lightpink}
+\rowcolor{tableheadercolour}
 & \multicolumn{1}{l|}{Setup} & \multicolumn{1}{l|}{Performance} & \multicolumn{1}{l|}{Performance} & \multicolumn{1}{l|}{Teardown} \\
-\rowcolor{lightpink}
+\rowcolor{tableheadercolour}
 & & \multicolumn{1}{l|}{(uncached)} & \multicolumn{1}{l|}{(cached)} & \\ \hline
 Local & N/A & 6.61 s & 0.11 s & N/A \\ \hline
 Raspberry Pi & N/A & 39.31 s & 0.72 s & N/A \\ \hline
@@ -729,7 +729,9 @@ These are the bug bounty challenges. In each case, users are only allowed to mod
 
 \begin{lstlisting}[caption=Bug Bounty Challenge \#1]
 reuse [L42.is/AdamsTowel]
+
 IsOK = {interface read method Bool isOk()}
+
 A = Data:{
   capsule IsOK inner
   @Cache.Now class method Void invariant(read IsOK inner) =
@@ -737,6 +739,7 @@ A = Data:{
   @Cache.Clear class method
   Void operation(mut IsOK inner) = Code.operation(inner)
   }
+
 // This `Code` section is modifiable
 Code = {
   AlwaysOk = Data:{[IsOK]
@@ -747,6 +750,7 @@ Code = {
   class method capsule AlwaysOk makeInner() = AlwaysOk()
   class method Void operation(mut IsOK that) = void
 }
+
 Main=(
   _=Log"".#$reader()
 
@@ -759,6 +763,7 @@ Main=(
   X[!a.inner().isOk()]
   Debug(S"--secret--")
   )
+
 \end{lstlisting}
 
 \begin{lstlisting}[caption=Bug Bounty Challenge \#2]
