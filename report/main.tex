@@ -42,7 +42,7 @@ In 2018 Facebook paid out \$50,000 to one person for finding a bug that exposed 
 
 \section{Constraints}
 
-A key feature of 42 is the ability to create constraints. Since constraints can contain arbitrary code, they can be used in a wide range of situations. Here is an example of a small 42 program that defines a "Point" class, with an invariant that both the x- and y-coordinates must always be positive:
+A key feature of 42 is the ability to create constraints, which are used to enforce invariants on classes. Since constraints can contain arbitrary code, they can be used in a wide range of situations. Here is an example of a small 42 program that defines a "Point" class, with an invariant that both the x- and y-coordinates must always be positive:
 
 \begin{lstlisting}[caption=Simple Constraint]
 reuse [L42.is/AdamsTowel]
@@ -103,7 +103,9 @@ Main=(
   )
 \end{lstlisting}
 
-This third example shows how to catch a constraint error:
+When 42 detects that a contraint no longer holds, a constraint error is thrown. This is similar to an exception in Java, and can be caught with a \code{catch} expression. Note that inside of the \code{catch} block we no longer have access to the invalid instance.
+
+Here is an example program that shows how a constraint error can be caught:
 
 \begin{lstlisting}[caption=Catching a constraint error]
 reuse [L42.is/AdamsTowel]
@@ -127,12 +129,13 @@ Main=(
   p.add(dx=Double"-6") // error on this line
   catch error This.X msg1 (
      Debug(S"We got an error: %msg1")
+     // Inside this `catch` block we can no longer access `p`
      )
   Debug(S"p = %p")
   )
 \end{lstlisting}
 
-It prints the following output:
+The above program will print this output:
 \begin{lstlisting}[caption=Constraint error]
 We got an error:
 Message This.X(This.Message, This.HasToS, This.Message.Assert):
@@ -144,7 +147,7 @@ Message This.X(This.Message, This.HasToS, This.Message.Assert):
 
 \section{Mutability}
 
-42 also has support for enforcing immutability. Immutability means that properties cannot be changed after an object has been created.
+42 also has support for enforcing immutability, which prevents objects from bring modified after they have been created. Unlike most other programming languages, 42 has support for compiler-enforced deep immutability, where immutable objects are not allowed to contain any mutable references, including via nested instance members.
 
 In the below example, we are creating Point and Square instances that are immutable. Regardless of how the \code{make}, \code{do1} and \code{do2} methods are implemented, the squares \code{s1} and \code{s2} will always be identical.
 
