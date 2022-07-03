@@ -355,11 +355,10 @@ Local costs in USD per month:
 \begin{itemize}
 \item \$10 in power usage (assuming a 50W server)
 \item \$10 for hardware (server and router)
-\item \$10 for internet access (flat rate)
-\item Total: \$30/month
+\item Total: \$20/month
 \end{itemize}
 
-Assuming we can respond in an average of two seconds per request, we can serve up to 1.3 million requests per month using self-hosted infrastructure.
+Assuming we can respond in an average of two seconds per request, we could theoretically serve up to 1.3 million requests per month using self-hosted infrastructure.
 
 \section{Self-hosting on a Raspberry Pi}
 
@@ -389,7 +388,6 @@ Costs:
 \begin{itemize}
 \item \$1 in power usage (5W power usage) \cite{neukirchen-2021}
 \item \$1.5 for hardware (\$100 over 5 years)
-\item Assuming a pre-existing internet connection (i.e. \$0)
 \item Total: \$2.50/month
 \end{itemize}
 
@@ -536,7 +534,7 @@ Similar to the Fargate solution, this implementation is also largely independent
 & \multicolumn{1}{l|}{Monthly} & \multicolumn{1}{l|}{Latency / Res-} & \multicolumn{1}{l|}{Scalability} & \multicolumn{1}{l|}{Availability} & \multicolumn{1}{l|}{Complexity} \\
 \rowcolor{tableheadercolour}
 & \multicolumn{1}{l|}{Costs} & \multicolumn{1}{l|}{ponsiveness} & & & \\ \hline
-Local & \$30 & \code{+} & \code{-} & \code{-} & \code{+} \\ \hline
+Local & \$20 & \code{+} & \code{-} & \code{-} & \code{+} \\ \hline
 Local (Raspberry Pi) & \$2.50 & \code{o} & \code{-} & \code{-} & \code{+} \\ \hline
 Lambda (low usage) & \$0 & \code{-} & \code{+} & \code{+} & \code{o} \\ \hline
 Lambda (high usage) & \$43 & \code{+} & \code{+} & \code{+} & \code{o} \\ \hline
