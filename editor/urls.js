@@ -1,3 +1,3 @@
 window.L42_SERVER_URLS = [
-    'no6itwdz43pu7lkohqaeh4a75q0gmbxr.lambda-url.ap-southeast-2.on.aws',
+    '5az2yt6xj2s4j2sfvrvxvxaxca0xnlsv.lambda-url.ap-southeast-2.on.aws',
 ];

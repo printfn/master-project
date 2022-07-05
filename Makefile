@@ -23,7 +23,10 @@ safeNativeCode:
 	mkdir -p artifacts
 	rm -rf artifacts/safe-native-code
 	git clone git@github.com:sanjay900/safe-native-code.git artifacts/safe-native-code
-	(cd artifacts/safe-native-code && JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_261.jdk/Contents/Home ./gradlew jar)
+	(cd artifacts/safe-native-code && JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_333.jdk/Contents/Home ./gradlew jar)
+
+deployLambda:
+	(cd lambda && terraform apply --auto-approve)
 
 build: zip docker
 
