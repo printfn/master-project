@@ -283,6 +283,12 @@ The web page is built with HTML, CSS and JavaScript. It uses asynchronous AJAX r
 
 The above screenshot shows one of the challenges that users can attempt to solve as part of the bug bounty programme. The code on the left-hand side is modifiable, while the code on the right-hand side shows the complete program (note that the 'Code' section contains the copied user input). In this challenge, users need to try to modify the 'Square' instance, which would break the immutability guarantee of 42. At the bottom we can see the program output, which currently shows that an exception was thrown because the challenge has not been solved.
 
+The next screenshot shows all currently available sample programs and challenges. The list is subdivided into three sections: sample programs, intended to show users how 42 programs work in general; tutorial challenges, which are designed to be easily solvable by learners of 42; and finally Bug Bounty Challenges, which are meant to be unsolvable except via a bug in the 42 implementation. The bug bounty challenges are shown in more detail in the appendix.
+
+\img{images/42-editor-sample-programs.png}{42 sample programs and challenges}
+
+Additional challenges can easily be added by simply modifying the front-end code. It includes a JavaScript/JSON configuration file that contains all built-in programs and challenges. New bug bounty challenges can be added to this configuration file, without requiring updates to the server-side (back-end) code.
+
 \chapter{Design and Implementation}
 
 \img{images/architecture.png}{42 Server Architecture}
