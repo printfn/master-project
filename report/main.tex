@@ -26,6 +26,10 @@ Another unique feature of 42 is the ability to customise, extend or replace the 
 
 The goal of this project is to demonstrate those constraints and security guarantees in practice. This is done by creating a public-facing website where users can submit arbitrary 42 code, that will then be executed in a constrained environment. Similar to a bug bounty programme, users will be encouraged to try and break the security guarantees of 42.
 
+A REPL system is a very good tool for beginners to learn a new programming language. Without needing to install 42 locally, users can try out simple programs via their web browser. It works on all devices, including tablets and phones. Syntax highlighting is available, making it easier to write syntactically correct code. A wealth of sample programs is available to give users a head start.
+
+The solutions presented in this report combine a REPL system with a bug bounty server.
+
 \chapter{Bug Bounty Programmes}
 
 Software has become significantly more complex. It's become ever easier to add third-party libraries and dependencies to software projects, any of which can add security vulnerabilities to existing code. The size of software projects, measured in lines of code, has continued to grow. For example, the initial 1.0 release of Linux comprised of approx. 180,000 lines of code \cite{mccandless-2020, perry-2012}, whereas in 2020 the kernel had grown to more than 27 million \cite{larabel-2020}. The increased use of third-party libraries comes hand-in-hand with an increase in contributor numbers, which raises the risk of supply-chain attacks \cite{sharma-2021}. Another example of a recent high-profile security vulnerability is the Log4J vulnerability \cite{apache-2021}, which led to arbitrary code execution and had hundreds of thousands of exploit attempts within days of being publicised \cite{raveendran-2021}.
@@ -261,7 +265,9 @@ Support for multiple Java versions is not relevant to 42 since it is a separate 
 
 \chapter{User Interface}
 
-The user interacts with the 42 bug bounty programme via a web page.
+\section{User Guide}
+
+The user interacts with the 42 bug bounty programme via a web page. It can be reached from the 42 website, \code{https://forty2.is}.
 
 The website allows users to choose between several example programs, to import a 42 program from their computer, or to type one directly into the editing interface.
 
@@ -277,19 +283,29 @@ When the 42 program contains errors, they are shown in red as below. In that exa
 
 \img{images/42-editor-error.png}{Example of an error message due to an invalid state}
 
-The web page is built with HTML, CSS and JavaScript. It uses asynchronous AJAX requests to communicate with the server. The editing UI is built around the Ace editor, and has support for syntax highlighting and themes. I have tested it in all modern web browsers (i.e. Chrome, Firefox and Safari).
+\section{Implementation of the User Interface}
+
+The web page is built with HTML, CSS and JavaScript. It uses asynchronous AJAX requests to communicate with the server. The editing UI is built around the Ace editor, and has support for syntax highlighting and themes. I have tested it in all modern web browsers (i.e. Chrome, Firefox and Safari), as well as on phones and tablets.
+
+The front-end user interface is implemented as a static website. The code that users enter is sent in JSON format to the back-end server. We are using HTTPS to encrypt all network traffic. Upon receiving the client's JSON message, the server begins by decoding it. It first parses the received JSON message into a Java object, returning an error if the message is invalid. The server then evaluates the given 42 code against malicious code injection (see chapter \ref{C:injection} for details).
+
+When no code injection is detected, the server starts executing the code. To sandbox it from the server process, a separate JVM is started just for this request. The two virtual machines communicate via the Java Remote Method Invocation (RMI) mechanism \cite{java-rmi}. Once the user's program has terminated, the server wraps the result in a JSON object and returns it to the front-end.
 
 \img{images/42-editor-template.png}{One of the challenges in the bug bounty programme}
 
-The above screenshot shows one of the challenges that users can attempt to solve as part of the bug bounty programme. The code on the left-hand side is modifiable, while the code on the right-hand side shows the complete program (note that the 'Code' section contains the copied user input). In this challenge, users need to try to modify the 'Square' instance, which would break the immutability guarantee of 42. At the bottom we can see the program output, which currently shows that an exception was thrown because the challenge has not been solved.
+The above screenshot shows one of the challenges that users can attempt to solve as part of the bug bounty programme. The code on the left-hand side is modifiable, while the code on the right-hand side reflects the complete program (note that the 'Code' section contains the copied user input). In this challenge, users need to try to modify the 'Square' instance, which would break the immutability guarantee of 42. At the bottom we can see the program output, which currently displays an exception that was thrown because the challenge had not been solved.
 
-The next screenshot shows all currently available sample programs and challenges. The list is subdivided into three sections: sample programs, intended to show users how 42 programs work in general; tutorial challenges, which are designed to be easily solvable by learners of 42; and finally Bug Bounty Challenges, which are meant to be unsolvable except via a bug in the 42 implementation. The bug bounty challenges are shown in more detail in the appendix.
+The next screenshot shows all currently available sample programs and challenges. The list is subdivided into three sections: sample programs, intended to guide users to understand how 42 programs work in general; tutorial challenges, which are designed to be easily solvable by learners of 42; and finally Bug Bounty Challenges, which are meant to be unsolvable except via a bug in the 42 implementation. The bug bounty challenges are described in more detail in the appendix.
 
 \img{images/42-editor-sample-programs.png}{42 sample programs and challenges}
 
-Additional challenges can easily be added by simply modifying the front-end code. It includes a JavaScript/JSON configuration file that contains all built-in programs and challenges. New bug bounty challenges can be added to this configuration file, without requiring updates to the server-side (back-end) code.
+\section{Adding Additional Challenges}
 
-\chapter{Design and Implementation}
+Additional challenges can easily be added by simply modifying the front-end code. It includes a JavaScript/JSON configuration file \code{editor/examples.js} that contains all built-in programs and challenges. New bug bounty challenges can be inserted into this configuration file, without requiring updates to the server-side (back-end) code.
+
+\img{images/examples-js.png}{Configuration of bug bounty challenges}
+
+\chapter{Design, Implementation and Deployment}
 
 \img{images/architecture.png}{42 Server Architecture}
 
@@ -564,7 +580,13 @@ ECS Fargate benefits from being a managed service, which makes it highly availab
 
 EC2 provides a maximum level of control, but at the cost of having to manage security updates ourselves. Similar to the Fargate solution, the level of security and associated costs can be changed as needed. The level of complexity is similar to the Fargate solution.
 
-\section{Preventing malicious code injection}
+\chapter{High Availability and Security}
+
+This chapter describes how to ensure our solution is production-ready. The bug bounty server will be publicly available on the internet, with a potentially high number of users. Therefore the server needs to be able to handle large numbers of requests, as well as be protected from malicious attacks. We also need to consider that legitimate users, who may accidently submit problematic code, such as infinite loops.
+
+We will be considering malicious code injection, how to respond to overloading the server with requests (DoS), implementing timeouts to prevent infinite loops, and how to increase server performance by leveraging caching.
+
+\section{Preventing Malicious Code Injection}\label{C:injection}
 
 For the bug bounty program, we want to allow arbitrary code to be executed on the 42 server. To enable this, we have a code editor front-end that accepts any user code. However, we want to protect the server from malicious code, as well as preventing users from trivially bypassing the security restrictions via code injection. This is similar to the well-known SQL injection attacks \cite{halfond2006classification}.
 
@@ -618,7 +640,7 @@ The following flowchart shows how the code validation is integrated.
 
 \img{../diagrams/Code Validation Flowchart.drawio.png}{Code Validation}
 
-\section{Queuing Requests}
+\section{Handling Parallel Requests}
 
 It takes some amount of time for the 42 server to process and execute input programs. Since the project is intended to be used by the public, we expect requests to be submitted at the same time, so the server needs to be able to handle simultaneous incoming requests correctly.
 
@@ -724,7 +746,7 @@ In the future, the bug bounty system can be expanded by adding more examples and
 
 The bug bounty REPL could also be extended with tutorial questions, which could then be integrated into the main 42 tutorial. For example, there could be tutorial exercises that users could try and solve using the REPL.
 
-While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens. We could also work more on accessibility features.
+While the REPL already works on mobile devices, including phones and tablets, it might be worth further optimising the user interface for small screens. We could also work more on accessibility features. Code autocompletion would also be a useful feature to add in the future.
 
 Another feature that might be useful would be a dashboard to show server usage. We are already logging requests to AWS CloudWatch. It would be straightforward to integrate this data into a Grafana dashboard. This would also make it possible to set up alert for system downtime.
 
